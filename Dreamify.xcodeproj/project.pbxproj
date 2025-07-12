@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C0A893FD2E22C602008B1730 /* Entity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A893FB2E22C602008B1730 /* Entity+CoreDataClass.swift */; };
+		C0A893FE2E22C602008B1730 /* Entity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A893FC2E22C602008B1730 /* Entity+CoreDataProperties.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C0A8937B2E087365008B1730 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +32,8 @@
 		C0A893602E087364008B1730 /* Dreamify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dreamify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0A8937A2E087365008B1730 /* DreamifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DreamifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0A893842E087365008B1730 /* DreamifyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DreamifyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0A893FB2E22C602008B1730 /* Entity+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Entity+CoreDataClass.swift"; path = "Dreamify/Model/Entity+CoreDataClass.swift"; sourceTree = "<group>"; };
+		C0A893FC2E22C602008B1730 /* Entity+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Entity+CoreDataProperties.swift"; path = "Dreamify/Model/Entity+CoreDataProperties.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -88,6 +95,8 @@
 		C0A893572E087364008B1730 = {
 			isa = PBXGroup;
 			children = (
+				C0A893FB2E22C602008B1730 /* Entity+CoreDataClass.swift */,
+				C0A893FC2E22C602008B1730 /* Entity+CoreDataProperties.swift */,
 				C0A893622E087364008B1730 /* Dreamify */,
 				C0A8937D2E087365008B1730 /* DreamifyTests */,
 				C0A893872E087365008B1730 /* DreamifyUITests */,
@@ -249,6 +258,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0A893FD2E22C602008B1730 /* Entity+CoreDataClass.swift in Sources */,
+				C0A893FE2E22C602008B1730 /* Entity+CoreDataProperties.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -290,13 +301,17 @@
 				CODE_SIGN_ENTITLEMENTS = Dreamify/Dreamify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 68J3XHLUKJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Dreamify/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Dreamify;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -318,13 +333,17 @@
 				CODE_SIGN_ENTITLEMENTS = Dreamify/Dreamify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 68J3XHLUKJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Dreamify/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Dreamify;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

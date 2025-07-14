@@ -16,12 +16,12 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate{
     //var recordButton: UIButton!
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
+    var dreamsRecordingViewModel:DreamRecordingViewModel
     
-    init(){
+    init(dreamRecordingViewModel:DreamRecordingViewModel){
         self.mainContentView = MainContentView()
-        
+        self.dreamsRecordingViewModel = dreamRecordingViewModel
         super.init(nibName: nil, bundle: nil)
-
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -56,6 +56,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate{
                 }
             }
         } catch {
+            
             // failed to record!
         }
   
@@ -105,17 +106,10 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate{
         mainContentView.actionButton.addTarget(self, action: #selector(recordTapped), for: .touchUpInside)
         
     }
+
     
-    
-//    func loadRecordingUI() {
-//        recordButton = UIButton(frame: CGRect(x: 64, y: 64, width: 128, height: 64))
-//        recordButton.setTitle("Tap to Record", for: .normal)
-//        recordButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .title1)
-//        recordButton.addTarget(self, action: #selector(recordTapped), for: .touchUpInside)
-//        view.addSubview(recordButton)
-//    }
     func startRecording() {
-        let audioFilename = getDocumentsDirectory().appendingPathComponent("recording.m4a")
+        let audioFilename = getDocumentsDirectory().appendingPathComponent("recording_2.m4a")
 
         let settings = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -134,6 +128,24 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate{
             finishRecording(success: false)
         }
     }
+//    func startRecording(){
+//        let text = "this is a test string that is going to be saved in the application directory";
+//        let directory = URL.documentsDirectory
+//        print("directory: \(directory.path())")
+//        let file_url = directory.appendingPathComponent("document_file.txt")
+//        
+//        do{
+//            let data =  text.data(using: .utf8)
+//            try data?.write(to: file_url)
+//            
+//
+//            
+//        }catch{
+//            print("text data err")
+//            
+//        }
+//    }
+    
     func getDocumentsDirectory() -> URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return paths[0]
@@ -143,7 +155,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate{
         audioRecorder = nil
 
         if success {
-            mainContentView.actionButton.setTitle("Tap to Re-record", for: .normal)
+            mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
         } else {
             mainContentView.actionButton.setTitle("recording failed", for: .normal)
             // recording failed :(

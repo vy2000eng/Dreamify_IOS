@@ -7,26 +7,54 @@
 
 import UIKit
 
+//MARK: note the delegated and datasources are in there designated folders
 class DreamRecordingsViewController:UIViewController{
+
     var dreamRecordingsView:DreamRecordsView
+    var dreamRecordingViewModel: DreamRecordingViewModel
     
-    
-    
-    init() {
-        
+    init(dreamRecordingViewModel:DreamRecordingViewModel) {
+        self.dreamRecordingViewModel = dreamRecordingViewModel
         dreamRecordingsView = DreamRecordsView()
         super.init(nibName: nil, bundle: nil)
     }
   
-
-
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    lazy var collectionView: UICollectionView = {
+        
+        let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment -> NSCollectionLayoutSection? in
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(112))
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+            let section = NSCollectionLayoutSection(group: group)
+            section.interGroupSpacing = 10 // This adds vertical spacing between cells
+            let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(50))
+            let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+            header.pinToVisibleBounds = true  // This makes the header sticky
+            section.boundarySupplementaryItems = [header]
+            return section
+        }
+        
+        let v = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
+        v.backgroundColor = .clear
+        v.delegate = self
+        v.dataSource = self
+        v.register(DreamRecordingViewCell.self, forCellWithReuseIdentifier: "dreamCell")
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
+    
+    
+    
     override func viewDidLoad() {
         setupUI()
         setupConstraints()
+        //getAllRecordings()
+        listFilesFromDocumentsFolder()
         super.viewDidLoad()
     }
     
@@ -35,20 +63,70 @@ class DreamRecordingsViewController:UIViewController{
         title = "Dreams"
         
         // Add subviews
-        view.addSubview(dreamRecordingsView.titleLabel)
+        //view.addSubview(dreamRecordingsView.titleLabel)
+        view.addSubview(collectionView)
+        //view.addSubview(dreamRecordingsView.dreamsLabel)
 
     }
     
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // Title Label
-            dreamRecordingsView.titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            dreamRecordingsView.titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
-            dreamRecordingsView.titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 20),
-            dreamRecordingsView.titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -20),
+
+            
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
         ])
     }
     
+    
+    func listFilesFromDocumentsFolder(){
+        do {
+            // Get the document directory url
+            let documentDirectory = try FileManager.default.url(
+                for: .documentDirectory,
+                in: .userDomainMask,
+                appropriateFor: nil,
+                create: true
+            )
+            
+            print("documentDirectory", documentDirectory.path)
+            // Get the directory contents urls (including subfolders urls)
+            let directoryContents = try FileManager.default.contentsOfDirectory(
+                at: documentDirectory,
+                includingPropertiesForKeys: nil
+            )
+
+            for var url in directoryContents {
+                url.hasHiddenExtension = true
+            }
+            for url in directoryContents {
+                print(url.localizedName ?? url.lastPathComponent)
+            }
+
+            
+        } catch {
+            print(error)
+        }
+    }
+    
+}
+
+
+extension URL {
+    var typeIdentifier: String? { (try? resourceValues(forKeys: [.typeIdentifierKey]))?.typeIdentifier }
+    var isMP3: Bool { typeIdentifier == "public.mp3" }
+    var localizedName: String? { (try? resourceValues(forKeys: [.localizedNameKey]))?.localizedName }
+    var hasHiddenExtension: Bool {
+        get { (try? resourceValues(forKeys: [.hasHiddenExtensionKey]))?.hasHiddenExtension == true }
+        set {
+            var resourceValues = URLResourceValues()
+            resourceValues.hasHiddenExtension = newValue
+            try? setResourceValues(resourceValues)
+        }
+    }
 }
 

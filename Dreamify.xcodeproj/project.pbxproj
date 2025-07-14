@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C0A893FD2E22C602008B1730 /* Entity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A893FB2E22C602008B1730 /* Entity+CoreDataClass.swift */; };
-		C0A893FE2E22C602008B1730 /* Entity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A893FC2E22C602008B1730 /* Entity+CoreDataProperties.swift */; };
+		C00B12462E2416DD00B4704D /* SwipeCellKit in Frameworks */ = {isa = PBXBuildFile; productRef = C00B12452E2416DD00B4704D /* SwipeCellKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,8 +31,6 @@
 		C0A893602E087364008B1730 /* Dreamify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dreamify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0A8937A2E087365008B1730 /* DreamifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DreamifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0A893842E087365008B1730 /* DreamifyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DreamifyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0A893FB2E22C602008B1730 /* Entity+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Entity+CoreDataClass.swift"; path = "Dreamify/Model/Entity+CoreDataClass.swift"; sourceTree = "<group>"; };
-		C0A893FC2E22C602008B1730 /* Entity+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Entity+CoreDataProperties.swift"; path = "Dreamify/Model/Entity+CoreDataProperties.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -72,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C00B12462E2416DD00B4704D /* SwipeCellKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,8 +93,6 @@
 		C0A893572E087364008B1730 = {
 			isa = PBXGroup;
 			children = (
-				C0A893FB2E22C602008B1730 /* Entity+CoreDataClass.swift */,
-				C0A893FC2E22C602008B1730 /* Entity+CoreDataProperties.swift */,
 				C0A893622E087364008B1730 /* Dreamify */,
 				C0A8937D2E087365008B1730 /* DreamifyTests */,
 				C0A893872E087365008B1730 /* DreamifyUITests */,
@@ -134,6 +130,7 @@
 			);
 			name = Dreamify;
 			packageProductDependencies = (
+				C00B12452E2416DD00B4704D /* SwipeCellKit */,
 			);
 			productName = Dreamify;
 			productReference = C0A893602E087364008B1730 /* Dreamify.app */;
@@ -217,6 +214,9 @@
 			);
 			mainGroup = C0A893572E087364008B1730;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C00B12192E22EF8400B4704D /* XCRemoteSwiftPackageReference "swipecellkit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C0A893612E087364008B1730 /* Products */;
 			projectDirPath = "";
@@ -258,8 +258,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C0A893FD2E22C602008B1730 /* Entity+CoreDataClass.swift in Sources */,
-				C0A893FE2E22C602008B1730 /* Entity+CoreDataProperties.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -584,6 +582,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C00B12192E22EF8400B4704D /* XCRemoteSwiftPackageReference "swipecellkit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swipecellkit/swipecellkit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C00B12452E2416DD00B4704D /* SwipeCellKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C00B12192E22EF8400B4704D /* XCRemoteSwiftPackageReference "swipecellkit" */;
+			productName = SwipeCellKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C0A893582E087364008B1730 /* Project object */;
 }

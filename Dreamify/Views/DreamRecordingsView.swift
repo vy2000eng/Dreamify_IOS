@@ -14,13 +14,29 @@ import UIKit
 class DreamRecordsView:UIView{
     let titleLabel: UILabel = {
           let label = UILabel()
-          label.text = "Welcome Home"
+          label.text = "This is where all you're dream will be "
           label.font = UIFont.boldSystemFont(ofSize: 24)
           label.textAlignment = .center
           label.textColor = .systemBlue
           label.translatesAutoresizingMaskIntoConstraints = false
           return label
       }()
+    
+    
+    let dreamsLabel:UILabel = {
+        let label = UILabel()
+        label.text = "/path/to/directory/of/recording"
+
+        label.font = UIFont.boldSystemFont(ofSize: 24)
+        label.textAlignment = .center
+        label.textColor = .systemBlue
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label;
+        
+        
+    }()
+    
+    
     
     
     override init(frame: CGRect) {

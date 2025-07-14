@@ -10,16 +10,21 @@ import UIKit
 
 
 class TabsViewController:UITabBarController{
-    var mainViewController          : MainViewController
-    var dreamRecordingViewController: DreamRecordingsViewController
-    var calendarViewController      : CalendarViewController
+    var mainViewController           : MainViewController
+    var dreamRecordingViewController : DreamRecordingsViewController
+    var calendarViewController       : CalendarViewController
+    var dreamRecordingViewModel      : DreamRecordingViewModel
     
     
     
     init() {
-        self.mainViewController           = MainViewController()
-        self.dreamRecordingViewController = DreamRecordingsViewController()
-        self.calendarViewController       = CalendarViewController()
+        self.dreamRecordingViewModel      = DreamRecordingViewModel()
+        self.mainViewController           = MainViewController(dreamRecordingViewModel: dreamRecordingViewModel)
+        self.dreamRecordingViewController = DreamRecordingsViewController(dreamRecordingViewModel: dreamRecordingViewModel)
+        self.calendarViewController       = CalendarViewController(dreamRecordingViewModel: dreamRecordingViewModel)
+        
+ 
+
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -35,16 +40,5 @@ class TabsViewController:UITabBarController{
         setViewControllers(  [mainViewController,dreamRecordingViewController,calendarViewController], animated: true)
 
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 }
 

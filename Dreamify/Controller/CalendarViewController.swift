@@ -11,7 +11,10 @@ import UIKit
 
 class CalendarViewController:UIViewController{
     var calendarView: CalendarView
-    init(){
+    var dreamRecordingViewModel:DreamRecordingViewModel
+    init(dreamRecordingViewModel:DreamRecordingViewModel){
+        
+        self.dreamRecordingViewModel = dreamRecordingViewModel
         calendarView = CalendarView()
         super.init(nibName: nil, bundle: nil)
     }

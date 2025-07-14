@@ -1,0 +1,15 @@
+{
+  "originHash" : "5df7fe00eac5a926bee83fddd9b67622a77d4396ff30b67bdb966109d6e4be85",
+  "pins" : [
+    {
+      "identity" : "swipecellkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swipecellkit/swipecellkit.git",
+      "state" : {
+        "revision" : "7219cad3098637176ace311510d11467dbfb9bb0",
+        "version" : "2.7.1"
+      }
+    }
+  ],
+  "version" : 3
+}

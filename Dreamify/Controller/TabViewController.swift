@@ -18,14 +18,11 @@ class TabsViewController:UITabBarController{
     
     
     init() {
-        self.dreamRecordingViewModel      = DreamRecordingViewModel()
-        self.mainViewController           = MainViewController(dreamRecordingViewModel: dreamRecordingViewModel)
+        self.dreamRecordingViewModel      = DreamRecordingViewModel      (                                                )
+        self.mainViewController           = MainViewController           (dreamRecordingViewModel: dreamRecordingViewModel)
         self.dreamRecordingViewController = DreamRecordingsViewController(dreamRecordingViewModel: dreamRecordingViewModel)
-        self.calendarViewController       = CalendarViewController(dreamRecordingViewModel: dreamRecordingViewModel)
-        
- 
-
-        super.init(nibName: nil, bundle: nil)
+        self.calendarViewController       = CalendarViewController       (dreamRecordingViewModel: dreamRecordingViewModel)
+        super.init                                                       (nibName                : nil, bundle: nil       )
     }
     
     required init?(coder: NSCoder) {
@@ -34,11 +31,17 @@ class TabsViewController:UITabBarController{
     
     
     override func viewDidLoad() {
+
+        delegate = self
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+
         mainViewController          .tabBarItem = UITabBarItem(title: "Home",        image: UIImage(systemName: "menucard"),    tag: 1)
         dreamRecordingViewController.tabBarItem = UITabBarItem(title: "Dreams", image: UIImage(systemName: "list.bullet"), tag: 2)
         calendarViewController      .tabBarItem = UITabBarItem(title: "Calendar",   image: UIImage(systemName: "calendar"), tag: 3)
         setViewControllers(  [mainViewController,dreamRecordingViewController,calendarViewController], animated: true)
 
     }
+  
 }
 

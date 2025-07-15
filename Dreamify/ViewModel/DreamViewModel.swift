@@ -23,7 +23,7 @@ class DreamViewModel{
         dream.title ?? "title is not defined"
     }
     var url:String{
-        dream.url ?? "url is not defined"
+        dream.url ?? "url path is not defined"
     }
     
 }

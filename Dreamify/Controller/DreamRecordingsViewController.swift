@@ -10,13 +10,13 @@ import UIKit
 //MARK: note the delegated and datasources are in there designated folders
 class DreamRecordingsViewController:UIViewController{
 
-    var dreamRecordingsView:DreamRecordsView
+    var dreamRecordingsView    : DreamRecordsView
     var dreamRecordingViewModel: DreamRecordingViewModel
     
     init(dreamRecordingViewModel:DreamRecordingViewModel) {
         self.dreamRecordingViewModel = dreamRecordingViewModel
-        dreamRecordingsView = DreamRecordsView()
-        super.init(nibName: nil, bundle: nil)
+        dreamRecordingsView          = DreamRecordsView()
+        super.init                     (nibName: nil, bundle: nil)
     }
   
     required init?(coder: NSCoder) {
@@ -26,59 +26,49 @@ class DreamRecordingsViewController:UIViewController{
     lazy var collectionView: UICollectionView = {
         
         let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment -> NSCollectionLayoutSection? in
-            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
-            let item = NSCollectionLayoutItem(layoutSize: itemSize)
-            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(112))
-            let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-            let section = NSCollectionLayoutSection(group: group)
+            let itemSize  = NSCollectionLayoutSize          (widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(0.75))
+            let item      = NSCollectionLayoutItem          (layoutSize: itemSize)
+            let groupSize = NSCollectionLayoutSize          (widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(112))
+            let group     = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+            let section   = NSCollectionLayoutSection       (group: group)
             section.interGroupSpacing = 10 // This adds vertical spacing between cells
-            let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(50))
-            let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
-            header.pinToVisibleBounds = true  // This makes the header sticky
-            section.boundarySupplementaryItems = [header]
             return section
         }
         
-        let v = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
-        v.backgroundColor = .clear
-        v.delegate = self
-        v.dataSource = self
-        v.register(DreamRecordingViewCell.self, forCellWithReuseIdentifier: "dreamCell")
+        let v                                       = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
+        
+        v.backgroundColor                           = .clear
+        v.contentInsetAdjustmentBehavior            = .automatic
+        v.delegate                                  = self
+        v.dataSource                                = self
+        v.register                                   (DreamRecordingViewCell.self, forCellWithReuseIdentifier: "dreamCell")
         v.translatesAutoresizingMaskIntoConstraints = false
         return v
     }()
     
-    
+    //override vi
     
     override func viewDidLoad() {
-        setupUI()
-        setupConstraints()
-        //getAllRecordings()
+        setupUI                     ()
+        setupConstraints            ()
         listFilesFromDocumentsFolder()
-        super.viewDidLoad()
+        super.viewDidLoad           ()
     }
     
     private func setupUI() {
         view.backgroundColor = .systemBackground
-        title = "Dreams"
-        
-        // Add subviews
-        //view.addSubview(dreamRecordingsView.titleLabel)
-        view.addSubview(collectionView)
-        //view.addSubview(dreamRecordingsView.dreamsLabel)
+        title                = "Dreams"
+        view.addSubview         (collectionView)
 
     }
     
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-
-            
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
+            collectionView.leadingAnchor.constraint (equalTo: view.leadingAnchor                ),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor               ),
+            collectionView.topAnchor.constraint     (equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.bottomAnchor.constraint  (equalTo: view.bottomAnchor                 ),
         ])
     }
     

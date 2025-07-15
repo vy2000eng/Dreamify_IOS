@@ -21,6 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
        // let vc = SubjectViewController()
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = UINavigationController(rootViewController: TabsViewController())
+        
         window?.makeKeyAndVisible()
     }
         

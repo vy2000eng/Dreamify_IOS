@@ -69,6 +69,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate{
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         mainContentView.actionButton.layer.cornerRadius =  mainContentView.actionButton.frame.width / 2
+
     }
     
     // MARK: - Setup Methods
@@ -115,8 +116,8 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate{
         let dateFormatter               = DateFormatter()
         dateFormatter.dateFormat        = "d.M.yyyy.hh.mm.ss"
         let formattedDate               = dateFormatter.string(from: Date())
-        let id                          = UUID()
-        let unique_file_name            = formattedDate
+        //let id                          = UUID()
+        let unique_file_name            = formattedDate  + ".m4a"
         let local_url                   = getDocumentsDirectory().appendingPathComponent(unique_file_name)
         scoped_url                      = local_url.absoluteString
         scoped_file_name                = unique_file_name
@@ -144,23 +145,6 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate{
         }
         
     }
-//    func startRecording(){
-//        let text = "this is a test string that is going to be saved in the application directory";
-//        let directory = URL.documentsDirectory
-//        print("directory: \(directory.path())")
-//        let file_url = directory.appendingPathComponent("document_file.txt")
-//        
-//        do{
-//            let data =  text.data(using: .utf8)
-//            try data?.write(to: file_url)
-//            
-//
-//            
-//        }catch{
-//            print("text data err")
-//            
-//        }
-//    }
     
     func getDocumentsDirectory() -> URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
@@ -201,18 +185,11 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate{
 
     
     @objc func recordTapped() {
-        
-        
-            if audioRecorder == nil {
-                startRecording()
-            } else {
-                
-                finishRecording(success: true)
-         
-            }
-        
-       
-     
+        if audioRecorder == nil {
+            startRecording()
+        } else {
+            finishRecording(success: true)
+        }
     }
     
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {

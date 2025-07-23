@@ -9,6 +9,8 @@ import UIKit
 import SwipeCellKit
 
 class DreamRecordingViewCell:SwipeCollectionViewCell{
+    private var parentWidth:CGFloat? = nil
+
     private lazy var stackView: UIStackView = {
         let stack                                       = UIStackView()
         stack.axis                                      = .vertical
@@ -16,15 +18,28 @@ class DreamRecordingViewCell:SwipeCollectionViewCell{
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
+    
+     lazy var expandedStackView: UIStackView = {
+         let stack = UIStackView()
+         stack.axis                                      = .horizontal
+         stack.spacing                                   = 2
+         stack.translatesAutoresizingMaskIntoConstraints = false
+         return stack
+         
+         
+        
+    }()
 
      lazy var dreamNameLabel: UILabel = {
         let label       = UILabel()
+         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
 
     lazy var createdOnLabel: UILabel = {
         let label       = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
@@ -36,6 +51,26 @@ class DreamRecordingViewCell:SwipeCollectionViewCell{
         mainContentView.layer.shadowRadius                        = 1.0
         mainContentView.layer.cornerRadius                        = 2
         return mainContentView
+    }()
+    
+    
+    
+    lazy var playPauseButton: UIButton = {
+        let button                                       = UIButton(type: .system)
+        let config                                       = UIImage.SymbolConfiguration(pointSize: 32, weight: .medium)
+        button.backgroundColor                           = .clear
+        button.clipsToBounds                             = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+        
+    }()
+    
+    lazy var testLabel:UILabel={
+        
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+        
     }()
 
     
@@ -53,6 +88,7 @@ class DreamRecordingViewCell:SwipeCollectionViewCell{
 
         contentView.addSubview(mainContentView)
         mainContentView.addSubview(stackView)
+        mainContentView.addSubview(playPauseButton)
         
         stackView.addArrangedSubview(dreamNameLabel)
         //stackView.addArrangedSubview(countLabel)
@@ -67,11 +103,20 @@ class DreamRecordingViewCell:SwipeCollectionViewCell{
             stackView.topAnchor.constraint(equalTo: mainContentView.topAnchor, constant: 12),
             stackView.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 12),
             stackView.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -12),
-            stackView.bottomAnchor.constraint(equalTo: mainContentView.bottomAnchor, constant: -12)
+            stackView.bottomAnchor.constraint(equalTo: mainContentView.bottomAnchor, constant: -12),
+            
+            
+            playPauseButton.topAnchor.constraint(equalTo: mainContentView.topAnchor, constant: 5),
+            playPauseButton.leadingAnchor.constraint(equalTo: stackView.trailingAnchor, constant: -35),
+            //playPauseButton.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: 5),
+            //playPauseButton.topAnchor.constraint(equalTo: mainContentView.topAnchor, constant: 5),
+            playPauseButton.bottomAnchor.constraint(equalTo: mainContentView.bottomAnchor, constant: -5),
         ])
     }
 
-    func configure(with dream: DreamViewModel) {
+    func configure(with dream: DreamViewModel, parentWidth: CGFloat) {
+        self.parentWidth = parentWidth
+        mainContentView.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
         mainContentView.backgroundColor = UIColor.secondarySystemBackground
         dreamNameLabel.attributedText   = .create(string: dream.title, font: .systemFont(ofSize: 15,weight: .bold), color: .tertiaryLabel)
         let dateFormatter               = DateFormatter()
@@ -81,5 +126,27 @@ class DreamRecordingViewCell:SwipeCollectionViewCell{
         createdOnLabel.attributedText   = .create(string: "🕒 \(formattedDate)", font: .systemFont(ofSize: 10,weight: .semibold), color: .secondaryLabel)
     }
     
-    
+    func addExpandedViewToMainView(){
+        //mainContentView.addSubview(expandedStackView)
+        mainContentView.addSubview(expandedStackView)
+        expandedStackView.addArrangedSubview(testLabel)
+        NSLayoutConstraint.activate([
+            expandedStackView.topAnchor.constraint(equalTo: stackView.bottomAnchor),
+            expandedStackView.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 5),
+            expandedStackView.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -5),
+            expandedStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            
+            
+            
+            
+        ])
+        
+
+        
+    }
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        let attribute = super.preferredLayoutAttributesFitting(layoutAttributes)
+        attribute.size = .init(width: self.parentWidth ?? 0 , height: mainContentView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height)
+        return layoutAttributes
+    }
 }

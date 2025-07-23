@@ -41,6 +41,12 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return dreamRecordingViewModel.dreamsCount
     }
+    
+    
+    
+    
+    
 }
+
 
 

@@ -23,56 +23,62 @@ class DreamRecordingsViewController:UIViewController{
         fatalError("init(coder:) has not been implemented")
     }
     
-//    lazy var collectionView: UICollectionView = {
+    lazy var collectionView: UICollectionView = {
+        
+        let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment -> NSCollectionLayoutSection? in
+            let itemSize  = NSCollectionLayoutSize          (widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(0.75))
+            let item      = NSCollectionLayoutItem          (layoutSize: itemSize)
+            let groupSize = NSCollectionLayoutSize          (widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(112))
+            let group     = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+            let section   = NSCollectionLayoutSection       (group: group)
+            section.interGroupSpacing = 10 // This adds vertical spacing between cells
+            let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(0.15))
+            let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+            header.pinToVisibleBounds = true  // This makes the header sticky
+            section.boundarySupplementaryItems = [header]
+            return section
+        }
+        
+        let v                                       = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
+        
+        v.backgroundColor                           = .clear
+        v.contentInsetAdjustmentBehavior            = .automatic
+        v.delegate                                  = self
+        v.dataSource                                = self
+        v.register                                   (DreamRecordingViewCell.self, forCellWithReuseIdentifier: "dreamCell")
+        v.register                                    (DreamRecordingHeaderViewCell.self, forSupplementaryViewOfKind:UICollectionView.elementKindSectionHeader , withReuseIdentifier: "headerCell")
+
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
+//    lazy var collectionView:UICollectionView = {
+//       
+//        //var flowLayout = UICollectionViewFlowLayout()
+//        let flowLayout = UICollectionViewFlowLayout()
+//        flowLayout.scrollDirection = .vertical
+//        flowLayout.minimumLineSpacing = 10.0
+//        flowLayout.itemSize = CGSize(width: view.bounds.width, height: 100) // Example item size
+//
+//       // flowLayout.itemSize = CGSize(width: 100, height: 100)
+//
+//
+//            
+//            
 //        
-//        let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment -> NSCollectionLayoutSection? in
-//            let itemSize  = NSCollectionLayoutSize          (widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(0.75))
-//            let item      = NSCollectionLayoutItem          (layoutSize: itemSize)
-//            let groupSize = NSCollectionLayoutSize          (widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(112))
-//            let group     = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-//            let section   = NSCollectionLayoutSection       (group: group)
-//            section.interGroupSpacing = 10 // This adds vertical spacing between cells
-//            return section
-//        }
-//        
-//        let v                                       = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
-//        
+//        let v = UICollectionView(frame: view.bounds, collectionViewLayout: flowLayout)
 //        v.backgroundColor                           = .clear
 //        v.contentInsetAdjustmentBehavior            = .automatic
+//        
 //        v.delegate                                  = self
 //        v.dataSource                                = self
 //        v.register                                   (DreamRecordingViewCell.self, forCellWithReuseIdentifier: "dreamCell")
 //        v.translatesAutoresizingMaskIntoConstraints = false
 //        return v
+//        
+//        
+//        
+//        
 //    }()
-    lazy var collectionView:UICollectionView = {
-       
-        //var flowLayout = UICollectionViewFlowLayout()
-        let flowLayout = UICollectionViewFlowLayout()
-        flowLayout.scrollDirection = .vertical
-        flowLayout.minimumLineSpacing = 10.0
-        flowLayout.itemSize = CGSize(width: view.bounds.width, height: 100) // Example item size
-
-       // flowLayout.itemSize = CGSize(width: 100, height: 100)
-
-
-            
-            
-        
-        let v = UICollectionView(frame: view.bounds, collectionViewLayout: flowLayout)
-        v.backgroundColor                           = .clear
-        v.contentInsetAdjustmentBehavior            = .automatic
-        
-        v.delegate                                  = self
-        v.dataSource                                = self
-        v.register                                   (DreamRecordingViewCell.self, forCellWithReuseIdentifier: "dreamCell")
-        v.translatesAutoresizingMaskIntoConstraints = false
-        return v
-        
-        
-        
-        
-    }()
     
     //override vi
     

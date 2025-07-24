@@ -12,19 +12,18 @@ struct SizeIndexAllocation{
     var isSelected:Bool
 }
 
-
 class DreamViewModel{
     private var dream:Dream
     private var isPlaying:Bool
     private var sizeIndexAllocation:SizeIndexAllocation
-//    private var selectedIndex:Int
-//    private var isSelected:Bool
+    private var isOpen:Bool
     
     
     init(dream: Dream) {
         self.sizeIndexAllocation = SizeIndexAllocation(selectedIndex: -1, isSelected: false)
         self.isPlaying = false
         self.dream = dream
+        self.isOpen = false
     }
     var id:UUID{
         dream.id
@@ -54,12 +53,14 @@ class DreamViewModel{
     func togglePlayPauseButton(){
         self.isPlaying = !self.isPlaying
         
-        //self.isPlaying = isPlaying
+    }
+    func toggleIsOpen(){
+        self.isOpen = !self.isOpen
+        
     }
     
-    
-//    var playPause:Bool{
-//        return playPause
-//    }
-    
+    func retrieveIsOpen() -> Bool{
+        return self.isOpen
+        
+    }
 }

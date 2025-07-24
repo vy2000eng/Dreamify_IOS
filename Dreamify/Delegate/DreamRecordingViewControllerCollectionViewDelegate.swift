@@ -14,12 +14,6 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
         case .left:
             
             let deleteAction = SwipeAction(style: .destructive, title: nil) { action, indexPath in
-               // if self.viewmodel.sectionType(for: indexPath.section ) == .topics{
-                    //self.deleteTopic(at: indexPath)
-                //}else{
-                //    self.deleteMap(at: indexPath)
-              //  }
-                //self.navigationItem.rightBarButtonItem = self.createOptionsBarButtonItem()
                 
             }
             deleteAction.image = UIImage(systemName: "trash")
@@ -36,10 +30,6 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
             return [favoriteAction]
         }
 
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return dreamRecordingViewModel.dreamsCount
     }
     
     

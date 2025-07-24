@@ -28,7 +28,7 @@ class DreamRecordingsViewController:UIViewController{
         let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment -> NSCollectionLayoutSection? in
             let itemSize  = NSCollectionLayoutSize          (widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(0.75))
             let item      = NSCollectionLayoutItem          (layoutSize: itemSize)
-            let groupSize = NSCollectionLayoutSize          (widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(112))
+            let groupSize = NSCollectionLayoutSize          (widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(175))
             let group     = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
             let section   = NSCollectionLayoutSection       (group: group)
             section.interGroupSpacing = 10 // This adds vertical spacing between cells

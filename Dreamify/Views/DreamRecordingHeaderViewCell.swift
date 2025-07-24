@@ -67,10 +67,9 @@ extension DreamRecordingHeaderViewCell{
         ])
     }
     func configureDreamRecordingViewHeader(viewmodel: DreamRecordingViewModel, row: Int){
-        headerView.backgroundColor = UIColor.secondarySystemBackground
-        let sectionTitleText = viewmodel.dream(by: row).title
-        
-        let createdDate = viewmodel.dream(by: row).createdDate
+        headerView.backgroundColor      = UIColor.secondarySystemBackground
+        let sectionTitleText            = viewmodel.dream(by: row).title
+        let createdDate                 = viewmodel.dream(by: row).createdDate
         let dateFormatter               =  DateFormatter()
         dateFormatter.dateStyle         = .short
         dateFormatter.timeStyle         = .short

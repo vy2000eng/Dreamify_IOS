@@ -18,7 +18,7 @@ extension DreamRecordingsViewController:UICollectionViewDataSource{
         cell.configure(with: dream)
         cell.playPauseButton.tag    = indexPath.section
         cell.playPauseButton.addTarget(self, action: #selector(handlePlayPause( _:)) , for: .touchUpInside)
-        let config = UIImage.SymbolConfiguration(pointSize: 32, weight: .medium)
+        let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
         if(dream.getIsPlaying){
             cell.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
         }else{
@@ -30,6 +30,7 @@ extension DreamRecordingsViewController:UICollectionViewDataSource{
 
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
         return dreamCell(indexPath: IndexPath(row: 0, section: indexPath.section))
         
         
@@ -90,27 +91,16 @@ extension DreamRecordingsViewController:UICollectionViewDataSource{
 
 extension DreamRecordingsViewController{
     @objc
-    func handlePlayPause(_ sender:UIButton) throws -> Void{
-        
+    func handlePlayPause(_ sender:UIButton) throws -> Void{        
         let indexPath = IndexPath(row: 0, section: sender.tag)
         let curr_cell = self.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell
-        let config    = UIImage.SymbolConfiguration(pointSize: 32, weight: .medium)
+        let config    = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
         let dream     = dreamRecordingViewModel.dream(by: indexPath.section)
        
         dream.getIsPlaying == false
         ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
         : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal)
-    
-        DispatchQueue.main.async {
-            [weak self ] in
-            
-            guard let self = self else{
-                return
-            }
-         
-            dream.togglePlayPauseButton()
-            self.collectionView.reloadItems(at: [indexPath])
-        }
+        dream.togglePlayPauseButton()
     }
     
     @objc

@@ -19,7 +19,7 @@ extension DreamRecordingsViewController:UICollectionViewDataSource{
         cell.playPauseButton.tag    = indexPath.section
         cell.playPauseButton.addTarget(self, action: #selector(handlePlayPause( _:)) , for: .touchUpInside)
         let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
-        if(dream.getIsPlaying){
+        if(dream.getIsPlaying()){
             cell.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
         }else{
             cell.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal)
@@ -91,16 +91,79 @@ extension DreamRecordingsViewController:UICollectionViewDataSource{
 
 extension DreamRecordingsViewController{
     @objc
-    func handlePlayPause(_ sender:UIButton) throws -> Void{        
-        let indexPath = IndexPath(row: 0, section: sender.tag)
+    func handlePlayPause(_ sender:UIButton) throws -> Void{
+        
+        
+        
+        let indexPath                                  = IndexPath                               (row: 0, section: sender.tag)
+        let indexThatIsCurrentlyPlaying                = dreamRecordingViewModel.getSelectedIndex()
+        let isTheCurrentlySelectedIndexPlayingRightNow = dreamRecordingViewModel.getIsPlaying    ()
+        
         let curr_cell = self.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell
         let config    = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
         let dream     = dreamRecordingViewModel.dream(by: indexPath.section)
-       
-        dream.getIsPlaying == false
-        ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
-        : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal)
-        dream.togglePlayPauseButton()
+        
+        if(indexPath.section == indexThatIsCurrentlyPlaying || indexThatIsCurrentlyPlaying == -1){
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                guard let self = self else{
+                    return
+                }
+                
+                UIView.transition(with: curr_cell?.playPauseButton ?? UIView(), duration: 0.3, options: .curveEaseOut) {
+                    dream.getIsPlaying() == false
+                        ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
+                        : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+                }
+                dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
+            }
+            
+            
+            
+            
+//            dream.getIsPlaying() == false
+//            ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
+//            : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal)
+//            dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
+            
+            
+            
+        }else{
+            
+            let prev_cell      = self.collectionView    .cellForItem(at: IndexPath(row:0, section:indexThatIsCurrentlyPlaying)) as? DreamRecordingViewCell
+            let prev_dream     = dreamRecordingViewModel.dream      (by: indexThatIsCurrentlyPlaying)
+            
+            UIView.transition(with: prev_cell?.playPauseButton ?? UIView(), duration: 0.3, options: .curveEaseIn) {
+                prev_dream.getIsPlaying() == false
+                    ? prev_cell?.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
+                    : prev_cell?.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+            }
+            
+//            prev_dream.getIsPlaying() == false
+//            ? prev_cell?.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
+//            : prev_cell?.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal)
+            dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexThatIsCurrentlyPlaying   )
+            
+            //Thread.sleep(forTimeInterval: 1.5)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                guard let self = self else{
+                    return
+                }
+                
+                UIView.transition(with: curr_cell?.playPauseButton ?? UIView(), duration: 0.3, options: .curveEaseOut) {
+                    dream.getIsPlaying() == false
+                        ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
+                        : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+                }
+                dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
+            }
+            
+            
+            
+//            dream.getIsPlaying() == false
+//            ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
+//            : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal)
+//            dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
+        }
     }
     
     @objc
@@ -110,10 +173,11 @@ extension DreamRecordingsViewController{
             
             print("tapped")
             guard let id = gesture.view?.tag else {
-                fatalError("Developer Error: viewID is nil or out of range (0-4)")
+                fatalError("Developer Error: Tapped An Item that is out of range lol, this shouldn't be possible")
             }
             let dream = dreamRecordingViewModel.dream(by: id)
             dream.toggleIsOpen()
+         
             
             if(dream.retrieveIsOpen()){
                 self.collectionView.insertItems(at:[ IndexPath(row: 0, section: id)])

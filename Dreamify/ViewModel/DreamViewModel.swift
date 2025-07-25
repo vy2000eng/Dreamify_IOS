@@ -7,26 +7,33 @@
 
 import Foundation
 
-struct SizeIndexAllocation{
-    var selectedIndex:Int
-    var isSelected:Bool
-}
+//struct IsPlayingAllocation{
+//    var selectedIndex:Int
+//    var isPlaying:Bool
+//}
 
 class DreamViewModel{
     private var dream:Dream
     private var isPlaying:Bool
-    private var sizeIndexAllocation:SizeIndexAllocation
+   // private var sizeIndexAllocation:IsPlayingAllocation
     private var isOpen:Bool
     
     
     init(dream: Dream) {
-        self.sizeIndexAllocation = SizeIndexAllocation(selectedIndex: -1, isSelected: false)
-        self.isPlaying = false
+        //self.sizeIndexAllocation = IsPlayingAllocation(selectedIndex: -1, isPlaying: false)
+       // self.isPlaying = false
         self.dream = dream
         self.isOpen = false
+        self.isPlaying = false
     }
     var id:UUID{
         dream.id
+    }
+    func setIsPlaying(isPlaying: Bool){
+        self.isPlaying = isPlaying
+    }
+    func getIsPlaying()->Bool{
+        return self.isPlaying
     }
     var createdDate:Date{
         dream.created_date ?? Date()
@@ -38,22 +45,7 @@ class DreamViewModel{
         dream.url ?? "url path is not defined"
     }
     
-    var getIsPlaying:Bool{
-        return self.isPlaying
-        
-    }
-    func getSizeIndexAllocationStruct() -> SizeIndexAllocation{
-        return self.sizeIndexAllocation
-    }
-    func setSizeIndexAllocation(isSelected:Bool, selectedIndex:Int){
-        self.sizeIndexAllocation = SizeIndexAllocation(selectedIndex: selectedIndex, isSelected: isSelected)
-    }
-    
-    
-    func togglePlayPauseButton(){
-        self.isPlaying = !self.isPlaying
-        
-    }
+
     func toggleIsOpen(){
         self.isOpen = !self.isOpen
         

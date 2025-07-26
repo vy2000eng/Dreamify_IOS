@@ -15,17 +15,30 @@ class MainViewController: UIViewController{
     var mainContentView          :  MainContentView
     var dreamsRecordingViewModel :  DreamRecordingViewModel
     var audioRecordingManager    : AudioRecorderManager
+    private var windowOrientation: UIInterfaceOrientation {
+          return view.window?.windowScene?.interfaceOrientation ?? .portrait
+      }
     init(dreamRecordingViewModel : DreamRecordingViewModel){
         
         self.mainContentView            = MainContentView()
         self.dreamsRecordingViewModel   = dreamRecordingViewModel
-        audioRecordingManager           = AudioRecorderManager(dreamRecordingViewModel: dreamRecordingViewModel)
+        audioRecordingManager           = AudioRecorderManager()
         super.init                        (nibName: nil, bundle: nil)
         
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+          Task {
+              if audioRecordingManager.getState() == .recording{
+                  try? await audioRecordingManager.updateOrientation(interfaceOrientation: windowOrientation)
+
+                  
+              }
+              // Update the orientation of the audio recorder manager based on the window orientation.
+          }
+      }
     
     
     // MARK: - Lifecycle
@@ -135,7 +148,7 @@ extension MainViewController{
         return paths[0]
     }
     
-    private func finishRecording(success: Bool) {
+    func finishRecording(success: Bool) {
         audioRecordingManager.stop()
         do{
             

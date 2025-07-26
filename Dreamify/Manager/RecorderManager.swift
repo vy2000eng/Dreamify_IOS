@@ -7,6 +7,7 @@
 
 import Foundation
 import AVFAudio
+import UIKit
 
 enum State  {
     case stopped
@@ -21,30 +22,17 @@ public class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
     private var recorder: AVAudioRecorder!
     private var recordingSession:AVAudioSession!
     private var state:State
-    private var dreamRecordingViewModel:DreamRecordingViewModel
     private var uniqueFileName:String!
+  
    // private var recodingFileName:String
 
     // MARK: - Initialization
 
-    init(dreamRecordingViewModel:DreamRecordingViewModel) {
+    override init() {
          state = State.stopped
-        self.dreamRecordingViewModel = dreamRecordingViewModel
-        
         super.init()
-        
-//        do {
-//            try configureAudioSession()
-//            try enableBuiltInMicrophone()
-//            try setupAudioRecorder()
-//        } catch {
-//            // If any errors occur during initialization,
-//            // terminate the app with a fatalError.
-//            fatalError("Error: \(error)")
-//        }
-       
-        //self.recodingFileName = recordingFileName
     }
+  
     
   
     // MARK: - Recorder Control
@@ -61,25 +49,8 @@ public class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
         state = .stopped
     }
     
-    public func getRecorder()->AVAudioRecorder!{
-        return self.recorder
-    }
-    public func deInitRecorder(){
-        self.recorder = nil
-    }
+  
 
-    // MARK: - AVAudioRecorderDelegate
-
-//    public func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-//        // Move the recorded audio file to the documents directory.
-//        let destURL = //FileManager.default.//.urlInDocumentsDirectory(named: self.recordingFileName)
-//        try? FileManager.default.removeItem(at: destURL)
-//        try? FileManager.default.moveItem(at: recorder.url, to: destURL)
-//  
-//        // Prepare for a new record.
-//        recorder.prepareToRecord()
-//        state = .stopped
-//    }
 
     // MARK: - Audio Session and Recorder Configuration
     
@@ -178,6 +149,62 @@ public class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
         //recorder.delegate = self
         recorder.prepareToRecord()
     }
+    public func updateOrientation(
+        withDataSourceOrientation orientation: AVAudioSession.Orientation = .front,
+        interfaceOrientation: UIInterfaceOrientation
+    ) async throws {
+        // Don't update the data source if the app is currently recording.
+        guard state != .recording else { return }
+
+        // Get the shared audio session.
+        let session = AVAudioSession.sharedInstance()
+
+        // Find the data source matching the specified orientation.
+        guard let preferredInput = session.preferredInput,
+              let dataSources = preferredInput.dataSources,
+              let newDataSource = dataSources.first(where: { $0.orientation == orientation }),
+              let supportedPolarPatterns = newDataSource.supportedPolarPatterns else {
+            return
+        }
+
+        do {
+            // Check for iOS 14.0 availability to handle stereo support.
+            if #available(iOS 14.0, *) {
+                //isStereoSupported = supportedPolarPatterns.contains(.stereo)
+
+                // Set the preferred polar pattern to stereo if supported.
+                //if isStereoSupported {
+                    try newDataSource.setPreferredPolarPattern(.stereo)
+                //}
+            }
+
+            // Set the preferred data source.
+            try preferredInput.setPreferredDataSource(newDataSource)
+
+            // Set the preferred input orientation based on the interface orientation.
+            //if #available(iOS 14.0, *) {
+            try session.setPreferredInputOrientation(session.inputOrientation)
+            //}
+        } catch {
+            throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "unable To Select Data Source"])
+
+            //throw RecorderError.unableToSelectDataSource(name: newDataSource.dataSourceName)
+        }
+    }
+
+    
+    
+    
+
+}
+
+
+
+extension AudioRecorderManager{
+    func getDocumentsDirectory() -> URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
+    }
     func getUniqueFileName()->String?{
         return self.uniqueFileName
         
@@ -190,37 +217,10 @@ public class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
         return self.recordingSession
     }
     
-    
-    
-
-   // private func setupAudioRecorder() throws {...}
-}
-
-//extension AudioRecorderManager{
-//    public func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-//        // Move the recorded audio file to the documents directory.
-//        //let destURL = //FileManager.default.//.urlInDocumentsDirectory(named: self.recordingFileName)
-//        let dateFormatter               = DateFormatter()
-//        dateFormatter.dateFormat        = "d-M-yyyy-hh:mm:ss"
-//        let formattedDate               = dateFormatter.string(from: Date())
-//        let unique_file_name            = formattedDate  + ".wav"
-//        let dest_url:String                   = getDocumentsDirectory().appendingPathComponent(unique_file_name).absoluteString
-////        try? FileManager.default.removeItem(at: dest_url)
-////        try? FileManager.default.moveItem(at: recorder.url, to: dest_url)
-//  
-//        // Prepare for a new record.
-//        recorder.prepareToRecord()
-//        state = .stopped
-//        
-//        //try dreamRecordingViewModel.addDream(url: dest_url, title: unique_file_name)
-//
-//        //dreamViewModel
-//    }
-//}
-
-extension AudioRecorderManager{
-    func getDocumentsDirectory() -> URL {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        return paths[0]
+    public func getRecorder()->AVAudioRecorder!{
+        return self.recorder
+    }
+    public func deInitRecorder(){
+        self.recorder = nil
     }
 }

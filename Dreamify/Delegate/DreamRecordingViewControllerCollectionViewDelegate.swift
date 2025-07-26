@@ -31,11 +31,6 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
         }
 
     }
-    
-    
-    
-    
-    
 }
 
 

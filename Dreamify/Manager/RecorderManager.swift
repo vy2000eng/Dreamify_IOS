@@ -1,0 +1,226 @@
+//
+//  RecorderManager.swift
+//  Dreamify
+//
+//  Created by Vladyslav Yatsuta on 7/25/25.
+//
+
+import Foundation
+import AVFAudio
+
+enum State  {
+    case stopped
+    case recording
+    
+    
+    
+}
+
+public class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
+
+    private var recorder: AVAudioRecorder!
+    private var recordingSession:AVAudioSession!
+    private var state:State
+    private var dreamRecordingViewModel:DreamRecordingViewModel
+    private var uniqueFileName:String!
+   // private var recodingFileName:String
+
+    // MARK: - Initialization
+
+    init(dreamRecordingViewModel:DreamRecordingViewModel) {
+         state = State.stopped
+        self.dreamRecordingViewModel = dreamRecordingViewModel
+        
+        super.init()
+        
+//        do {
+//            try configureAudioSession()
+//            try enableBuiltInMicrophone()
+//            try setupAudioRecorder()
+//        } catch {
+//            // If any errors occur during initialization,
+//            // terminate the app with a fatalError.
+//            fatalError("Error: \(error)")
+//        }
+       
+        //self.recodingFileName = recordingFileName
+    }
+    
+  
+    // MARK: - Recorder Control
+
+    public func record() {
+        guard state != .recording else { return }
+        
+        recorder.record()
+        state = .recording
+    }
+    
+    public func stop() {
+        recorder.stop()
+        state = .stopped
+    }
+    
+    public func getRecorder()->AVAudioRecorder!{
+        return self.recorder
+    }
+    public func deInitRecorder(){
+        self.recorder = nil
+    }
+
+    // MARK: - AVAudioRecorderDelegate
+
+//    public func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+//        // Move the recorded audio file to the documents directory.
+//        let destURL = //FileManager.default.//.urlInDocumentsDirectory(named: self.recordingFileName)
+//        try? FileManager.default.removeItem(at: destURL)
+//        try? FileManager.default.moveItem(at: recorder.url, to: destURL)
+//  
+//        // Prepare for a new record.
+//        recorder.prepareToRecord()
+//        state = .stopped
+//    }
+
+    // MARK: - Audio Session and Recorder Configuration
+    
+    func configureAudioSessionAndConfigureRecorderExternally() throws -> Void{
+        do {
+            try configureAudioSession()
+            try enableBuiltInMicrophone()
+            //try setupAudioRecorder()
+        } catch let err as NSError {
+            throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: err.localizedDescription])
+
+            // If any errors occur during initialization,
+            // terminate the app with a fatalError.
+           // fatalError("Error: \(error)")
+        }
+       // configureAudioSession()
+        
+        
+    }
+
+    private func configureAudioSession() throws {
+        do {
+            // Get the instance of audio session.
+             recordingSession = AVAudioSession.sharedInstance()
+            
+            // Set the audio session category to record, allowing default to speaker and Bluetooth.
+            try recordingSession.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetooth])
+            
+            // Activate the audio session.
+            try recordingSession.setActive(true)
+            
+            
+        } catch {
+            throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "error in configuration"])
+
+            // If an error occurs during configuration, throw an appropriate error.
+           // throw AudioSessionError.configurationFailed
+        }
+    }
+
+   // private func enableBuiltInMicrophone() throws {...}
+    private func enableBuiltInMicrophone() throws {
+        // Get the instance of audio session.
+        let audioSession = AVAudioSession.sharedInstance()
+
+        // Get the audio inputs.
+        let availableInputs = audioSession.availableInputs
+        
+        // Find the available input that corresponds to the built-in microphone.
+        guard let builtInMicInput = availableInputs?.first(where: { $0.portType == .builtInMic }) else {
+            // If no built-in microphone is found, throw an error.
+            //throw AudioSessionError.missingBuiltInMicrophone
+            throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "build in microphone"])
+
+        }
+        
+        do {
+            // Set the built-in microphone as the preferred input.
+            try audioSession.setPreferredInput(builtInMicInput)
+        } catch {
+            throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "set preferred"])
+
+            // If an error occurs while setting the preferred input, throw an appropriate error.
+            //throw AudioSessionError.unableToSetBuiltInMicrophone
+        }
+    }
+    public func setupAudioRecorder() throws {
+//        let tempDir = FileManager.default.temporaryDirectory
+//        let fileURL = tempDir.appendingPathComponent(recordingFileName)
+        let dateFormatter               = DateFormatter()
+        dateFormatter.dateFormat        = "d-M-yyyy.hh.mm.ss"
+        let formattedDate               = dateFormatter.string(from: Date())
+        uniqueFileName            = formattedDate  + ".aac"
+        let local_url                   = getDocumentsDirectory().appendingPathComponent(uniqueFileName)
+       // _url                      = local_url.absoluteString
+//        file_title                      = unique_file_name
+        
+        
+        
+        do {
+            let audioSettings: [String: Any] = [
+                AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                AVLinearPCMIsNonInterleaved: false,
+                AVSampleRateKey: 44_100.0,
+                AVNumberOfChannelsKey: 1,
+                AVLinearPCMBitDepthKey: 16,
+                AVEncoderAudioQualityKey: AVAudioQuality.max.rawValue
+            ]
+            recorder = try AVAudioRecorder(url: local_url, settings: audioSettings)
+        } catch {
+            throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "unable to create audio recorder"])
+
+           // throw RecorderError.unableToCreateAudioRecorder
+        }
+        
+        //recorder.delegate = self
+        recorder.prepareToRecord()
+    }
+    func getUniqueFileName()->String?{
+        return self.uniqueFileName
+        
+    }
+    func getState() -> State{
+        return self.state
+    }
+    
+    func getRecordingSession() ->AVAudioSession{
+        return self.recordingSession
+    }
+    
+    
+    
+
+   // private func setupAudioRecorder() throws {...}
+}
+
+//extension AudioRecorderManager{
+//    public func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+//        // Move the recorded audio file to the documents directory.
+//        //let destURL = //FileManager.default.//.urlInDocumentsDirectory(named: self.recordingFileName)
+//        let dateFormatter               = DateFormatter()
+//        dateFormatter.dateFormat        = "d-M-yyyy-hh:mm:ss"
+//        let formattedDate               = dateFormatter.string(from: Date())
+//        let unique_file_name            = formattedDate  + ".wav"
+//        let dest_url:String                   = getDocumentsDirectory().appendingPathComponent(unique_file_name).absoluteString
+////        try? FileManager.default.removeItem(at: dest_url)
+////        try? FileManager.default.moveItem(at: recorder.url, to: dest_url)
+//  
+//        // Prepare for a new record.
+//        recorder.prepareToRecord()
+//        state = .stopped
+//        
+//        //try dreamRecordingViewModel.addDream(url: dest_url, title: unique_file_name)
+//
+//        //dreamViewModel
+//    }
+//}
+
+extension AudioRecorderManager{
+    func getDocumentsDirectory() -> URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
+    }
+}

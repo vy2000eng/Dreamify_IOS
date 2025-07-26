@@ -10,66 +10,67 @@ import AVFoundation
 
 
 
-class MainViewController: UIViewController, AVAudioRecorderDelegate{
+class MainViewController: UIViewController{
     
-    var mainContentView         :  MainContentView
-    var recordingSession        :  AVAudioSession!
-    var audioRecorder           :  AVAudioRecorder!
-    var dreamsRecordingViewModel:  DreamRecordingViewModel
-    var scoped_file_name        :  String? // is set in startRecording()
-    var scoped_url              :  String?
-    
-    init(dreamRecordingViewModel:DreamRecordingViewModel){
-        scoped_file_name                = nil
+    var mainContentView          :  MainContentView
+    var dreamsRecordingViewModel :  DreamRecordingViewModel
+    var audioRecordingManager    : AudioRecorderManager
+    init(dreamRecordingViewModel : DreamRecordingViewModel){
+        
         self.mainContentView            = MainContentView()
         self.dreamsRecordingViewModel   = dreamRecordingViewModel
+        audioRecordingManager           = AudioRecorderManager(dreamRecordingViewModel: dreamRecordingViewModel)
         super.init                        (nibName: nil, bundle: nil)
+        
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
- 
         
         setupUI()
         setupConstraints()
-        recordingSession = AVAudioSession.sharedInstance()
-
-
+        
         do {
-            try recordingSession.setCategory(.playAndRecord, mode: .default)
-            try recordingSession.setActive(true)
+            try audioRecordingManager.configureAudioSessionAndConfigureRecorderExternally()
+            
+            let recordingSession = audioRecordingManager.getRecordingSession()
+            
             recordingSession.requestRecordPermission() { [unowned self] allowed in
                 DispatchQueue.main.async {
+                    
                     if allowed {
                         self.setupActions()
                     } else {
                         // failed to record!
                         let alert = UIAlertController(title: "action failed",
-                                                    message: "You tapped the start recording button, but the action failed",
+                                                      message: "Please Enable Audio ini Settings to start Recording",
                                                       preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                         self.present(alert, animated: true)
                     }
                 }
             }
-        } catch {
+        } catch let err as NSError{
+            let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.present(alert, animated: true)
             
-            // failed to record!
         }
-  
-        //setupActions()
-
-
+        
+        
+        
     }
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         mainContentView.actionButton.layer.cornerRadius =  mainContentView.actionButton.frame.width / 2
-
+        
     }
     
     // MARK: - Setup Methods
@@ -109,96 +110,75 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate{
         mainContentView.actionButton.addTarget(self, action: #selector(recordTapped), for: .touchUpInside)
         
     }
+}
 
-    //MARK: sets the scoped_file_name variable
-    func startRecording() {
-        //generate unique file name
-        let dateFormatter               = DateFormatter()
-        dateFormatter.dateFormat        = "d.M.yyyy.hh.mm.ss"
-        let formattedDate               = dateFormatter.string(from: Date())
-        //let id                          = UUID()
-        let unique_file_name            = formattedDate  + ".m4a"
-        let local_url                   = getDocumentsDirectory().appendingPathComponent(unique_file_name)
-        scoped_url                      = local_url.absoluteString
-        scoped_file_name                = unique_file_name
-        
-        
-
-        //configure audio recording
-        let settings = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 12000,
-            AVNumberOfChannelsKey: 1,
-            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
-        ]
-
-        do {
-
+extension MainViewController{
+    private func startRecording(){
+        do{
+            try audioRecordingManager.setupAudioRecorder()
+            audioRecordingManager.getRecorder ().delegate = self
             
-            audioRecorder = try AVAudioRecorder(url: local_url, settings: settings)
-            audioRecorder.delegate = self
-            audioRecorder.record()
-
+            audioRecordingManager.record()
             mainContentView.actionButton.setTitle("Tap to Stop", for: .normal)
-        } catch {
-            finishRecording(success: false)
+            
+        }catch let err as NSError{
+            let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.present(alert, animated: true)
         }
-        
     }
     
-    func getDocumentsDirectory() -> URL {
+    private func getDocumentsDirectory() -> URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return paths[0]
     }
-    func finishRecording(success: Bool) {
-        audioRecorder.stop()
-        audioRecorder = nil
-        
+    
+    private func finishRecording(success: Bool) {
+        audioRecordingManager.stop()
         do{
             
             if success{
-                guard let unwrappedUrl = scoped_url else {
+                guard let unwrappedUrl = audioRecordingManager.getRecorder()?.url.absoluteString else {
                     throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
                 }
-                guard let unwrapped_file_name =  scoped_file_name else {
+                guard let unwrapped_file_title =  audioRecordingManager.getUniqueFileName() else {
                     throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid FileName"])
                 }
                 
-                try dreamsRecordingViewModel.addDream    (url: unwrappedUrl, title: unwrapped_file_name)
-                scoped_url                             = nil
-                scoped_file_name                       = nil
+                try dreamsRecordingViewModel.addDream(url: unwrappedUrl, title: unwrapped_file_title)
+                
                 try dreamsRecordingViewModel.getAllDreams()
                 mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
-
+                
             }
-            
         }catch let err as NSError{
             print("Error saving the staged changes \(err), \(err.userInfo)")
-
+            
             //TODO: add alert here
             mainContentView.actionButton.setTitle("recording failed", for: .normal)
             
         }
-
+        audioRecordingManager.deInitRecorder()
+        
+        
+        
     }
     
+}
 
-    
-    @objc func recordTapped() {
-        if audioRecorder == nil {
+extension MainViewController{
+    @objc private func recordTapped() {
+        
+        
+        if audioRecordingManager.getState()  == .stopped {
+            
             startRecording()
         } else {
             finishRecording(success: true)
         }
     }
     
-    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-        if !flag {
-            finishRecording(success: false)
-        }
-    }
-    
-   
-
-
 }
+

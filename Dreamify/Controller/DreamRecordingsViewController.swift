@@ -6,12 +6,17 @@
 //
 
 import UIKit
+import AVFAudio
 
 //MARK: note the delegated and datasources are in there designated folders
-class DreamRecordingsViewController:UIViewController{
+class DreamRecordingsViewController:UIViewController, AVAudioPlayerDelegate{
 
     var dreamRecordingsView    : DreamRecordsView
     var dreamRecordingViewModel: DreamRecordingViewModel
+    var audioPlayer : AVAudioPlayer?
+    //let audioFile = /* An AVAudioFile instance that points to file that's open for reading. */
+    //let audioEngine //= AVAudioEngine()
+    //let playerNode //= AVAudioPlayerNode()
     
     init(dreamRecordingViewModel:DreamRecordingViewModel) {
         self.dreamRecordingViewModel = dreamRecordingViewModel
@@ -51,36 +56,6 @@ class DreamRecordingsViewController:UIViewController{
         v.translatesAutoresizingMaskIntoConstraints = false
         return v
     }()
-//    lazy var collectionView:UICollectionView = {
-//       
-//        //var flowLayout = UICollectionViewFlowLayout()
-//        let flowLayout = UICollectionViewFlowLayout()
-//        flowLayout.scrollDirection = .vertical
-//        flowLayout.minimumLineSpacing = 10.0
-//        flowLayout.itemSize = CGSize(width: view.bounds.width, height: 100) // Example item size
-//
-//       // flowLayout.itemSize = CGSize(width: 100, height: 100)
-//
-//
-//            
-//            
-//        
-//        let v = UICollectionView(frame: view.bounds, collectionViewLayout: flowLayout)
-//        v.backgroundColor                           = .clear
-//        v.contentInsetAdjustmentBehavior            = .automatic
-//        
-//        v.delegate                                  = self
-//        v.dataSource                                = self
-//        v.register                                   (DreamRecordingViewCell.self, forCellWithReuseIdentifier: "dreamCell")
-//        v.translatesAutoresizingMaskIntoConstraints = false
-//        return v
-//        
-//        
-//        
-//        
-//    }()
-    
-    //override vi
     
     override func viewDidLoad() {
         setupUI                     ()
@@ -138,6 +113,59 @@ class DreamRecordingsViewController:UIViewController{
     }
     
 }
+
+
+// utilily functions for audio player
+extension DreamRecordingsViewController{
+    func playAudio(dreamViewModel:DreamViewModel) throws -> Void{
+        
+        let isPlaying = dreamViewModel.getIsPlaying()
+        
+        let url = URL(string: dreamViewModel.url)
+        
+        do{
+            if(isPlaying){
+                
+                audioPlayer = try AVAudioPlayer(contentsOf: url!) //AVAudioPlayer(contentsOf: url!)
+                //audioPlayer?.setVolume(1.0, fadeDuration: .greatestFiniteMagnitude)
+
+                //audioPlayer?.prepareToPlay()
+                
+                audioPlayer?.delegate = self
+                audioPlayer?.volume = 1.0
+                audioPlayer?.play()
+
+                
+            }else{
+                stopAudio()
+            }
+        
+            
+        }catch let err as NSError {
+            throw NSError(domain: "AudioPlayingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid FileName"])
+
+            
+       }
+       
+     
+    }
+    func stopAudio() {
+
+   
+        
+            audioPlayer?.stop()
+            audioPlayer = nil
+    
+    }
+    func audioPlayerDidFinishPlaying(player: AVAudioPlayer!, successfully flag: Bool) {
+        stopAudio()
+        //player.
+
+    }
+    
+}
+    
+
 
 
 extension URL {

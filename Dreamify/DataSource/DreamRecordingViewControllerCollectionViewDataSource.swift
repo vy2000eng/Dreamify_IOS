@@ -105,25 +105,54 @@ extension DreamRecordingsViewController{
         
         if(indexPath.section == indexThatIsCurrentlyPlaying || indexThatIsCurrentlyPlaying == -1){
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                guard let self = self else{
+                guard let self = self else {
                     return
                 }
                 
-                UIView.transition(with: curr_cell?.playPauseButton ?? UIView(), duration: 0.3, options: .curveEaseOut) {
+                UIView.transition(with: curr_cell?.playPauseButton ?? UIView(),
+                                 duration: 0.3,
+                                 options: .curveEaseOut,
+                                 animations: {
                     dream.getIsPlaying() == false
                         ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
                         : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+                }) { completed in
+                    // This runs when the animation finishes
+                    self.dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
+                    
+                    // Start playing audio right after animation completes
+                    do{
+                        try    self.playAudio(dreamViewModel: dream)
+
+                        
+                    }catch let err as NSError{
+                        let alert = UIAlertController(title: "action failed",
+                                                    message: "You tapped the play button, but the action failed",
+                                                      preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                        self.present(alert, animated: true)
+                        
+
+                        
+                    }
                 }
-                dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
             }
             
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+//                guard let self = self else{
+//                    return
+//                }
+//                
+//                UIView.transition(with: curr_cell?.playPauseButton ?? UIView(), duration: 0.3, options: .curveEaseOut) {
+//                    dream.getIsPlaying() == false
+//                        ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
+//                        : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+//                }
+//                dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
+//                //playAudio(sender: <#T##AnyObject#>)
+//            }
             
             
-            
-//            dream.getIsPlaying() == false
-//            ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
-//            : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal)
-//            dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
             
             
             
@@ -138,12 +167,8 @@ extension DreamRecordingsViewController{
                     : prev_cell?.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
             }
             
-//            prev_dream.getIsPlaying() == false
-//            ? prev_cell?.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
-//            : prev_cell?.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal)
             dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexThatIsCurrentlyPlaying   )
             
-            //Thread.sleep(forTimeInterval: 1.5)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 guard let self = self else{
                     return
@@ -156,13 +181,6 @@ extension DreamRecordingsViewController{
                 }
                 dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
             }
-            
-            
-            
-//            dream.getIsPlaying() == false
-//            ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
-//            : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal)
-//            dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
         }
     }
     

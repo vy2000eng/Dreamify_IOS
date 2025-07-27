@@ -19,11 +19,18 @@ extension DreamRecordingsViewController:UICollectionViewDataSource{
         cell.playPauseButton.tag    = indexPath.section
         cell.playPauseButton.addTarget(self, action: #selector(handlePlayPause( _:)) , for: .touchUpInside)
         let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
-        if(dream.getIsPlaying()){
-            cell.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
+        
+        if let currentPlayIndex = dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying{
+            if (currentPlayIndex == indexPath.section){
+                cell.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
+            }else{
+                cell.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal)
+            }
+            
         }else{
-            cell.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal)
+            cell.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal) 
         }
+            
         cell.delegate = self
         return cell
     }
@@ -91,7 +98,7 @@ extension DreamRecordingsViewController:UICollectionViewDataSource{
 
 extension DreamRecordingsViewController{
     @objc
-    func handlePlayPause(_ sender:UIButton) throws -> Void{
+    func handlePlayPause(_ sender:UIButton)  throws -> Void{
         
         
         
@@ -99,88 +106,170 @@ extension DreamRecordingsViewController{
         let indexThatIsCurrentlyPlaying                = dreamRecordingViewModel.getSelectedIndex()
         let isTheCurrentlySelectedIndexPlayingRightNow = dreamRecordingViewModel.getIsPlaying    ()
         
-        let curr_cell = self.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell
+        guard let curr_cell = self.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell else{
+            let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                          message: "Item Cannot Be Selected.",//"You tapped the start recording button, but the action failed",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.present(alert, animated: true)
+            return
+            
+        }
+        
         let config    = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
         let dream     = dreamRecordingViewModel.dream(by: indexPath.section)
         
-        if(indexPath.section == indexThatIsCurrentlyPlaying || indexThatIsCurrentlyPlaying == -1){
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                guard let self = self else {
-                    return
-                }
+        
+        // if it is the same index, so pausing the current recording
+        if(dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying == indexPath.section){
+            curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+            //stopAudio()
+            do{
+                try stopAudio()
+
                 
-                UIView.transition(with: curr_cell?.playPauseButton ?? UIView(),
-                                 duration: 0.3,
-                                 options: .curveEaseOut,
-                                 animations: {
-                    dream.getIsPlaying() == false
-                        ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
-                        : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
-                }) { completed in
-                    // This runs when the animation finishes
-                    self.dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
+            }catch let err as NSError{
+                
+                let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                              message: "An error occured when the audio player was attempting to stop",//"You tapped the start recording button, but the action failed",
+                                              preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                self.present(alert, animated: true)
+                return
+                
+                
+            }
+            
+            dreamRecordingViewModel.setPlayPauseController(dreamViewModel: nil, selectedIndex: nil,isPlaying: false)
+
+
+            return
+            
+            
+        }
+        // if there is nothing playing
+        if(!dreamRecordingViewModel.getIsPlaying()){
+          
+                do{
                     
-                    // Start playing audio right after animation completes
+                    
+                    curr_cell.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
+                    dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.section,isPlaying: true)
+                    let url = dream.url//URL(string: dream.url)
+                    try     self.playAudio(fileName: url)
+                    
+
+                }catch let err as NSError{
+                
+                    curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+                    //self.stopAudio()
                     do{
-                        try    self.playAudio(dreamViewModel: dream)
+                        try stopAudio()
 
                         
                     }catch let err as NSError{
-                        let alert = UIAlertController(title: "action failed",
-                                                    message: "You tapped the play button, but the action failed",
+                        let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                                      message: "An error occured when the audio player was attempting to stop",//"You tapped the start recording button, but the action failed",
                                                       preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                         self.present(alert, animated: true)
+                        return
                         
-
                         
                     }
+                    
+                    
+                    print(err.localizedDescription)
+                    let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                                  message: "Issue with audio player please try again later.",//"You tapped the start recording button, but the action failed",
+                                                  preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                    self.present(alert, animated: true)
+
+                    
+                    
                 }
+            
+
+            return
+            
+            
+        }
+        //if smthing is playing, but another recording is selected
+        else{
+            let prevPlayDetails = dreamRecordingViewModel.getPlayPauseController()
+            guard let currentPlayingIndex = prevPlayDetails.indexThatIsCurrentlyPlaying else{
+                let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                              message: "Cannot Be Played at this time.",//"You tapped the start recording button, but the action failed",
+                                              preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                self.present(alert, animated: true)
+                return
             }
             
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-//                guard let self = self else{
-//                    return
-//                }
-//                
-//                UIView.transition(with: curr_cell?.playPauseButton ?? UIView(), duration: 0.3, options: .curveEaseOut) {
-//                    dream.getIsPlaying() == false
-//                        ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
-//                        : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
-//                }
-//                dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
-//                //playAudio(sender: <#T##AnyObject#>)
-//            }
-            
-            
-            
-            
-            
-        }else{
-            
-            let prev_cell      = self.collectionView    .cellForItem(at: IndexPath(row:0, section:indexThatIsCurrentlyPlaying)) as? DreamRecordingViewCell
-            let prev_dream     = dreamRecordingViewModel.dream      (by: indexThatIsCurrentlyPlaying)
-            
-            UIView.transition(with: prev_cell?.playPauseButton ?? UIView(), duration: 0.3, options: .curveEaseIn) {
-                prev_dream.getIsPlaying() == false
-                    ? prev_cell?.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
-                    : prev_cell?.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+            guard let prev_cell = self.collectionView.cellForItem(at: IndexPath(row: 0, section: currentPlayingIndex) ) as? DreamRecordingViewCell else{
+                let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                              message: "Cannot Stop Playing the previous Recording",//"You tapped the start recording button, but the action failed",
+                                              preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                self.present(alert, animated: true)
+                return
+                
             }
             
-            dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexThatIsCurrentlyPlaying   )
+            prev_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+            do{
+                try stopAudio()
+
+                
+            }catch let err as NSError{
+                let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                              message: "An error occured when the audio player was attempting to stop",//"You tapped the start recording button, but the action failed",
+                                              preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                self.present(alert, animated: true)
+                return
+                
+                
+            }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                guard let self = self else{
+            
+            
+            
+            curr_cell.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
+            dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.section,isPlaying: true)
+            let url = dream.url
+            
+            do{
+                try  self.playAudio(fileName: url)
+                
+            }catch{
+                curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+                //self.stopAudio()
+                do{
+                    try stopAudio()
+
+                    
+                }catch let err as NSError{
+                    let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                                  message: "An error occured when the audio player was attempting to stop",//"You tapped the start recording button, but the action failed",
+                                                  preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                    self.present(alert, animated: true)
                     return
+                    
+                    
                 }
                 
-                UIView.transition(with: curr_cell?.playPauseButton ?? UIView(), duration: 0.3, options: .curveEaseOut) {
-                    dream.getIsPlaying() == false
-                        ? curr_cell?.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
-                        : curr_cell?.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
-                }
-                dreamRecordingViewModel.togglePlayPauseButton(selectedIndex: indexPath.section)
+                let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                              message: "Issue with audio player please try again later.",//"You tapped the start recording button, but the action failed",
+                                              preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                self.present(alert, animated: true)
+                
+                
             }
+            return
         }
     }
     
@@ -188,7 +277,6 @@ extension DreamRecordingsViewController{
     func handleTapGesture(gesture: UITapGestureRecognizer){
         
         if gesture.state == .ended{
-            
             print("tapped")
             guard let id = gesture.view?.tag else {
                 fatalError("Developer Error: Tapped An Item that is out of range lol, this shouldn't be possible")

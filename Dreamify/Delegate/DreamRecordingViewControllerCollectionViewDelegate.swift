@@ -7,8 +7,29 @@
 
 import UIKit
 import SwipeCellKit
+import AVFAudio
 
-extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectionViewCellDelegate{
+extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectionViewCellDelegate,AVAudioPlayerDelegate,AddNewRecordingToCollectionView{
+    func updateCollection() {
+        
+        
+        print("deldegate called")
+        let section = dreamRecordingViewModel.dreamsCount
+        DispatchQueue.main.async{ [weak self] in
+            
+            guard let self = self,
+                  self.isViewLoaded,
+                  self.collectionView != nil else{
+                return
+            }
+            self.collectionView.insertSections(IndexSet(integer: section-1))
+
+
+            
+        }
+
+    }
+
     func collectionView(_ collectionView: UICollectionView, editActionsForItemAt indexPath: IndexPath, for orientation: SwipeCellKit.SwipeActionsOrientation) -> [SwipeCellKit.SwipeAction]? {
         switch(orientation){
         case .left:
@@ -31,6 +52,48 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
         }
 
     }
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+                print("audio finished")
+        
+                do{
+                    print("audio finished")
+                    try stopAudio()
+        
+                    guard let curr_index  = dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying else{
+                        throw NSError(domain: "AudioStoppingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Play Pause Controller is nil"])
+        
+        
+                    }
+                    guard let  currPlayingCell = self.collectionView.cellForItem(at: IndexPath(row: 0, section: curr_index) ) as? DreamRecordingViewCell else{
+                        throw NSError(domain: "AudioStoppingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Play Pause Controller is accessing a variable that doesnt exist in the collection"])
+        
+        
+                    }
+                    let config    = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
+                    currPlayingCell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+        
+        
+                }catch let err as NSError{
+                    let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                                  message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                                  preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                    self.present(alert, animated: true)
+                    return
+        
+        
+                }
+    }
+
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        print("🚫 Audio decode error: \(error?.localizedDescription ?? "Unknown")")
+    }
+
+    func audioPlayerBeginInterruption(_ player: AVAudioPlayer) {
+        print("🔇 Audio interrupted")
+    }
+    
+    
 }
 
 

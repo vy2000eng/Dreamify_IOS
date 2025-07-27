@@ -39,6 +39,7 @@ class TabsViewController:UITabBarController{
         mainViewController          .tabBarItem = UITabBarItem(title: "Home",        image: UIImage(systemName: "menucard"),    tag: 1)
         dreamRecordingViewController.tabBarItem = UITabBarItem(title: "Dreams", image: UIImage(systemName: "list.bullet"), tag: 2)
         calendarViewController      .tabBarItem = UITabBarItem(title: "Calendar",   image: UIImage(systemName: "calendar"), tag: 3)
+        mainViewController.addNewRecordToDreamRecordingViewdelegate = dreamRecordingViewController
         setViewControllers(  [mainViewController,dreamRecordingViewController,calendarViewController], animated: true)
 
     }

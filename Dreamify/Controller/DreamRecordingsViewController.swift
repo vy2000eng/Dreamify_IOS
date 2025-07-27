@@ -9,14 +9,11 @@ import UIKit
 import AVFAudio
 
 //MARK: note the delegated and datasources are in there designated folders
-class DreamRecordingsViewController:UIViewController, AVAudioPlayerDelegate{
+class DreamRecordingsViewController:UIViewController{
 
     var dreamRecordingsView    : DreamRecordsView
     var dreamRecordingViewModel: DreamRecordingViewModel
     var audioPlayer : AVAudioPlayer?
-    //let audioFile = /* An AVAudioFile instance that points to file that's open for reading. */
-    //let audioEngine //= AVAudioEngine()
-    //let playerNode //= AVAudioPlayerNode()
     
     init(dreamRecordingViewModel:DreamRecordingViewModel) {
         self.dreamRecordingViewModel = dreamRecordingViewModel
@@ -28,7 +25,12 @@ class DreamRecordingsViewController:UIViewController, AVAudioPlayerDelegate{
         fatalError("init(coder:) has not been implemented")
     }
     
-    lazy var collectionView: UICollectionView = {
+    override func viewDidDisappear(_ animated: Bool) {
+      //  if audioPlayer
+       // print("recording view is not in the viewing context")
+    }
+    
+    lazy var collectionView: UICollectionView! = {
         
         let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment -> NSCollectionLayoutSection? in
             let itemSize  = NSCollectionLayoutSize          (widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(0.75))
@@ -117,53 +119,42 @@ class DreamRecordingsViewController:UIViewController, AVAudioPlayerDelegate{
 
 // utilily functions for audio player
 extension DreamRecordingsViewController{
-    func playAudio(dreamViewModel:DreamViewModel) throws -> Void{
+    func  playAudio(fileName:String)  throws -> Void{
         
-        let isPlaying = dreamViewModel.getIsPlaying()
-        
-        let url = URL(string: dreamViewModel.url)
+        let url = getDocumentsDirectory().appendingPathComponent(fileName)
         
         do{
-            if(isPlaying){
                 
-                audioPlayer = try AVAudioPlayer(contentsOf: url!) //AVAudioPlayer(contentsOf: url!)
-                //audioPlayer?.setVolume(1.0, fadeDuration: .greatestFiniteMagnitude)
-
-                //audioPlayer?.prepareToPlay()
-                
+                audioPlayer = try  AVAudioPlayer(contentsOf: url) //AVAudioPlayer(contentsOf: url!)
+         
+            
                 audioPlayer?.delegate = self
                 audioPlayer?.volume = 1.0
                 audioPlayer?.play()
 
-                
-            }else{
-                stopAudio()
-            }
         
             
         }catch let err as NSError {
-            throw NSError(domain: "AudioPlayingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid FileName"])
+            throw NSError(domain: "AudioPlayingError", code: 1, userInfo: [NSLocalizedDescriptionKey: err.localizedDescription])
 
             
        }
        
      
     }
-    func stopAudio() {
-
-   
-        
+    func stopAudio() throws ->Void {
             audioPlayer?.stop()
             audioPlayer = nil
-    
     }
-    func audioPlayerDidFinishPlaying(player: AVAudioPlayer!, successfully flag: Bool) {
-        stopAudio()
-        //player.
 
-    }
+
     
+    func getDocumentsDirectory() -> URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
+    }
 }
+
     
 
 

@@ -9,12 +9,17 @@ import UIKit
 import AVFoundation
 
 
+protocol AddNewRecordingToCollectionView:AnyObject{
+    func updateCollection() -> Void
+}
 
 class MainViewController: UIViewController{
     
     var mainContentView          :  MainContentView
     var dreamsRecordingViewModel :  DreamRecordingViewModel
-    var audioRecordingManager    : AudioRecorderManager
+    var audioRecordingManager    :  AudioRecorderManager
+    weak var addNewRecordToDreamRecordingViewdelegate: AddNewRecordingToCollectionView?
+    
     private var windowOrientation: UIInterfaceOrientation {
           return view.window?.windowScene?.interfaceOrientation ?? .portrait
       }
@@ -85,6 +90,7 @@ class MainViewController: UIViewController{
         mainContentView.actionButton.layer.cornerRadius =  mainContentView.actionButton.frame.width / 2
         
     }
+     
     
     // MARK: - Setup Methods
     private func setupUI() {
@@ -153,17 +159,20 @@ extension MainViewController{
         do{
             
             if success{
-                guard let unwrappedUrl = audioRecordingManager.getRecorder()?.url.absoluteString else {
-                    throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
-                }
+
                 guard let unwrapped_file_title =  audioRecordingManager.getUniqueFileName() else {
                     throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid FileName"])
                 }
                 
-                try dreamsRecordingViewModel.addDream(url: unwrappedUrl, title: unwrapped_file_title)
                 
-                try dreamsRecordingViewModel.getAllDreams()
+                try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title)
+                
                 mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                
+                addNewRecordToDreamRecordingViewdelegate?.updateCollection()
+                
+                
+                
                 
             }
         }catch let err as NSError{

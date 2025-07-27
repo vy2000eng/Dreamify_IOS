@@ -7,13 +7,12 @@
 
 import Foundation
 
-//struct IsPlayingAllocation{
-//    var selectedIndex:Int
-//    var isPlaying:Bool
-//}
 struct PlayPauseController{
-        var selectedIndex:Int
-        var isPlaying:Bool
+    var dream:DreamViewModel?
+    var isPlaying:Bool
+    var indexThatIsCurrentlyPlaying:Int?
+
+        
 }
 
 
@@ -29,7 +28,7 @@ public class DreamRecordingViewModel{
     
     init(){
         do{
-            self.playPauseController = PlayPauseController(selectedIndex: -1, isPlaying: false)
+            self.playPauseController = PlayPauseController(dream: nil, isPlaying: false,indexThatIsCurrentlyPlaying: nil)
             try getAllDreams()
 
         }catch let err as NSError{
@@ -40,16 +39,28 @@ public class DreamRecordingViewModel{
         return self.playPauseController.isPlaying
     }
     
-    func getSelectedIndex() -> Int{
-        return playPauseController.selectedIndex
+    func getSelectedIndex() -> Int?{
+        return playPauseController.indexThatIsCurrentlyPlaying
+        
+        //return playPauseController.selectedIndex
         
     }
-    func togglePlayPauseButton(selectedIndex:Int){
+    
+    func setPlayPauseController(dreamViewModel:DreamViewModel?, selectedIndex:Int?,isPlaying:Bool){
+        self.playPauseController = PlayPauseController(dream: dreamViewModel, isPlaying: isPlaying,indexThatIsCurrentlyPlaying: selectedIndex)
         
-        self.playPauseController.isPlaying = !self.playPauseController.isPlaying
-        self.playPauseController.selectedIndex = selectedIndex
+    }
+    func getPlayPauseController()->PlayPauseController{
+        return self.playPauseController
+    }
+    
+    func updateInternalPlayPauseButtonByIndex(index:Int){
+        let dream = dream(by: index)
+        dream.setIsPlaying(isPlaying: !dream.getIsPlaying())
         
-        dream(by:selectedIndex).setIsPlaying(isPlaying: self.playPauseController.isPlaying)
+        
+
+        
     }
     
     
@@ -59,22 +70,39 @@ public class DreamRecordingViewModel{
     }
     
     func getAllDreams()throws -> Void{
+        var previousOpenStates:[String:Bool] = [:]
+        
+        for (_, dream) in dreams.enumerated(){
+            previousOpenStates[dream.id.uuidString] = dream.retrieveIsOpen()
+        }
+    
         do{
-            dreams = try CoreDataManager.shared.getAllDreams().map(DreamViewModel.init)
+            
+            dreams = try CoreDataManager.shared.getAllDreams().map(DreamViewModel.init )
+            
         }catch let err as NSError{
             print("Error initializing dreams in getAllDreams() \(err), \(err.userInfo)")
             throw err
         }
+        
+        for dream in dreams{
+            if previousOpenStates[dream.id.uuidString] == true{
+                dream.toggleIsOpen()
+            }
+            
+        }
+        
     }
+    
     func addDream(url:String, title:String)throws -> Void{
         do{
             try CoreDataManager.shared.addDream(title: title, url: url)
+            
+            try getAllDreams()
+            
             
         }catch let err as NSError{
             print("Error adding dreams in addDream(url:String, title:String) \(err), \(err.userInfo)")
         }
     }
-    
-    
-    
 }

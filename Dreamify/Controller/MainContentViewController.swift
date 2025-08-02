@@ -18,7 +18,10 @@ class MainViewController: UIViewController{
     var mainContentView          :  MainContentView
     var dreamsRecordingViewModel :  DreamRecordingViewModel
     var audioRecordingManager    :  AudioRecorderManager
+   // var speechTranscriberManager : SpeeachTranscriberManager
     weak var addNewRecordToDreamRecordingViewdelegate: AddNewRecordingToCollectionView?
+    
+   // var SpeechTranscriberManager
     
     private var windowOrientation: UIInterfaceOrientation {
           return view.window?.windowScene?.interfaceOrientation ?? .portrait
@@ -28,6 +31,7 @@ class MainViewController: UIViewController{
         self.mainContentView            = MainContentView()
         self.dreamsRecordingViewModel   = dreamRecordingViewModel
         audioRecordingManager           = AudioRecorderManager()
+        //self.speechTranscriberManager = SpeeachTranscriberManager()
         super.init                        (nibName: nil, bundle: nil)
         
     }
@@ -66,12 +70,31 @@ class MainViewController: UIViewController{
                     } else {
                         // failed to record!
                         let alert = UIAlertController(title: "action failed",
-                                                      message: "Please Enable Audio ini Settings to start Recording",
+                                                      message: "Please Enable Microphone Settings to start Recording",
                                                       preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                         self.present(alert, animated: true)
                     }
                 }
+            }
+            SpeechTranscriberManager.shared.requestSpeechRecognizerPermission(){[weak self] result in
+                guard let self = self else{
+                    return
+                }
+                switch result{
+                    case.success:
+                        print("success")
+                        
+                    case .failure(let err):
+                        let alert = UIAlertController(title: "action failed",
+                                                      message: err.localizedDescription,
+                                                      preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                        self.present(alert, animated: true)
+                }
+                    
+                
+                
             }
         } catch let err as NSError{
             let alert = UIAlertController(title: "An Unexpected Error Occured",
@@ -165,21 +188,81 @@ extension MainViewController{
                 }
                 
                 
-                try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title)
                 
-                mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+
+                        SpeechTranscriberManager.shared.transcribeAudio(url: self.audioRecordingManager.getDocumentsDirectory().appending(component: unwrapped_file_title)) { [weak self] transcriptionResult in
+                            guard let self = self else{
+                                return
+                            }
+                            switch transcriptionResult {
+                            case .success(let text):
+                                do{
+                                    print(text)
+                                    try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title,transcribedText: text)
+                                    mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                                    
+                                    addNewRecordToDreamRecordingViewdelegate?.updateCollection()
+                                    
+                                }catch let err as NSError{
+                                   // try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title,transcribedText: text)
+
+                                    let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                                                  message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                                                  preferredStyle: .alert)
+                                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                                    self.present(alert, animated: true)
+                                    mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                                    
+                                }
+
+                                print("Transcribed: \(text)")
+                            case .failure(let err):
+                                let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                                              message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                                              preferredStyle: .alert)
+                                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                                self.present(alert, animated: true)
+                               // mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                                do{
+                                   // print(text)
+                                    try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title,transcribedText: nil)
+                                    mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                                    
+                                    addNewRecordToDreamRecordingViewdelegate?.updateCollection()
+                                    
+                                }catch let err as NSError{
+
+                                    let alert = UIAlertController(title: "An Error occured while saving your recording",
+                                                                  message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                                                  preferredStyle: .alert)
+                                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                                    self.present(alert, animated: true)
+                                    mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                                    
+                                }
+                            }
+                        }
+
                 
-                addNewRecordToDreamRecordingViewdelegate?.updateCollection()
+
+           
+                
+                
+                
                 
                 
                 
                 
             }
         }catch let err as NSError{
-            print("Error saving the staged changes \(err), \(err.userInfo)")
-            
-            //TODO: add alert here
-            mainContentView.actionButton.setTitle("recording failed", for: .normal)
+            let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.present(alert, animated: true)
+            mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+
+
             
         }
         audioRecordingManager.deInitRecorder()

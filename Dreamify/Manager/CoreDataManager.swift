@@ -63,12 +63,28 @@ class CoreDataManager{
         }
     }
     
-    func addDream(title:String, url:String) throws{
+    func addDream(title:String, url:String, transribedText:String?) throws{
         let newDream          = Dream(context: context)
         newDream.title        = title
         newDream.url          = url
         newDream.id           = UUID()
         newDream.created_date = Date()
+        newDream.transcribedText = transribedText
+        do{
+            try context.save()
+        }catch let err as NSError{
+            print("Error saving a dream from funciton call addDream(title:String, url:String) \(err), \(err.userInfo)")
+            throw err
+        }
+    }
+    
+    func addDreamWithOutTextTranscription(title:String, url:String) throws{
+        let newDream          = Dream(context: context)
+        newDream.title        = title
+        newDream.url          = url
+        newDream.id           = UUID()
+        newDream.created_date = Date()
+        //newDream.transcribedText = transribedText
         do{
             try context.save()
         }catch let err as NSError{

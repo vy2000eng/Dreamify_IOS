@@ -73,7 +73,7 @@ class DreamRecordingViewCell:SwipeCollectionViewCell{
     func configure(with dream: DreamViewModel) {
         mainContentView.frame               = CGRect(x: 0, y: 0, width: 100, height: 100)
         mainContentView.backgroundColor     = UIColor.tertiaryLabel//UIColor.secondarySystemBackground
-        textView       .attributedText      = .create(string: "Lorem ipsum, this is going to have a bunch of text which you will be able to read. This text is going to be of the recoding that you made", font: .systemFont(ofSize: 10,weight: .semibold), color: .tertiaryLabel)
+        textView       .attributedText      = .create(string:dream.transcribedTest, font: .systemFont(ofSize: 10,weight: .semibold), color: .tertiaryLabel)// "Lorem ipsum, this is going to have a bunch of text which you will be able to read. This text is going to be of the recoding that you made", font: .systemFont(ofSize: 10,weight: .semibold), color: .tertiaryLabel)
 
     }
 }

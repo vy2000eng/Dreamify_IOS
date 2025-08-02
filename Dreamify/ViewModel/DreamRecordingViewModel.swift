@@ -19,6 +19,7 @@ struct PlayPauseController{
 public class DreamRecordingViewModel{
     
     private var playPauseController:PlayPauseController
+   // private var SpeechTranscriberManager:SpeeachTranscriberManager!
     var dreams  = [DreamViewModel]()
     
      var dreamsCount:Int {
@@ -94,9 +95,9 @@ public class DreamRecordingViewModel{
         
     }
     
-    func addDream(url:String, title:String)throws -> Void{
+    func addDream(url:String, title:String, transcribedText:String?)throws -> Void{
         do{
-            try CoreDataManager.shared.addDream(title: title, url: url)
+            try CoreDataManager.shared.addDream(title: title, url: url,transribedText: transcribedText)
             
             try getAllDreams()
             
@@ -104,5 +105,21 @@ public class DreamRecordingViewModel{
         }catch let err as NSError{
             print("Error adding dreams in addDream(url:String, title:String) \(err), \(err.userInfo)")
         }
+    }
+    
+    func addDreamWithNoTextTranscription(url:String, title:String, transcribedText:String)throws -> Void{
+        do{
+            try CoreDataManager.shared.addDream(title: title, url: url,transribedText: transcribedText)
+            
+            try getAllDreams()
+            
+            
+        }catch let err as NSError{
+            print("Error adding dreams in addDream(url:String, title:String) \(err), \(err.userInfo)")
+        }
+    }
+    
+    func transcribeAudioFile(){
+        
     }
 }

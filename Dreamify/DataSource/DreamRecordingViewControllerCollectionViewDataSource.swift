@@ -282,7 +282,10 @@ extension DreamRecordingsViewController{
                 fatalError("Developer Error: Tapped An Item that is out of range lol, this shouldn't be possible")
             }
             let dream = dreamRecordingViewModel.dream(by: id)
+            
             dream.toggleIsOpen()
+            //speechTranscriberManager.transcribeAudio(url: <#T##URL#>)
+
          
             
             if(dream.retrieveIsOpen()){

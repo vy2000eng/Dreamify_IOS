@@ -18,6 +18,7 @@ class TabsViewController:UITabBarController{
     
     
     init() {
+        
         self.dreamRecordingViewModel      = DreamRecordingViewModel      (                                                )
         self.mainViewController           = MainViewController           (dreamRecordingViewModel: dreamRecordingViewModel)
         self.dreamRecordingViewController = DreamRecordingsViewController(dreamRecordingViewModel: dreamRecordingViewModel)

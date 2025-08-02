@@ -44,6 +44,9 @@ class DreamViewModel{
     var url:String{
         dream.url ?? "url path is not defined"
     }
+    var transcribedTest:String{
+        dream.transcribedText ?? "There is no transcribed text for this recording"
+    }
     
 
     func toggleIsOpen(){

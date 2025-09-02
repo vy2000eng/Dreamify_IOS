@@ -20,7 +20,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
        // let vc = SubjectViewController()
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = UINavigationController(rootViewController: TabsViewController())
+        if UserSettings.shared.userLoginState == true{
+            window?.rootViewController = UINavigationController(rootViewController: TabsViewController())
+
+            
+        }else{
+            window?.rootViewController = UINavigationController(rootViewController: LoginViewController())
+
+            
+        }
         
         window?.makeKeyAndVisible()
     }

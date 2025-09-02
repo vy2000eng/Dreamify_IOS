@@ -52,6 +52,7 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
         }
 
     }
+    
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
                 print("audio finished")
         

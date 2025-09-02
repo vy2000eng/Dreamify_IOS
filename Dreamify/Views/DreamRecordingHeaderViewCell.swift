@@ -7,8 +7,9 @@
 
 import Foundation
 import UIKit
+import SwipeCellKit
 
-class DreamRecordingHeaderViewCell:UICollectionViewCell{
+class DreamRecordingHeaderViewCell:SwipeCollectionViewCell{
     lazy var headerView: UIView = {
        let v = UIView()
         v.translatesAutoresizingMaskIntoConstraints = false

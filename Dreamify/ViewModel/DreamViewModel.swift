@@ -17,6 +17,7 @@ class DreamViewModel{
     private var isPlaying:Bool
    // private var sizeIndexAllocation:IsPlayingAllocation
     private var isOpen:Bool
+    private var isshowingTextTransctionOrAnalysis:Bool
     
     
     init(dream: Dream) {
@@ -25,6 +26,7 @@ class DreamViewModel{
         self.dream = dream
         self.isOpen = false
         self.isPlaying = false
+        self.isshowingTextTransctionOrAnalysis = false
     }
     var id:UUID{
         dream.id
@@ -48,6 +50,10 @@ class DreamViewModel{
         dream.transcribedText ?? "There is no transcribed text for this recording"
     }
     
+    var analyzedText:String{
+        dream.analyzedText ?? "The Analysis has not been done yet"
+    }
+    
 
     func toggleIsOpen(){
         self.isOpen = !self.isOpen
@@ -56,6 +62,21 @@ class DreamViewModel{
     
     func retrieveIsOpen() -> Bool{
         return self.isOpen
+        
+    }
+    
+    func retrieveIsShowingTextTranscriptionOrAnalysis() -> Bool{
+        return self.isshowingTextTransctionOrAnalysis;
+    }
+    
+    
+    func toggleIsShowingTextTransctiptionOrAnalysis(){
+        self.isshowingTextTransctionOrAnalysis = !self.isshowingTextTransctionOrAnalysis
+        
+    }
+    
+    
+    func updateAnalyzedText(){
         
     }
 }

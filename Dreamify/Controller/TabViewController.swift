@@ -32,6 +32,7 @@ class TabsViewController:UITabBarController{
     
     
     override func viewDidLoad() {
+        
 
         delegate = self
         navigationController?.navigationBar.prefersLargeTitles = true

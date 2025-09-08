@@ -78,6 +78,24 @@ class CoreDataManager{
         }
     }
     
+    func updateAnalyzedTextForDream(analyzedText:String, dreamId:UUID){
+        let fetchRequest: NSFetchRequest<Dream> = Dream.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format:"id == %@", dreamId.uuidString)
+        do{
+            let dream = try context.fetch(fetchRequest).first
+            dream?.analyzedText = analyzedText
+            try context.save()
+        }catch let error as NSError{
+            print("Error updating dream: \(error.userInfo), \(error.localizedDescription)")
+        }
+        
+
+        
+
+        
+        
+    }
+    
     func addDreamWithOutTextTranscription(title:String, url:String) throws{
         let newDream          = Dream(context: context)
         newDream.title        = title

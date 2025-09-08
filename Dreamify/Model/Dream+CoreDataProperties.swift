@@ -21,7 +21,8 @@ extension Dream {
     @NSManaged public var title: String?
     @NSManaged public var created_date: Date?
     @NSManaged public var transcribedText: String?
-    
+    @NSManaged public var analyzedText: String?
+
 
 }
 

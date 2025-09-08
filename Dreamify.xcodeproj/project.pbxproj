@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C00B12462E2416DD00B4704D /* SwipeCellKit in Frameworks */ = {isa = PBXBuildFile; productRef = C00B12452E2416DD00B4704D /* SwipeCellKit */; };
+		C00B12B72E67F7FF00B4704D /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = C00B12B62E67F7FF00B4704D /* KeychainAccess */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C00B12B72E67F7FF00B4704D /* KeychainAccess in Frameworks */,
 				C00B12462E2416DD00B4704D /* SwipeCellKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -131,6 +133,7 @@
 			name = Dreamify;
 			packageProductDependencies = (
 				C00B12452E2416DD00B4704D /* SwipeCellKit */,
+				C00B12B62E67F7FF00B4704D /* KeychainAccess */,
 			);
 			productName = Dreamify;
 			productReference = C0A893602E087364008B1730 /* Dreamify.app */;
@@ -216,6 +219,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				C00B12192E22EF8400B4704D /* XCRemoteSwiftPackageReference "swipecellkit" */,
+				C00B12B52E67F7FF00B4704D /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C0A893612E087364008B1730 /* Products */;
@@ -596,6 +600,14 @@
 				minimumVersion = 2.7.1;
 			};
 		};
+		C00B12B52E67F7FF00B4704D /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -603,6 +615,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C00B12192E22EF8400B4704D /* XCRemoteSwiftPackageReference "swipecellkit" */;
 			productName = SwipeCellKit;
+		};
+		C00B12B62E67F7FF00B4704D /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C00B12B52E67F7FF00B4704D /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -53,9 +53,15 @@ class MainViewController: UIViewController{
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupUI()
         setupConstraints()
+      
+       
+      
+     
+     
+        
+      
         
         do {
             try audioRecordingManager.configureAudioSessionAndConfigureRecorderExternally()
@@ -104,47 +110,32 @@ class MainViewController: UIViewController{
             self.present(alert, animated: true)
             
         }
+       
+
         
         
         
     }
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        mainContentView.actionButton.layer.cornerRadius =  mainContentView.actionButton.frame.width / 2
-        
-    }
+  
      
     
     // MARK: - Setup Methods
     private func setupUI() {
         view.backgroundColor = .systemBackground
         title = "Home"
-        
-        // Add subviews
-        view.addSubview(mainContentView.titleLabel)
-        view.addSubview(mainContentView.descriptionLabel)
-        view.addSubview(mainContentView.actionButton)
+        view.addSubview(mainContentView)
+        mainContentView.translatesAutoresizingMaskIntoConstraints = false
+
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // Title Label
-            mainContentView.titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            mainContentView.titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
-            mainContentView.titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 20),
-            mainContentView.titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -20),
-            
-            // Description Label
-            mainContentView.descriptionLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            mainContentView.descriptionLabel.topAnchor.constraint(equalTo: mainContentView.titleLabel.bottomAnchor, constant: 20),
-            mainContentView.descriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            mainContentView.descriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            
-            // Action Button
-            mainContentView.actionButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            mainContentView.actionButton.topAnchor.constraint(equalTo: mainContentView.descriptionLabel.bottomAnchor, constant: 40),
-            mainContentView.actionButton.widthAnchor.constraint(equalToConstant: 200),
-            mainContentView.actionButton.heightAnchor.constraint(equalToConstant: 200)
+            mainContentView.topAnchor.constraint(equalTo: view.topAnchor),
+            mainContentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            mainContentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+
+            mainContentView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
         ])
     }
     
@@ -161,8 +152,9 @@ extension MainViewController{
             audioRecordingManager.getRecorder ().delegate = self
             
             audioRecordingManager.record()
-            mainContentView.actionButton.setTitle("Tap to Stop", for: .normal)
+            mainContentView.startRecording()
             
+
         }catch let err as NSError{
             let alert = UIAlertController(title: "An Unexpected Error Occured",
                                           message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
@@ -199,8 +191,9 @@ extension MainViewController{
                                 do{
                                     print(text)
                                     try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title,transcribedText: text)
-                                    mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
-                                    
+                                    mainContentView.stopRecording()
+
+
                                     addNewRecordToDreamRecordingViewdelegate?.updateCollection()
                                     
                                 }catch let err as NSError{

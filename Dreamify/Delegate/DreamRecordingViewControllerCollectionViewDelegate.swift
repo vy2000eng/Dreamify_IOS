@@ -9,10 +9,9 @@ import UIKit
 import SwipeCellKit
 import AVFAudio
 
-extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectionViewCellDelegate,AVAudioPlayerDelegate,AddNewRecordingToCollectionView{
+extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectionViewCellDelegate,AVAudioPlayerDelegate,AddNewRecordingToCollectionView, PresentErrIfAnalysisFails{
+    // explicitly defined delegates
     func updateCollection() {
-        
-        
         print("deldegate called")
         let section = dreamRecordingViewModel.dreamsCount
         DispatchQueue.main.async{ [weak self] in
@@ -23,11 +22,22 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
                 return
             }
             self.collectionView.insertSections(IndexSet(integer: section-1))
-
-
-            
         }
 
+    }
+    func presentUiAlertErr(title:String, errMessage: String) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else{return}
+            
+            let alert = UIAlertController(title: title,
+                                          message: errMessage,
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.present(alert, animated: true)
+        
+        }
+        
+     
     }
 
     func collectionView(_ collectionView: UICollectionView, editActionsForItemAt indexPath: IndexPath, for orientation: SwipeCellKit.SwipeActionsOrientation) -> [SwipeCellKit.SwipeAction]? {

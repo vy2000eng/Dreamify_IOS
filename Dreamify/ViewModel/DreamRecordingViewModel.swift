@@ -15,10 +15,21 @@ struct PlayPauseController{
         
 }
 
+protocol PresentErrIfAnalysisFails:AnyObject{
+    func presentUiAlertErr(title:String, errMessage:String) -> Void
+}
+//weak var :PresentErrIfAnalysisFails?
+
+
+
+
+
 
 public class DreamRecordingViewModel{
     
     private var playPauseController:PlayPauseController
+    weak var presentErrIfAnalysisFailsDelagate:PresentErrIfAnalysisFails?
+
    // private var SpeechTranscriberManager:SpeeachTranscriberManager!
     var dreams  = [DreamViewModel]()
     
@@ -94,6 +105,55 @@ public class DreamRecordingViewModel{
         }
         
     }
+    
+    func analyzeDream(dreamViewModel: DreamViewModel) {
+        
+        APIClientManager.shared.authRequest(
+       
+            endpoint: "/Analysis/analyzeDream",
+            method: "POST",
+            body:["textToAnalyze": dreamViewModel.transcribedTest],
+            type: AnalysisRespone.self){[weak self] result in
+                guard let self  = self else {return}
+                switch result{
+                case .success(let response):
+                    print(response.dreamAnalysisResponse)
+                    updateAnalyzedText(dreamId: dreamViewModel.id, analyzedText: response.dreamAnalysisResponse)
+                    
+                case .failure(let err):
+                    let (title, message) = getErrorMessage(for: err)
+                    presentErrIfAnalysisFailsDelagate?.presentUiAlertErr(title: title, errMessage: message)
+
+                    
+                   // print(err.localizedDescription)
+                }
+                
+            }
+    }
+    private func getErrorMessage(for error: APIError) -> (String, String) {
+        switch error {
+        case .networkError:
+            return ("Network Error", "Please check your internet connection and try again.")
+        case .serverError(let code):
+            return ("Server Error", "Server returned error code: \(code). Please try again later.")
+        case .noData:
+            return ("No Data", "No response received from server.")
+        case .decodingError:
+            return ("Data Error", "Unable to process server response.")
+        case .invalidURL:
+            return ("Invalid Url", "Unable to process server response.")
+
+        case .authenticationError:
+            return ("Authentication Error", "Unable to process server response.")
+
+        }
+    }
+    
+    func updateAnalyzedText(dreamId: UUID, analyzedText:String){
+        CoreDataManager.shared.updateAnalyzedTextForDream(analyzedText: analyzedText, dreamId: dreamId)
+        
+    }
+    
     
     func addDream(url:String, title:String, transcribedText:String?)throws -> Void{
         do{

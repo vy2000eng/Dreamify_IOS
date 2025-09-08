@@ -25,7 +25,7 @@ class UserSettings{
         self.userLoginState = false
         //saveLoginState()
         if let loadedUserLoginState =  loadUserLogInState(){
-            userLoginState = loadedUserLoginState
+            self.userLoginState = loadedUserLoginState
             
             
         }

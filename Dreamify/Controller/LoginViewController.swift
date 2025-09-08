@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import KeychainAccess
 class LoginViewController:UIViewController{
     
     var loginView : LoginView;
@@ -93,6 +94,7 @@ extension LoginViewController{
             // Handle password reset
             print("Password reset requested")
         }
+       // present(resetAction, animated: true)
         //
     }
     @objc private func signUpButtonTapped() {
@@ -105,12 +107,46 @@ extension LoginViewController{
         
         // Show loading state
         setLoadingState(true)
+        let email = loginView.emailTextField.text
+        let password = loginView.passwordTextField.text
+        
+        
+        APIClientManager.shared.request(
+            endpoint: "/account/login",
+            method: "POST",
+            body: ["email": email, "password": password],
+            type: LoginResponse.self) {[weak self] result in
+            guard let self = self else {return}
+            DispatchQueue.main.async{
+                switch result {
+                case .success(let response):
+                    let mainViewController = TabsViewController()
+                    self.navigationController?.pushViewController(mainViewController, animated: true)
+                    self.setLoadingState(false)
+                    TokenManager.shared.saveAccessToken(response.accessToken)
+                    TokenManager.shared.saveRefreshToken(response.refreshToken)
+                    
+
+                    
+                    print("Success: \(response.accessToken)")
+                case .failure(let error):
+                    print("Error: \(error)")
+                    self.setLoadingState(false)
+
+                }
+                
+            }
+         
+        }
+        
+        
+        
         
         // Simulate login process
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-            self?.setLoadingState(false)
-            self?.handleLoginSuccess()
-        }
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+//            self?.setLoadingState(false)
+//            self?.handleLoginSuccess()
+//        }
     }
 }
 // MARK: utililty functions

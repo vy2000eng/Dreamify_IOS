@@ -8,8 +8,14 @@
 import UIKit
 import AVFAudio
 
+
+
 //MARK: note the delegated and datasources are in there designated folders
 class DreamRecordingsViewController:UIViewController{
+
+
+  
+
 
     var dreamRecordingsView    : DreamRecordsView
     var dreamRecordingViewModel: DreamRecordingViewModel
@@ -25,52 +31,80 @@ class DreamRecordingsViewController:UIViewController{
         fatalError("init(coder:) has not been implemented")
     }
     
+    
     override func viewDidDisappear(_ animated: Bool) {
       //  if audioPlayer
        // print("recording view is not in the viewing context")
     }
     
     lazy var collectionView: UICollectionView! = {
-        
         let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment -> NSCollectionLayoutSection? in
-            let itemSize  = NSCollectionLayoutSize          (widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(0.75))
-            let item      = NSCollectionLayoutItem          (layoutSize: itemSize)
-            let groupSize = NSCollectionLayoutSize          (widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(175))
-            let group     = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-            let section   = NSCollectionLayoutSection       (group: group)
-            section.interGroupSpacing = 10 // This adds vertical spacing between cells
-            let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(0.15))
-            let header = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
-            header.pinToVisibleBounds = true  // This makes the header sticky
+            // Main content item
+            let itemSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .estimated(150)
+            )
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            
+            // Group
+            let groupSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .estimated(150)
+            )
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+            
+            // Section
+            let section = NSCollectionLayoutSection(group: group)
+            section.interGroupSpacing = 16 // More generous spacing
+            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0)
+            
+            // Header
+            let headerSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .estimated(60)
+            )
+            let header = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: headerSize,
+                elementKind: UICollectionView.elementKindSectionHeader,
+                alignment: .top
+            )
+            header.pinToVisibleBounds = false // Less aggressive pinning
             section.boundarySupplementaryItems = [header]
+            
             return section
         }
         
-        let v                                       = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
+        let collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
+        collectionView.backgroundColor = .systemBackground
+        collectionView.contentInsetAdjustmentBehavior = .automatic
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(DreamRecordingViewCell.self, forCellWithReuseIdentifier: "dreamCell")
+        collectionView.register(DreamRecordingHeaderViewCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "headerCell")
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.showsVerticalScrollIndicator = false // Cleaner look
         
-        v.backgroundColor                           = .clear
-        v.contentInsetAdjustmentBehavior            = .automatic
-        v.delegate                                  = self
-        v.dataSource                                = self
-        v.register                                   (DreamRecordingViewCell.self, forCellWithReuseIdentifier: "dreamCell")
-        v.register                                    (DreamRecordingHeaderViewCell.self, forSupplementaryViewOfKind:UICollectionView.elementKindSectionHeader , withReuseIdentifier: "headerCell")
-
-        v.translatesAutoresizingMaskIntoConstraints = false
-        return v
+        return collectionView
     }()
     
     override func viewDidLoad() {
+        self.dreamRecordingViewModel.presentErrIfAnalysisFailsDelagate = self
         setupUI                     ()
         setupConstraints            ()
         listFilesFromDocumentsFolder()
+
         super.viewDidLoad           ()
     }
     
     private func setupUI() {
         view.backgroundColor = .systemBackground
-        title                = "Dreams"
-        view.addSubview         (collectionView)
-
+        title = "Dreams"
+        
+        // Modern navigation bar styling
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+        
+        view.addSubview(collectionView)
     }
     
     

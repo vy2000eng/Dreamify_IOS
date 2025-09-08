@@ -18,6 +18,15 @@ extension DreamRecordingsViewController:UICollectionViewDataSource{
         cell.configure(with: dream)
         cell.playPauseButton.tag    = indexPath.section
         cell.playPauseButton.addTarget(self, action: #selector(handlePlayPause( _:)) , for: .touchUpInside)
+        
+        cell.analyzeButton.tag    = indexPath.section
+        cell.analyzeButton.addTarget(self, action: #selector(analyzeDream(_:)), for: .touchUpInside)
+        
+        cell.transcriptionAnalysisButton.tag = indexPath.section
+        cell.transcriptionAnalysisButton.addTarget(self, action: #selector(handleAnalysisTranscriptionButton), for: .touchUpInside)
+        
+        
+        
         let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
         
         if let currentPlayIndex = dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying{
@@ -296,6 +305,72 @@ extension DreamRecordingsViewController{
             }
             
         }
+        
+    }
+    @objc
+    func analyzeDream(_ sender:UIButton) {
+        print("analyzze tapped")
+        let indexPath = IndexPath (row: 0, section: sender.tag)
+        var dream    = dreamRecordingViewModel.dream(by: indexPath.section)
+        do{
+            try  dreamRecordingViewModel.analyzeDream(dreamViewModel: dream)
+        }catch let err as NSError{
+            let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.present(alert, animated: true)
+                
+        }
+        
+        
+
+
+        
+        
+        
+        
+    }
+    
+    @objc
+    func handleAnalysisTranscriptionButton(_ sender:UIButton){
+        let indexPath = IndexPath (row: 0, section: sender.tag)
+        let dream = dreamRecordingViewModel.dream(by: indexPath.section)
+        
+        guard let curr_cell = self.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell else{
+            let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                          message: "Item Cannot Be Selected.",//"You tapped the start recording button, but the action failed",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.present(alert, animated: true)
+            return
+            
+        }
+        
+        
+        dream.toggleIsShowingTextTransctiptionOrAnalysis()
+        if(dream.retrieveIsShowingTextTranscriptionOrAnalysis() == true){
+            curr_cell.transcriptionAnalysisButton.setTitle("Analysis", for: .normal)
+            curr_cell.transcriptionAnalysisButton.backgroundColor = .systemOrange
+            curr_cell.textView.attributedText =  .create(
+                string: dream.analyzedText,
+                font: .systemFont(ofSize: 16, weight: .regular),
+                color: .label
+            )
+
+        }else{
+            curr_cell.transcriptionAnalysisButton.setTitle("Transcription", for: .normal)
+            curr_cell.transcriptionAnalysisButton.backgroundColor = .systemCyan
+            curr_cell.textView.attributedText =  .create(
+                string: dream.transcribedTest,
+                font: .systemFont(ofSize: 16, weight: .regular),
+                color: .label
+            )
+
+            
+        }
+
+        
         
     }
     

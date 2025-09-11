@@ -10,6 +10,8 @@ import SwipeCellKit
 import AVFAudio
 
 extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectionViewCellDelegate,AVAudioPlayerDelegate,AddNewRecordingToCollectionView, PresentErrIfAnalysisFails{
+//
+
     // explicitly defined delegates
     func updateCollection() {
         print("deldegate called")
@@ -18,13 +20,15 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
             
             guard let self = self,
                   self.isViewLoaded,
-                  self.collectionView != nil else{
+                  self.dreamRecordingsView.collectionView != nil else{
                 return
             }
-            self.collectionView.insertSections(IndexSet(integer: section-1))
+            self.dreamRecordingsView.collectionView.insertSections(IndexSet(integer: section-1))
         }
 
     }
+    
+    
     func presentUiAlertErr(title:String, errMessage: String) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else{return}
@@ -39,6 +43,9 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
         
      
     }
+    
+    
+    
 
     func collectionView(_ collectionView: UICollectionView, editActionsForItemAt indexPath: IndexPath, for orientation: SwipeCellKit.SwipeActionsOrientation) -> [SwipeCellKit.SwipeAction]? {
         switch(orientation){
@@ -75,7 +82,7 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
         
         
                     }
-                    guard let  currPlayingCell = self.collectionView.cellForItem(at: IndexPath(row: 0, section: curr_index) ) as? DreamRecordingViewCell else{
+                    guard let  currPlayingCell = self.dreamRecordingsView.collectionView.cellForItem(at: IndexPath(row: 0, section: curr_index) ) as? DreamRecordingViewCell else{
                         throw NSError(domain: "AudioStoppingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Play Pause Controller is accessing a variable that doesnt exist in the collection"])
         
         

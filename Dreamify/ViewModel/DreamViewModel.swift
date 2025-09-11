@@ -17,7 +17,7 @@ class DreamViewModel{
     private var isPlaying:Bool
    // private var sizeIndexAllocation:IsPlayingAllocation
     private var isOpen:Bool
-    private var isshowingTextTransctionOrAnalysis:Bool
+    private var isShowingTranscriptionOrAnalysis:Bool
     
     
     init(dream: Dream) {
@@ -26,7 +26,7 @@ class DreamViewModel{
         self.dream = dream
         self.isOpen = false
         self.isPlaying = false
-        self.isshowingTextTransctionOrAnalysis = false
+        self.isShowingTranscriptionOrAnalysis = false
     }
     var id:UUID{
         dream.id
@@ -46,7 +46,7 @@ class DreamViewModel{
     var url:String{
         dream.url ?? "url path is not defined"
     }
-    var transcribedTest:String{
+    var transcribedText:String{
         dream.transcribedText ?? "There is no transcribed text for this recording"
     }
     
@@ -66,12 +66,12 @@ class DreamViewModel{
     }
     
     func retrieveIsShowingTextTranscriptionOrAnalysis() -> Bool{
-        return self.isshowingTextTransctionOrAnalysis;
+        return self.isShowingTranscriptionOrAnalysis;
     }
     
     
     func toggleIsShowingTextTransctiptionOrAnalysis(){
-        self.isshowingTextTransctionOrAnalysis = !self.isshowingTextTransctionOrAnalysis
+        self.isShowingTranscriptionOrAnalysis = !self.isShowingTranscriptionOrAnalysis
         
     }
     

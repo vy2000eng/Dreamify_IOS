@@ -7,48 +7,35 @@
 import Foundation
 import UIKit
 
-class UserSettings{
+class UserSettings {
     static let shared = UserSettings()
     
+    private var _userLoginState: Bool
     
-    
-    private(set) var userLoginState:Bool{
-        didSet{
-            saveLoginState(successful_loging: false)
-
+    var userLoginState: Bool {
+        get {
+            return _userLoginState
         }
-        
-    }
-    
-    
-    private init(){
-        self.userLoginState = false
-        //saveLoginState()
-        if let loadedUserLoginState =  loadUserLogInState(){
-            self.userLoginState = loadedUserLoginState
-            
-            
+        set {
+            _userLoginState = newValue
+            saveLoginState(successful_login: newValue)
         }
-        
     }
     
-    
-    
-    private func saveLoginState(successful_loging:Bool) {
-        //viewmodel.selectedTheme = selectedTheme
-        UserDefaults.standard.set(successful_loging, forKey: "IS_USER_LOGGED_IN")
-        
+    private init() {
+        // Initialize the backing property directly
+        self._userLoginState = UserDefaults.standard.bool(forKey: "IS_USER_LOGGED_IN")
     }
     
-    private func loadUserLogInState() ->Bool?{
-
-        return UserDefaults.standard.object(forKey: "IS_USER_LOGGED_IN") as? Bool//viewmodel.convertThemeDmViewModelToDefinedThemeObject(themeID: viewmodel.themeViewModel[0].id)
-        
+    func setLoginState(_ isLoggedIn: Bool) {
+        userLoginState = isLoggedIn
     }
     
+    private func saveLoginState(successful_login: Bool) {
+        UserDefaults.standard.set(successful_login, forKey: "IS_USER_LOGGED_IN")
+    }
     
-    
-    
-    
-    
+    func logout() {
+        userLoginState = false
+    }
 }

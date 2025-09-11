@@ -18,6 +18,9 @@ struct PlayPauseController{
 protocol PresentErrIfAnalysisFails:AnyObject{
     func presentUiAlertErr(title:String, errMessage:String) -> Void
 }
+
+
+
 //weak var :PresentErrIfAnalysisFails?
 
 
@@ -83,9 +86,12 @@ public class DreamRecordingViewModel{
     
     func getAllDreams()throws -> Void{
         var previousOpenStates:[String:Bool] = [:]
-        
+
+        var previousTranscribedStates:[String:Bool] = [:]
+
         for (_, dream) in dreams.enumerated(){
             previousOpenStates[dream.id.uuidString] = dream.retrieveIsOpen()
+            previousTranscribedStates[dream.id.uuidString] = dream.retrieveIsShowingTextTranscriptionOrAnalysis()
         }
     
         do{
@@ -101,6 +107,9 @@ public class DreamRecordingViewModel{
             if previousOpenStates[dream.id.uuidString] == true{
                 dream.toggleIsOpen()
             }
+            if previousTranscribedStates[dream.id.uuidString] == true{
+                dream.toggleIsShowingTextTransctiptionOrAnalysis()
+            }
             
         }
         
@@ -108,27 +117,27 @@ public class DreamRecordingViewModel{
     
     func analyzeDream(dreamViewModel: DreamViewModel) {
         
+        
         APIClientManager.shared.authRequest(
-       
+            
             endpoint: "/Analysis/analyzeDream",
             method: "POST",
-            body:["textToAnalyze": dreamViewModel.transcribedTest],
-            type: AnalysisRespone.self){[weak self] result in
-                guard let self  = self else {return}
-                switch result{
-                case .success(let response):
-                    print(response.dreamAnalysisResponse)
-                    updateAnalyzedText(dreamId: dreamViewModel.id, analyzedText: response.dreamAnalysisResponse)
+            body:["textToAnalyze": dreamViewModel.transcribedText],
+            type: AnalysisRespone.self){
+                [weak self] result in
+                    guard let self  = self else {return}
+                    switch result{
+                    case .success(let response):
+                        updateAnalyzedText(dreamId: dreamViewModel.id, analyzedText: response.dreamAnalysisResponse)
+                        
+                    case .failure(let err):
+                        let (title, message) = getErrorMessage(for: err)
+                        presentErrIfAnalysisFailsDelagate?.presentUiAlertErr(title: title, errMessage: message)
+                        
+                    }
                     
-                case .failure(let err):
-                    let (title, message) = getErrorMessage(for: err)
-                    presentErrIfAnalysisFailsDelagate?.presentUiAlertErr(title: title, errMessage: message)
-
-                    
-                   // print(err.localizedDescription)
                 }
-                
-            }
+        
     }
     private func getErrorMessage(for error: APIError) -> (String, String) {
         switch error {
@@ -182,4 +191,6 @@ public class DreamRecordingViewModel{
     func transcribeAudioFile(){
         
     }
+    
+    
 }

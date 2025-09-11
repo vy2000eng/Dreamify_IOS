@@ -28,4 +28,14 @@ class TokenManager {
     func getAccessToken() -> String? {
         return keychain["access_token"]
     }
+    func clearTokens() -> Void{
+        keychain["refresh_token"] = nil
+        keychain["access_token"] = nil
+
+
+        
+        
+    }
+    
+    
 }

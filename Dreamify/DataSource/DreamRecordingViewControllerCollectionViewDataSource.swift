@@ -10,7 +10,7 @@ import UIKit
 extension DreamRecordingsViewController:UICollectionViewDataSource{
     
     func dreamCell(indexPath:IndexPath) -> UICollectionViewCell{
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "dreamCell", for: indexPath) as? DreamRecordingViewCell
+        guard let cell = dreamRecordingsView.collectionView.dequeueReusableCell(withReuseIdentifier: "dreamCell", for: indexPath) as? DreamRecordingViewCell
         else{
             fatalError("Unable to dequeue TopicViewCell. This is a developer error.")
         }
@@ -115,7 +115,7 @@ extension DreamRecordingsViewController{
         let indexThatIsCurrentlyPlaying                = dreamRecordingViewModel.getSelectedIndex()
         let isTheCurrentlySelectedIndexPlayingRightNow = dreamRecordingViewModel.getIsPlaying    ()
         
-        guard let curr_cell = self.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell else{
+        guard let curr_cell = dreamRecordingsView.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell else{
             let alert = UIAlertController(title: "An Unexpected Error Occured",
                                           message: "Item Cannot Be Selected.",//"You tapped the start recording button, but the action failed",
                                           preferredStyle: .alert)
@@ -216,7 +216,7 @@ extension DreamRecordingsViewController{
                 return
             }
             
-            guard let prev_cell = self.collectionView.cellForItem(at: IndexPath(row: 0, section: currentPlayingIndex) ) as? DreamRecordingViewCell else{
+            guard let prev_cell = dreamRecordingsView.collectionView.cellForItem(at: IndexPath(row: 0, section: currentPlayingIndex) ) as? DreamRecordingViewCell else{
                 let alert = UIAlertController(title: "An Unexpected Error Occured",
                                               message: "Cannot Stop Playing the previous Recording",//"You tapped the start recording button, but the action failed",
                                               preferredStyle: .alert)
@@ -298,9 +298,9 @@ extension DreamRecordingsViewController{
          
             
             if(dream.retrieveIsOpen()){
-                self.collectionView.insertItems(at:[ IndexPath(row: 0, section: id)])
+                dreamRecordingsView.collectionView.insertItems(at:[ IndexPath(row: 0, section: id)])
             }else{
-                self.collectionView.deleteItems(at:[ IndexPath(row: 0, section: id)])
+                dreamRecordingsView.collectionView.deleteItems(at:[ IndexPath(row: 0, section: id)])
 
             }
             
@@ -311,17 +311,19 @@ extension DreamRecordingsViewController{
     func analyzeDream(_ sender:UIButton) {
         print("analyzze tapped")
         let indexPath = IndexPath (row: 0, section: sender.tag)
-        var dream    = dreamRecordingViewModel.dream(by: indexPath.section)
-        do{
-            try  dreamRecordingViewModel.analyzeDream(dreamViewModel: dream)
-        }catch let err as NSError{
-            let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
-                                          preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-            self.present(alert, animated: true)
-                
-        }
+        let dream    = dreamRecordingViewModel.dream(by: indexPath.section)
+       // do{
+        dreamRecordingViewModel.analyzeDream(dreamViewModel: dream)
+        
+            
+//        }catch let err as NSError{
+//            let alert = UIAlertController(title: "An Unexpected Error Occured",
+//                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+//                                          preferredStyle: .alert)
+//            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+//            self.present(alert, animated: true)
+//                
+//        }
         
         
 
@@ -337,7 +339,7 @@ extension DreamRecordingsViewController{
         let indexPath = IndexPath (row: 0, section: sender.tag)
         let dream = dreamRecordingViewModel.dream(by: indexPath.section)
         
-        guard let curr_cell = self.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell else{
+        guard let curr_cell = dreamRecordingsView.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell else{
             let alert = UIAlertController(title: "An Unexpected Error Occured",
                                           message: "Item Cannot Be Selected.",//"You tapped the start recording button, but the action failed",
                                           preferredStyle: .alert)
@@ -348,8 +350,19 @@ extension DreamRecordingsViewController{
         }
         
         
-        dream.toggleIsShowingTextTransctiptionOrAnalysis()
-        if(dream.retrieveIsShowingTextTranscriptionOrAnalysis() == true){
+        //dream.toggleIsShowingTextTransctiptionOrAnalysis()
+        if(dream.retrieveIsShowingTextTranscriptionOrAnalysis()){
+            curr_cell.transcriptionAnalysisButton.setTitle("Transcription", for: .normal)
+            curr_cell.transcriptionAnalysisButton.backgroundColor = .systemCyan
+            curr_cell.textView.attributedText =  .create(
+                string: dream.transcribedText,
+                font: .systemFont(ofSize: 16, weight: .regular),
+                color: .label
+            )
+            
+          
+
+        }else{
             curr_cell.transcriptionAnalysisButton.setTitle("Analysis", for: .normal)
             curr_cell.transcriptionAnalysisButton.backgroundColor = .systemOrange
             curr_cell.textView.attributedText =  .create(
@@ -357,18 +370,14 @@ extension DreamRecordingsViewController{
                 font: .systemFont(ofSize: 16, weight: .regular),
                 color: .label
             )
-
-        }else{
-            curr_cell.transcriptionAnalysisButton.setTitle("Transcription", for: .normal)
-            curr_cell.transcriptionAnalysisButton.backgroundColor = .systemCyan
-            curr_cell.textView.attributedText =  .create(
-                string: dream.transcribedTest,
-                font: .systemFont(ofSize: 16, weight: .regular),
-                color: .label
-            )
+         
 
             
         }
+        dream.toggleIsShowingTextTransctiptionOrAnalysis()
+
+        
+        dreamRecordingsView.collectionView.reloadItems(at: [indexPath])
 
         
         

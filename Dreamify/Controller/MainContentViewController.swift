@@ -7,6 +7,7 @@
 
 import UIKit
 import AVFoundation
+import BackgroundTasks
 
 
 protocol AddNewRecordingToCollectionView:AnyObject{
@@ -20,6 +21,8 @@ class MainViewController: UIViewController{
     var audioRecordingManager    :  AudioRecorderManager
    // var speechTranscriberManager : SpeeachTranscriberManager
     weak var addNewRecordToDreamRecordingViewdelegate: AddNewRecordingToCollectionView?
+    let taskId = "dreamify.refreshAuthToken.backgroundTask"
+
     
    // var SpeechTranscriberManager
     
@@ -110,12 +113,15 @@ class MainViewController: UIViewController{
             self.present(alert, animated: true)
             
         }
+        //schedule()
        
 
         
         
         
     }
+    
+
   
      
     

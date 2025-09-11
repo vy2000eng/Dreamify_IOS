@@ -6,10 +6,17 @@
 //
 
 import UIKit
+import BackgroundTasks
+
+
+
+
 
 
 
 class TabsViewController:UITabBarController{
+    let taskId = "dreamify.refreshAuthToken.backgroundTask"
+    
     var mainViewController           : MainViewController
     var dreamRecordingViewController : DreamRecordingsViewController
     var calendarViewController       : CalendarViewController
@@ -33,18 +40,29 @@ class TabsViewController:UITabBarController{
     
     override func viewDidLoad() {
         
-
+        
         delegate = self
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always
-
+        
         mainViewController          .tabBarItem = UITabBarItem(title: "Home",        image: UIImage(systemName: "menucard"),    tag: 1)
         dreamRecordingViewController.tabBarItem = UITabBarItem(title: "Dreams", image: UIImage(systemName: "list.bullet"), tag: 2)
         calendarViewController      .tabBarItem = UITabBarItem(title: "Calendar",   image: UIImage(systemName: "calendar"), tag: 3)
         mainViewController.addNewRecordToDreamRecordingViewdelegate = dreamRecordingViewController
         setViewControllers(  [mainViewController,dreamRecordingViewController,calendarViewController], animated: true)
-
+        
     }
-  
+
+    
+    
+    
+    
+    
+    
 }
+
+  
+
+//let taskId = "dreamify.refreshAuthToken.backgroundTask"
+//e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"dreamify.refreshAuthToken.backgroundTask"]
 

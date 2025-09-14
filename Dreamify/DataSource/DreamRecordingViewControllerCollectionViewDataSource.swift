@@ -312,8 +312,65 @@ extension DreamRecordingsViewController{
         print("analyzze tapped")
         let indexPath = IndexPath (row: 0, section: sender.tag)
         let dream    = dreamRecordingViewModel.dream(by: indexPath.section)
+        
+        let loading = LoadingOverlayView(
+               title: "Analyzing dream...",
+               subtitle: "Please wait while we analyze your dream"
+           )
+           loading.show(in: view)
+        
+        
+        dreamRecordingViewModel.analyzeDream(dreamViewModel: dream) { [weak self] result in
+            guard let self = self else{return}
+              DispatchQueue.main.async {
+                  loading.hide()
+                  
+                  switch result {
+                  case .success(_):
+                      guard let curr_cell = self.dreamRecordingsView.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell else{
+                          let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                                        message: "Item Cannot Be Selected.",//"You tapped the start recording button, but the action failed",
+                                                        preferredStyle: .alert)
+                          alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                          self.present(alert, animated: true)
+                          return
+                          
+                          
+                      }
+                      curr_cell.transcriptionAnalysisButton.setTitle("Analysis", for: .normal)
+                      curr_cell.transcriptionAnalysisButton.backgroundColor = .systemOrange
+                      curr_cell.textView.attributedText =  .create(
+                          string: dream.analyzedText,
+                          font: .systemFont(ofSize: 16, weight: .regular),
+                          color: .label
+                      )
+                      dream.toggleIsShowingTextTransctiptionOrAnalysis()
+                      self.dreamRecordingsView.collectionView.reloadItems(at: [indexPath])
+
+
+                      
+                      print("Analysis completed successfully")
+                      // Optionally refresh your collection view or show success message
+                      
+                  case .failure(_):
+                      // Error is already handled by the delegate in the view model
+                      UserSettings.shared.setLoginState(false)
+                      
+                      let loginViewController = LoginViewController()
+                      
+                      if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                         let window = windowScene.windows.first {
+                          window.rootViewController = UINavigationController(rootViewController: loginViewController)
+                          window.makeKeyAndVisible()
+                      }
+                      
+                      print("Analysis failed")
+                  }
+              }
+          }
+        
        // do{
-        dreamRecordingViewModel.analyzeDream(dreamViewModel: dream)
+        //dreamRecordingViewModel.analyzeDream(dreamViewModel: dream)
         
             
 //        }catch let err as NSError{

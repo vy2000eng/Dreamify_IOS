@@ -36,15 +36,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Schedule when app goes to background
-        checkIfLoginNeeded()
            schedule()
     }
     
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Optionally reschedule when app comes to foreground
+        checkIfLoginNeeded()
+
         schedule()
     }
     
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // Also check when app becomes active
+        checkIfLoginNeeded()
+    }
 
     
 
@@ -121,7 +126,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
             do{
                 let newTask = BGAppRefreshTaskRequest(identifier: self.taskId)
-                newTask.earliestBeginDate = Date().addingTimeInterval(30 * 60)
+                newTask.earliestBeginDate = Date().addingTimeInterval(15 * 60)
                 try BGTaskScheduler.shared.submit(newTask)
                 
                 print("task scheduled")
@@ -149,6 +154,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("token refresh was executed successfully")
                 TokenManager.shared.saveAccessToken(response.accessToken)
                 TokenManager.shared.saveRefreshToken(response.refreshToken)
+                
                 self.schedule()
                 
                 task.setTaskCompleted(success: true)
@@ -159,14 +165,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("Token refresh failed: \(err)")
                 TokenManager.shared.clearTokens()
                 UserSettings.shared.setLoginState(false)
+                task.setTaskCompleted(success: false)
             }
             
         }
     }
-    private func checkIfLoginNeeded() {
-        if UserSettings.shared.userLoginState {//UserDefaults.standard.bool(forKey: "needs_login") {
-            UserDefaults.standard.removeObject(forKey: "needs_login")
-            
+    internal func checkIfLoginNeeded() {
+        if !UserSettings.shared.userLoginState {
             DispatchQueue.main.async {
                 self.navigateToLogin()
             }
@@ -181,6 +186,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             window.makeKeyAndVisible()
         }
     }
-
 }
 

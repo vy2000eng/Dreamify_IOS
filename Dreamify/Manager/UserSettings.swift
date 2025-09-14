@@ -37,5 +37,6 @@ class UserSettings {
     
     func logout() {
         userLoginState = false
+        TokenManager.shared.clearTokens()
     }
 }

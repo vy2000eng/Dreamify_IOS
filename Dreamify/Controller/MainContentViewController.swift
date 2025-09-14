@@ -54,8 +54,13 @@ class MainViewController: UIViewController{
     
     
     // MARK: - Lifecycle
+
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+      
+
+        
         setupUI()
         setupConstraints()
       
@@ -113,6 +118,7 @@ class MainViewController: UIViewController{
             self.present(alert, animated: true)
             
         }
+    
         //schedule()
        
 
@@ -149,6 +155,10 @@ class MainViewController: UIViewController{
         mainContentView.actionButton.addTarget(self, action: #selector(recordTapped), for: .touchUpInside)
         
     }
+    
+    
+    
+
 }
 
 extension MainViewController{

@@ -16,6 +16,8 @@ class DreamRecordingsViewController:UIViewController{
     var dreamRecordingsView    : DreamRecordsView
     var dreamRecordingViewModel: DreamRecordingViewModel
     var audioPlayer : AVAudioPlayer?
+    private var loadingOverlay: LoadingOverlayView?
+
     
     init(dreamRecordingViewModel:DreamRecordingViewModel) {
         self.dreamRecordingViewModel = dreamRecordingViewModel
@@ -34,27 +36,40 @@ class DreamRecordingsViewController:UIViewController{
 //    }
     
 
+
     
     override func viewDidLoad() {
+        
+        
+        print("dream recording view loaded")
         super.viewDidLoad           ()
+        title = "All Recordings"
+
 
         self.dreamRecordingViewModel.presentErrIfAnalysisFailsDelagate = self
-        dreamRecordingsView.translatesAutoresizingMaskIntoConstraints = false
         setupUI                     ()
         setupConstraints            ()
         listFilesFromDocumentsFolder()
         dreamRecordingsView.collectionView.delegate = self
         dreamRecordingsView.collectionView.dataSource = self
 
+
+ 
+
+        
+
     }
+
+
+    
+
 
     private func setupUI() {
         view.backgroundColor = .systemBackground
-        title = "Dreams"
+
         
-        // Modern navigation bar styling
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.largeTitleDisplayMode = .always
+        dreamRecordingsView.translatesAutoresizingMaskIntoConstraints = false
+
         
         view.addSubview(dreamRecordingsView)
     }
@@ -64,7 +79,7 @@ class DreamRecordingsViewController:UIViewController{
         NSLayoutConstraint.activate([
             dreamRecordingsView.leadingAnchor.constraint (equalTo: view.leadingAnchor                ),
             dreamRecordingsView.trailingAnchor.constraint(equalTo: view.trailingAnchor               ),
-            dreamRecordingsView.topAnchor.constraint     (equalTo: view.safeAreaLayoutGuide.topAnchor),
+            dreamRecordingsView.topAnchor.constraint     (equalTo: view.topAnchor),
             dreamRecordingsView.bottomAnchor.constraint  (equalTo: view.bottomAnchor                 ),
         ])
     }
@@ -157,5 +172,24 @@ extension URL {
             try? setResourceValues(resourceValues)
         }
     }
+}
+
+
+extension DreamRecordingsViewController{
+    private func showLoading() {
+           hideLoading() // Remove any existing overlay
+           
+           let loading = LoadingOverlayView(
+               title: "Analyzing dream...",
+               subtitle: "Please wait while we analyze your dream"
+           )
+           loading.show(in: view)
+           loadingOverlay = loading
+       }
+       
+       private func hideLoading() {
+           loadingOverlay?.hide()
+           loadingOverlay = nil
+       }
 }
 

@@ -115,29 +115,52 @@ public class DreamRecordingViewModel{
         
     }
     
-    func analyzeDream(dreamViewModel: DreamViewModel) {
-        
-        
+//    func analyzeDream(dreamViewModel: DreamViewModel) {
+//        
+//        
+//        APIClientManager.shared.authRequest(
+//            
+//            endpoint: "/Analysis/analyzeDream",
+//            method: "POST",
+//            body:["textToAnalyze": dreamViewModel.transcribedText],
+//            type: AnalysisRespone.self){
+//                [weak self] result in
+//                    guard let self  = self else {return}
+//                    switch result{
+//                    case .success(let response):
+//                        updateAnalyzedText(dreamId: dreamViewModel.id, analyzedText: response.dreamAnalysisResponse)
+//                        
+//                    case .failure(let err):
+//                        let (title, message) = getErrorMessage(for: err)
+//                        presentErrIfAnalysisFailsDelagate?.presentUiAlertErr(title: title, errMessage: message)
+//                        
+//                    }
+//                    
+//                }
+//        
+//    }
+    
+    
+    func analyzeDream(dreamViewModel: DreamViewModel, completion: @escaping (Result<AnalysisRespone, APIError>) -> Void) {
         APIClientManager.shared.authRequest(
-            
             endpoint: "/Analysis/analyzeDream",
             method: "POST",
-            body:["textToAnalyze": dreamViewModel.transcribedText],
-            type: AnalysisRespone.self){
-                [weak self] result in
-                    guard let self  = self else {return}
-                    switch result{
-                    case .success(let response):
-                        updateAnalyzedText(dreamId: dreamViewModel.id, analyzedText: response.dreamAnalysisResponse)
-                        
-                    case .failure(let err):
-                        let (title, message) = getErrorMessage(for: err)
-                        presentErrIfAnalysisFailsDelagate?.presentUiAlertErr(title: title, errMessage: message)
-                        
-                    }
-                    
-                }
-        
+            body: ["textToAnalyze": dreamViewModel.transcribedText],
+            type: AnalysisRespone.self
+        ) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let response):
+                updateAnalyzedText(dreamId: dreamViewModel.id, analyzedText: response.dreamAnalysisResponse)
+                completion(.success(response))
+                
+            case .failure(let err):
+                let (title, message) = getErrorMessage(for: err)
+                presentErrIfAnalysisFailsDelagate?.presentUiAlertErr(title: title, errMessage: message)
+                completion(.failure(err))
+            }
+        }
     }
     private func getErrorMessage(for error: APIError) -> (String, String) {
         switch error {

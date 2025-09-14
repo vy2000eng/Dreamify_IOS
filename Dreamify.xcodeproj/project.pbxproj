@@ -560,7 +560,7 @@
 				C0A893912E087365008B1730 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		C0A8938D2E087365008B1730 /* Build configuration list for PBXNativeTarget "Dreamify" */ = {
 			isa = XCConfigurationList;
@@ -569,7 +569,7 @@
 				C0A8938F2E087365008B1730 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		C0A893922E087365008B1730 /* Build configuration list for PBXNativeTarget "DreamifyTests" */ = {
 			isa = XCConfigurationList;
@@ -578,7 +578,7 @@
 				C0A893942E087365008B1730 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		C0A893952E087365008B1730 /* Build configuration list for PBXNativeTarget "DreamifyUITests" */ = {
 			isa = XCConfigurationList;
@@ -587,7 +587,7 @@
 				C0A893972E087365008B1730 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 

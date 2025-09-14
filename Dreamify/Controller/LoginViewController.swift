@@ -120,11 +120,21 @@ extension LoginViewController{
             DispatchQueue.main.async{
                 switch result {
                 case .success(let response):
-                    let mainViewController = TabsViewController()
-                    self.navigationController?.pushViewController(mainViewController, animated: true)
-                    self.setLoadingState(false)
+             
                     TokenManager.shared.saveAccessToken(response.accessToken)
                     TokenManager.shared.saveRefreshToken(response.refreshToken)
+                    UserSettings.shared.setLoginState(true)
+                    
+                    
+                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                         let window = windowScene.windows.first {
+                          let mainViewController = TabsViewController()
+                          window.rootViewController = UINavigationController(rootViewController: mainViewController)
+                          window.makeKeyAndVisible()
+                    }
+                    
+                    self.setLoadingState(false)
+
                     
 
                     
@@ -139,14 +149,6 @@ extension LoginViewController{
          
         }
         
-        
-        
-        
-        // Simulate login process
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-//            self?.setLoadingState(false)
-//            self?.handleLoginSuccess()
-//        }
     }
 }
 // MARK: utililty functions

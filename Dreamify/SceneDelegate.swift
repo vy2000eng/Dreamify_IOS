@@ -19,7 +19,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         //guard let _ = (scene as? UIWindowScene) else { return }
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
-        if TokenManager.shared.getAccessToken() != nil && TokenManager.shared.getRefreshToken() != nil{
+        if UserSettings.shared.userLoginState{
+            
             window?.rootViewController = UINavigationController(rootViewController: TabsViewController())
 
             
@@ -45,6 +46,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+              appDelegate.checkIfLoginNeeded()
+          }
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
@@ -55,6 +59,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillEnterForeground(_ scene: UIScene) {
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+             appDelegate.checkIfLoginNeeded() // You'll need to make this method internal instead of private
+         }
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {

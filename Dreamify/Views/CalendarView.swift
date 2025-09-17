@@ -21,11 +21,31 @@ class CalendarView:UIView{
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        setupUI()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    
+    private func setupUI(){
+        addSubview(calendar)
+        
+        
+        
+        NSLayoutConstraint.activate([
+            calendar.centerXAnchor.constraint(equalTo: centerXAnchor),
+           calendar.topAnchor.constraint(equalTo: topAnchor, constant: 50),
+           calendar.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 20),
+           calendar.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20),
+        ])
+  
+        
+    }
+    
+    
+    
     
 
     

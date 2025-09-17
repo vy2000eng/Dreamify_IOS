@@ -10,12 +10,23 @@ import UIKit
 
 
 class CalendarViewController:UIViewController{
+
+    
     var calendarView: CalendarView
     var dreamRecordingViewModel:DreamRecordingViewModel
-    init(dreamRecordingViewModel:DreamRecordingViewModel){
-        
-        self.dreamRecordingViewModel = dreamRecordingViewModel
+    var dreamRecordingView: DreamRecordsView
+   // var dreamRecordingsViewController:DreamRecordingsViewController
+    var dreamRecordingDataSourceManage:DreamRecordingViewDataSourceManager!
+    
+    init(dreamRecordingViewController:DreamRecordingsViewController){
+        //self.dre
+        self.dreamRecordingViewModel = DreamRecordingViewModel()
+        self.dreamRecordingView = DreamRecordsView(frame: .zero)
         calendarView = CalendarView()
+        //self.dreamRecordingsViewController = dreamRecordingViewController
+        
+        
+        
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -24,7 +35,10 @@ class CalendarViewController:UIViewController{
     }
     
     override func viewDidLoad() {
+
         super.viewDidLoad()
+        dreamRecordingDataSourceManage = DreamRecordingViewDataSourceManager(dreamRecordingView: dreamRecordingView, dreamRecordingViewModel: dreamRecordingViewModel, controller: self)
+
         setupUI()
         setupConstraints()
     }
@@ -35,22 +49,46 @@ class CalendarViewController:UIViewController{
     private func setupUI(){
         view.backgroundColor = .systemBackground
         title = "Calendar"
+
+        calendarView.calendar.delegate = self
+        dreamRecordingView.collectionView.delegate = dreamRecordingDataSourceManage
+        dreamRecordingView.collectionView.dataSource = dreamRecordingDataSourceManage
         
         // Add subviews
-        view.addSubview(calendarView.calendar)
-        
+        view.addSubview(calendarView)
+        view.addSubview(dreamRecordingView)
+        calendarView.translatesAutoresizingMaskIntoConstraints = false
+        dreamRecordingView.translatesAutoresizingMaskIntoConstraints = false
     }
+    
+    
     private func setupConstraints(){
         NSLayoutConstraint.activate([
-            // Title Label
-            calendarView.calendar .centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            calendarView.calendar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
-            calendarView.calendar.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 20),
-            calendarView.calendar.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -20),
+            calendarView.topAnchor.constraint(equalTo: view.topAnchor),
+            calendarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            calendarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            calendarView.heightAnchor.constraint(equalToConstant: 600), // Give it a fixed height
+
+           // calendarView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            
+            dreamRecordingView.topAnchor.constraint(equalTo: calendarView.bottomAnchor),
+            dreamRecordingView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            dreamRecordingView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            dreamRecordingView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            
+            
+            
         ])
         
     }
+    
+    
+    
    
+}
+
+extension CalendarViewController:UICalendarViewDelegate{
+      //  cale
 }
 
 

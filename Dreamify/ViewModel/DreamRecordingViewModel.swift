@@ -35,6 +35,7 @@ public class DreamRecordingViewModel{
 
    // private var SpeechTranscriberManager:SpeeachTranscriberManager!
     var dreams  = [DreamViewModel]()
+   // var dreamByDate = [DreamViewModel]()
     
      var dreamsCount:Int {
         dreams.count
@@ -112,6 +113,23 @@ public class DreamRecordingViewModel{
             }
             
         }
+        
+    }
+    func getAllDreamsCreatedByDate(seleectedDate:Date) throws -> [DreamViewModel] {
+        do{
+            
+            try getAllDreams()
+            dreams  = dreams.filter({$0.createdDate == seleectedDate})
+            return dreams
+
+
+            
+        }catch let err as NSError{
+            print("Error initializing dreams in getAllDreams() \(err), \(err.userInfo)")
+            throw err
+            
+        }
+        
         
     }
     

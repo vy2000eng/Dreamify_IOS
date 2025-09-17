@@ -9,7 +9,7 @@ import UIKit
 import SwipeCellKit
 import AVFAudio
 
-extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectionViewCellDelegate,AVAudioPlayerDelegate,AddNewRecordingToCollectionView, PresentErrIfAnalysisFails{
+extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCollectionViewCellDelegate,AVAudioPlayerDelegate,AddNewRecordingToCollectionView, PresentErrIfAnalysisFails{
 //
 
     // explicitly defined delegates
@@ -19,7 +19,7 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
         DispatchQueue.main.async{ [weak self] in
             
             guard let self = self,
-                  self.isViewLoaded,
+                  self.controller.isViewLoaded,
                   self.dreamRecordingsView.collectionView != nil else{
                 return
             }
@@ -37,7 +37,7 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
                                           message: errMessage,
                                           preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-            self.present(alert, animated: true)
+            self.controller.present(alert, animated: true)
         
         }
         
@@ -75,7 +75,7 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
         
                 do{
                     print("audio finished")
-                    try stopAudio()
+                    try  self.audioPlayerManager.stopAudio()
         
                     guard let curr_index  = dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying else{
                         throw NSError(domain: "AudioStoppingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Play Pause Controller is nil"])
@@ -96,7 +96,7 @@ extension DreamRecordingsViewController:UICollectionViewDelegate, SwipeCollectio
                                                   message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
                                                   preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                    self.present(alert, animated: true)
+                    self.controller.present(alert, animated: true)
                     return
         
         

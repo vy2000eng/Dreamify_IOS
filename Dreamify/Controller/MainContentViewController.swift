@@ -29,10 +29,10 @@ class MainViewController: UIViewController{
     private var windowOrientation: UIInterfaceOrientation {
           return view.window?.windowScene?.interfaceOrientation ?? .portrait
       }
-    init(dreamRecordingViewModel : DreamRecordingViewModel){
+    init(){
         
         self.mainContentView            = MainContentView()
-        self.dreamsRecordingViewModel   = dreamRecordingViewModel
+        self.dreamsRecordingViewModel   = DreamRecordingViewModel()
         audioRecordingManager           = AudioRecorderManager()
         //self.speechTranscriberManager = SpeeachTranscriberManager()
         super.init                        (nibName: nil, bundle: nil)

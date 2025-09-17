@@ -62,6 +62,22 @@ class CoreDataManager{
             throw err
         }
     }
+    func getAllDreamsCreatedByDate() throws -> [Dream] {
+        
+        let fetchRequest:NSFetchRequest<Dream> = Dream.fetchRequest()
+        do {
+            let dreams = try context.fetch(fetchRequest)
+            return dreams
+            
+        }catch let err as NSError{
+            print("Error retrieving dreams from function call getAllDreams() \(err), \(err.userInfo)")
+
+            throw err
+        }
+    }
+    
+    
+    
     
     func addDream(title:String, url:String, transribedText:String?) throws{
         let newDream          = Dream(context: context)

@@ -17,10 +17,11 @@ class DreamRecordingsViewController:UIViewController{
     var dreamRecordingViewModel: DreamRecordingViewModel
     var audioPlayer : AVAudioPlayer?
     private var loadingOverlay: LoadingOverlayView?
+    var dreamRecordingDataSourceManager: DreamRecordingViewDataSourceManager!
 
     
-    init(dreamRecordingViewModel:DreamRecordingViewModel) {
-        self.dreamRecordingViewModel = dreamRecordingViewModel
+    init() {
+        self.dreamRecordingViewModel = DreamRecordingViewModel()
         dreamRecordingsView          = DreamRecordsView(frame: .zero)
         super.init                     (nibName: nil, bundle: nil)
     }
@@ -44,14 +45,16 @@ class DreamRecordingsViewController:UIViewController{
         print("dream recording view loaded")
         super.viewDidLoad           ()
         title = "All Recordings"
+        dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(dreamRecordingView: dreamRecordingsView, dreamRecordingViewModel: dreamRecordingViewModel, controller: self)
 
 
-        self.dreamRecordingViewModel.presentErrIfAnalysisFailsDelagate = self
+
+        self.dreamRecordingViewModel.presentErrIfAnalysisFailsDelagate = dreamRecordingDataSourceManager
         setupUI                     ()
         setupConstraints            ()
         listFilesFromDocumentsFolder()
-        dreamRecordingsView.collectionView.delegate = self
-        dreamRecordingsView.collectionView.dataSource = self
+        dreamRecordingsView.collectionView.delegate = dreamRecordingDataSourceManager
+        dreamRecordingsView.collectionView.dataSource = dreamRecordingDataSourceManager
 
 
  
@@ -120,40 +123,40 @@ class DreamRecordingsViewController:UIViewController{
 
 // utilily functions for audio player
 extension DreamRecordingsViewController{
-    func  playAudio(fileName:String)  throws -> Void{
-        
-        let url = getDocumentsDirectory().appendingPathComponent(fileName)
-        
-        do{
-                
-                audioPlayer = try  AVAudioPlayer(contentsOf: url) //AVAudioPlayer(contentsOf: url!)
-         
-            
-                audioPlayer?.delegate = self
-                audioPlayer?.volume = 1.0
-                audioPlayer?.play()
-
-        
-            
-        }catch let err as NSError {
-            throw NSError(domain: "AudioPlayingError", code: 1, userInfo: [NSLocalizedDescriptionKey: err.localizedDescription])
-
-            
-       }
-       
-     
-    }
-    func stopAudio() throws ->Void {
-            audioPlayer?.stop()
-            audioPlayer = nil
-    }
+//    func  playAudio(fileName:String)  throws -> Void{
+//        
+//        let url = getDocumentsDirectory().appendingPathComponent(fileName)
+//        
+//        do{
+//                
+//                audioPlayer = try  AVAudioPlayer(contentsOf: url) //AVAudioPlayer(contentsOf: url!)
+//         
+//            
+//                audioPlayer?.delegate = self
+//                audioPlayer?.volume = 1.0
+//                audioPlayer?.play()
+//
+//        
+//            
+//        }catch let err as NSError {
+//            throw NSError(domain: "AudioPlayingError", code: 1, userInfo: [NSLocalizedDescriptionKey: err.localizedDescription])
+//
+//            
+//       }
+//       
+//     
+//    }
+//    func stopAudio() throws ->Void {
+//            audioPlayer?.stop()
+//            audioPlayer = nil
+//    }
 
 
     
-    func getDocumentsDirectory() -> URL {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        return paths[0]
-    }
+//    func getDocumentsDirectory() -> URL {
+//        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+//        return paths[0]
+//    }
 }
 
     
@@ -172,6 +175,10 @@ extension URL {
             try? setResourceValues(resourceValues)
         }
     }
+//    func getDocumentsDirectory() -> URL {
+//        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+//        return paths[0]
+//    }
 }
 
 

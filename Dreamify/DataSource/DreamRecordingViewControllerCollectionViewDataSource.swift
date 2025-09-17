@@ -7,7 +7,44 @@
 
 import UIKit
 
-extension DreamRecordingsViewController:UICollectionViewDataSource{
+//extension DreamRecordingsViewController:UICollectionViewDataSource{
+class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
+    var dreamRecordingViewModel:DreamRecordingViewModel
+    var dreamRecordingsView:DreamRecordsView
+    var controller:UIViewController
+    var audioPlayerManager: AudioPlayerManager
+    var controllerManagedByAudioPlayer:ControllerManagedByAudioPlayerClass
+    //var controller:UIViewController!
+    
+    init(dreamRecordingView:DreamRecordsView, dreamRecordingViewModel:DreamRecordingViewModel,controller:UIViewController) {
+        self.controller = controller
+        
+        self.dreamRecordingsView = dreamRecordingView
+        self.dreamRecordingViewModel = dreamRecordingViewModel
+        // Cleaner type checking
+        switch controller {
+        case is DreamRecordingsViewController:
+            controllerManagedByAudioPlayer = .DreamViewController
+        case is CalendarViewController:
+            controllerManagedByAudioPlayer = .CalendarViewController
+        default:
+            fatalError("Unsupported controller type")
+            
+            
+        }
+        
+        
+        self.audioPlayerManager = AudioPlayerManager(
+            viewcontroller: controller,
+            viewmodel: dreamRecordingViewModel,
+            controllerManagedByAudioPlayer: controllerManagedByAudioPlayer
+        )
+        
+        super.init()
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     func dreamCell(indexPath:IndexPath) -> UICollectionViewCell{
         guard let cell = dreamRecordingsView.collectionView.dequeueReusableCell(withReuseIdentifier: "dreamCell", for: indexPath) as? DreamRecordingViewCell
@@ -105,7 +142,7 @@ extension DreamRecordingsViewController:UICollectionViewDataSource{
 
 }
 
-extension DreamRecordingsViewController{
+extension DreamRecordingViewDataSourceManager{
     @objc
     func handlePlayPause(_ sender:UIButton)  throws -> Void{
         
@@ -120,7 +157,11 @@ extension DreamRecordingsViewController{
                                           message: "Item Cannot Be Selected.",//"You tapped the start recording button, but the action failed",
                                           preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-            self.present(alert, animated: true)
+            
+            //viewCon
+            
+            
+            self.controller.present(alert, animated: true)
             return
             
         }
@@ -134,7 +175,7 @@ extension DreamRecordingsViewController{
             curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
             //stopAudio()
             do{
-                try stopAudio()
+                try self.audioPlayerManager.stopAudio()
 
                 
             }catch let err as NSError{
@@ -143,7 +184,7 @@ extension DreamRecordingsViewController{
                                               message: "An error occured when the audio player was attempting to stop",//"You tapped the start recording button, but the action failed",
                                               preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                self.present(alert, animated: true)
+                self.controller.present(alert, animated: true)
                 return
                 
                 
@@ -165,7 +206,7 @@ extension DreamRecordingsViewController{
                     curr_cell.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
                     dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.section,isPlaying: true)
                     let url = dream.url//URL(string: dream.url)
-                    try     self.playAudio(fileName: url)
+                    try     self.audioPlayerManager.playAudio(fileName: url)
                     
 
                 }catch let err as NSError{
@@ -173,7 +214,7 @@ extension DreamRecordingsViewController{
                     curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
                     //self.stopAudio()
                     do{
-                        try stopAudio()
+                        try self.audioPlayerManager.stopAudio()
 
                         
                     }catch let err as NSError{
@@ -181,7 +222,7 @@ extension DreamRecordingsViewController{
                                                       message: "An error occured when the audio player was attempting to stop",//"You tapped the start recording button, but the action failed",
                                                       preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                        self.present(alert, animated: true)
+                        self.controller.present(alert, animated: true)
                         return
                         
                         
@@ -193,7 +234,7 @@ extension DreamRecordingsViewController{
                                                   message: "Issue with audio player please try again later.",//"You tapped the start recording button, but the action failed",
                                                   preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                    self.present(alert, animated: true)
+                    self.controller.present(alert, animated: true)
 
                     
                     
@@ -212,7 +253,7 @@ extension DreamRecordingsViewController{
                                               message: "Cannot Be Played at this time.",//"You tapped the start recording button, but the action failed",
                                               preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                self.present(alert, animated: true)
+                self.controller.present(alert, animated: true)
                 return
             }
             
@@ -221,14 +262,14 @@ extension DreamRecordingsViewController{
                                               message: "Cannot Stop Playing the previous Recording",//"You tapped the start recording button, but the action failed",
                                               preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                self.present(alert, animated: true)
+                self.controller.present(alert, animated: true)
                 return
                 
             }
             
             prev_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
             do{
-                try stopAudio()
+                try self.audioPlayerManager.stopAudio()
 
                 
             }catch let err as NSError{
@@ -236,7 +277,7 @@ extension DreamRecordingsViewController{
                                               message: "An error occured when the audio player was attempting to stop",//"You tapped the start recording button, but the action failed",
                                               preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                self.present(alert, animated: true)
+                self.controller.present(alert, animated: true)
                 return
                 
                 
@@ -250,13 +291,13 @@ extension DreamRecordingsViewController{
             let url = dream.url
             
             do{
-                try  self.playAudio(fileName: url)
+                try  self.audioPlayerManager.playAudio(fileName: url)
                 
             }catch{
                 curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
                 //self.stopAudio()
                 do{
-                    try stopAudio()
+                    try self.audioPlayerManager.stopAudio()
 
                     
                 }catch let err as NSError{
@@ -264,7 +305,7 @@ extension DreamRecordingsViewController{
                                                   message: "An error occured when the audio player was attempting to stop",//"You tapped the start recording button, but the action failed",
                                                   preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                    self.present(alert, animated: true)
+                    self.controller.present(alert, animated: true)
                     return
                     
                     
@@ -274,7 +315,7 @@ extension DreamRecordingsViewController{
                                               message: "Issue with audio player please try again later.",//"You tapped the start recording button, but the action failed",
                                               preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                self.present(alert, animated: true)
+                self.controller.present(alert, animated: true)
                 
                 
             }
@@ -290,6 +331,8 @@ extension DreamRecordingsViewController{
             guard let id = gesture.view?.tag else {
                 fatalError("Developer Error: Tapped An Item that is out of range lol, this shouldn't be possible")
             }
+            print("id of tapped item:\(id)")
+
             let dream = dreamRecordingViewModel.dream(by: id)
             
             dream.toggleIsOpen()
@@ -317,7 +360,7 @@ extension DreamRecordingsViewController{
                title: "Analyzing dream...",
                subtitle: "Please wait while we analyze your dream"
            )
-           loading.show(in: view)
+        loading.show(in: self.controller.view)
         
         
         dreamRecordingViewModel.analyzeDream(dreamViewModel: dream) { [weak self] result in
@@ -332,7 +375,7 @@ extension DreamRecordingsViewController{
                                                         message: "Item Cannot Be Selected.",//"You tapped the start recording button, but the action failed",
                                                         preferredStyle: .alert)
                           alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                          self.present(alert, animated: true)
+                          self.controller.present(alert, animated: true)
                           return
                           
                           
@@ -401,7 +444,7 @@ extension DreamRecordingsViewController{
                                           message: "Item Cannot Be Selected.",//"You tapped the start recording button, but the action failed",
                                           preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-            self.present(alert, animated: true)
+            self.controller.present(alert, animated: true)
             return
             
         }

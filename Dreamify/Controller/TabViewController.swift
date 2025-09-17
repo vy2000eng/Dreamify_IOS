@@ -20,20 +20,20 @@ class TabsViewController:UITabBarController{
     var mainViewController           : MainViewController
     var dreamRecordingViewController : DreamRecordingsViewController
     var calendarViewController       : CalendarViewController
-    var dreamRecordingViewModel      : DreamRecordingViewModel
+    //var dreamRecordingViewModel      : DreamRecordingViewModel
     
     
     
     init() {
         
-        self.dreamRecordingViewModel      = DreamRecordingViewModel      (                                                )
-        self.mainViewController           = MainViewController           (dreamRecordingViewModel: dreamRecordingViewModel)
-        self.dreamRecordingViewController = DreamRecordingsViewController(dreamRecordingViewModel: dreamRecordingViewModel)
-        self.calendarViewController       = CalendarViewController       (dreamRecordingViewModel: dreamRecordingViewModel)
+      //  self.dreamRecordingViewModel      = DreamRecordingViewModel      (                                                )
+        self.mainViewController           = MainViewController           ()
+        self.dreamRecordingViewController = DreamRecordingsViewController()
+        self.calendarViewController       = CalendarViewController       (dreamRecordingViewController: dreamRecordingViewController)
         
-        self.mainViewController.navigationItem.largeTitleDisplayMode = .automatic
+        self.mainViewController.navigationItem.largeTitleDisplayMode           = .automatic
         self.dreamRecordingViewController.navigationItem.largeTitleDisplayMode = .automatic
-        self.calendarViewController.navigationItem.largeTitleDisplayMode = .automatic
+        self.calendarViewController.navigationItem.largeTitleDisplayMode       = .automatic
         
         super.init                                                       (nibName                : nil, bundle: nil       )
     }
@@ -45,55 +45,33 @@ class TabsViewController:UITabBarController{
     
     override func viewDidLoad() {
         print("actual vc appeared")
-        //setupNavigationBar()
         super.viewDidLoad()
-   
 
-
-        
-        
         
         let nav1 = UINavigationController(rootViewController: mainViewController)
         let nav2 = UINavigationController(rootViewController: dreamRecordingViewController)
         let nav3 = UINavigationController(rootViewController: calendarViewController)
         
-         nav1.tabBarItem = UITabBarItem(title: "Home",
-                                         image: UIImage(systemName: "menucard"),
-                                         tag: 1)
-        nav2.tabBarItem = UITabBarItem(title: "Dreams",
-                                     image: UIImage(systemName: "list.bullet"),
-                                     tag: 2)
-        nav3.tabBarItem = UITabBarItem(title: "Calendar",
-                                     image: UIImage(systemName: "calendar"),
-                                     tag: 3)
+        nav1.tabBarItem = UITabBarItem(title: "Home",  image: UIImage(systemName: "menucard"),tag: 1)
+        nav2.tabBarItem = UITabBarItem(title: "Dreams",image: UIImage(systemName: "list.bullet"),tag: 2)
+        nav3.tabBarItem = UITabBarItem(title: "Calendar",image: UIImage(systemName: "calendar"), tag: 3)
+        var count = 0;
+        
         for nav in [nav1, nav2, nav3] {
-                 nav.navigationBar.prefersLargeTitles = true
-            nav.navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white,.font: UIFont.systemFont(ofSize: 16,weight: .regular) ]
-            nav.navigationController?.navigationBar.largeTitleTextAttributes = [.foregroundColor: UIColor.white, .font: UIFont.systemFont(ofSize: 24,weight: .bold) ]
-            nav.navigationController?.navigationBar.layoutMargins = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
-
             
+                nav.navigationBar.prefersLargeTitles                             = true
+                nav.navigationController?.navigationBar.titleTextAttributes      = [.foregroundColor: UIColor.white,.font: UIFont.systemFont(ofSize: 16,weight: .regular) ]
+                nav.navigationController?.navigationBar.largeTitleTextAttributes = [.foregroundColor: UIColor.white, .font: UIFont.systemFont(ofSize: 24,weight: .bold) ]
+                nav.navigationController?.navigationBar.layoutMargins            = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
             
-            
-            
-            
-             }
-        setViewControllers(
-                   [nav1, nav2, nav3, ],
-                   animated: true
-               )
+        
+        }
+        setViewControllers([nav1, nav2, nav3, ], animated: true)
                                              
 
-        mainViewController.addNewRecordToDreamRecordingViewdelegate = dreamRecordingViewController
-
-
+        //mainViewController.addNewRecordToDreamRecordingViewdelegate = dreamRecordingViewController.dreamRecordingDataSourceManager
         
     }
-    
-    
-    
-    
-    
 }
 
   

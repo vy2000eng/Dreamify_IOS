@@ -7,16 +7,23 @@
 import UIKit
 import Foundation
 
-class CalendarView:UIView{
+class CalendarView: UIView {
     
-    let calendar:UICalendarView={
-        let calendarV                = UICalendarView()
-        let gregorianCalendar        = Calendar(identifier: .gregorian)
-        calendarV.calendar           = gregorianCalendar
-        calendarV.tintColor          = .systemMint
-        calendarV.availableDateRange = DateInterval(start: .now, end: .distantFuture)
-        calendarV.translatesAutoresizingMaskIntoConstraints = false;
-        return calendarV;
+    let calendar: UICalendarView = {
+        let calendarV = UICalendarView()
+        let gregorianCalendar = Calendar(identifier: .gregorian)
+        calendarV.calendar = gregorianCalendar
+        calendarV.tintColor = .systemBlue
+        calendarV.fontDesign = .rounded
+        calendarV.backgroundColor = .systemBackground
+        calendarV.layer.cornerRadius = 16
+        calendarV.layer.shadowColor = UIColor.black.cgColor
+        calendarV.layer.shadowOffset = CGSize(width: 0, height: 2)
+        calendarV.layer.shadowRadius = 8
+        calendarV.layer.shadowOpacity = 0.1
+        calendarV.availableDateRange = DateInterval(start: .distantPast, end: Date())
+        calendarV.translatesAutoresizingMaskIntoConstraints = false
+        return calendarV
     }()
     
     override init(frame: CGRect) {
@@ -28,25 +35,15 @@ class CalendarView:UIView{
         fatalError("init(coder:) has not been implemented")
     }
     
-    
-    private func setupUI(){
+    private func setupUI() {
+        backgroundColor = .clear
         addSubview(calendar)
         
-        
-        
         NSLayoutConstraint.activate([
-            calendar.centerXAnchor.constraint(equalTo: centerXAnchor),
-           calendar.topAnchor.constraint(equalTo: topAnchor, constant: 50),
-           calendar.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 20),
-           calendar.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20),
+            calendar.topAnchor.constraint(equalTo: topAnchor, constant: 16),
+            calendar.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            calendar.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            calendar.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16)
         ])
-  
-        
     }
-    
-    
-    
-    
-
-    
 }

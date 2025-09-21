@@ -9,22 +9,103 @@ import UIKit
 import SwipeCellKit
 import AVFAudio
 
+//protocol RetrieveCurrentlySelectedDate: AnyObject{
+//    
+//    func retrieveCurrentlySelectedDate() -> Date
+//    
+//}
+
+
+
+
 extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCollectionViewCellDelegate,AVAudioPlayerDelegate,AddNewRecordingToCollectionView, PresentErrIfAnalysisFails{
 //
 
     // explicitly defined delegates
-    func updateCollection() {
-        print("deldegate called")
-        let section = dreamRecordingViewModel.dreamsCount
-        DispatchQueue.main.async{ [weak self] in
+    func updateCollection(controllerMangedByDataSource :ControllerManagedByAudioPlayerClass) throws -> Void{
+        print("delegate called")
+
+        do{
+            try dreamRecordingViewModel.getAllDreams()
             
-            guard let self = self,
-                  self.controller.isViewLoaded,
-                  self.dreamRecordingsView.collectionView != nil else{
-                return
-            }
-            self.dreamRecordingsView.collectionView.insertSections(IndexSet(integer: section-1))
+        }catch let err as NSError{
+            print("An err occured")
+            
+            
         }
+        print("delegate Called")
+        
+        switch(controllerMangedByDataSource){
+        case .DreamViewController:
+            guard let  vc = self.controller as? DreamRecordingsViewController else{
+                throw NSError(domain: "DreamCiewController Casting Exception", code: 1, userInfo: [NSLocalizedDescriptionKey: "could not cast controller to DreamViewContoller"])
+                
+            }
+            let section = dreamRecordingViewModel.dreamsCount
+            if(controllerManagedByAudioPlayer == .DreamViewController && self.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfSections){
+                DispatchQueue.main.async{ [weak self] in
+                    guard let self = self else{ return }
+                    //let vc = controller as! DreamRecordingsViewController
+                    vc.dreamRecordingView.collectionView.insertSections(IndexSet(integer: section-1))
+                    
+                    // self.dreamRecordingsView.collectionView.insertSections(IndexSet(integer: section-1))
+                }
+                
+            }
+            break;
+            
+            
+        case .CalendarViewController:
+            guard let  vc = self.controller as? CalendarViewController else{
+                throw NSError(domain: "CalendarViewController Casting Exception", code: 1, userInfo: [NSLocalizedDescriptionKey: "could not cast controller to CalendarViewContoller"])
+                
+            }
+            
+            do{
+                guard let  currently_selected_date = retrieveCurrentlySelectedDateDelegate?.retrieveCurrentlySelectedDate() else{
+                    return
+                }
+                //try  vc.dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: currently_selected_date)
+                    // let section = vc.dreamRecordingViewModel.dreamsCount
+                if(controllerManagedByAudioPlayer == .CalendarViewController && vc.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfSections){
+                    DispatchQueue.main.async{ [weak self] in
+                        guard let self = self else{ return }
+                        //let vc = controller as! CalendarViewController
+                        vc.filterDreamsForDate( currently_selected_date)
+                       // vc.dreamRecordingView.collectionView.insertSections(IndexSet(integer: section-1))
+
+                        //vc.dreamRecordingView.collectionView.insertSections(IndexSet(integer: section-1))
+                        
+                        // self.dreamRecordingsView.collectionView.insertSections(IndexSet(integer: section-1))
+                    }
+                    
+                }
+                
+                
+                
+                
+            }catch let err as NSError{
+                throw NSError(domain: err.domain, code: 1, userInfo: [NSLocalizedDescriptionKey:err.localizedDescription])
+                
+                
+            }
+            
+            
+            break;
+        }
+//        print("deldegate called")
+//        let section = dreamRecordingViewModel.dreamsCount
+//        
+//        DispatchQueue.main.async{ [weak self] in
+//            
+//            guard let self = self,
+//                  self.controller.isViewLoaded,
+//                  //if controllerManagedByAudioPlayer
+//                  self.dreamRecordingsView.collectionView != nil else{
+//                return
+//            }
+//            self.dreamRecordingsView.collectionView.insertSections(IndexSet(integer: section-1))
+//        }
 
     }
     

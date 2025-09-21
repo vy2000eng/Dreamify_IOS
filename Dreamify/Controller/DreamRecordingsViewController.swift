@@ -13,7 +13,7 @@ import AVFAudio
 //MARK: note the delegated and datasources are in there designated folders
 class DreamRecordingsViewController:UIViewController{
 
-    var dreamRecordingsView    : DreamRecordsView
+    var dreamRecordingView    : DreamRecordsView
     var dreamRecordingViewModel: DreamRecordingViewModel
     var audioPlayer : AVAudioPlayer?
     private var loadingOverlay: LoadingOverlayView?
@@ -21,9 +21,14 @@ class DreamRecordingsViewController:UIViewController{
 
     
     init() {
-        self.dreamRecordingViewModel = DreamRecordingViewModel()
-        dreamRecordingsView          = DreamRecordsView(frame: .zero)
+        self.dreamRecordingViewModel = DreamRecordingViewModel(controllerManagedByDataSource: .DreamViewController)
+        dreamRecordingView          = DreamRecordsView(frame: .zero)
+
         super.init                     (nibName: nil, bundle: nil)
+        dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(dreamRecordingView: dreamRecordingView, dreamRecordingViewModel: dreamRecordingViewModel, controller: self)
+
+
+
     }
   
     required init?(coder: NSCoder) {
@@ -45,16 +50,17 @@ class DreamRecordingsViewController:UIViewController{
         print("dream recording view loaded")
         super.viewDidLoad           ()
         title = "All Recordings"
-        dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(dreamRecordingView: dreamRecordingsView, dreamRecordingViewModel: dreamRecordingViewModel, controller: self)
+        //dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(dreamRecordingView: dreamRecordingsView, dreamRecordingViewModel: dreamRecordingViewModel, controller: self)
 
 
-
+        dreamRecordingView.collectionView.delegate = dreamRecordingDataSourceManager
+        dreamRecordingView.collectionView.dataSource = dreamRecordingDataSourceManager
         self.dreamRecordingViewModel.presentErrIfAnalysisFailsDelagate = dreamRecordingDataSourceManager
         setupUI                     ()
         setupConstraints            ()
         listFilesFromDocumentsFolder()
-        dreamRecordingsView.collectionView.delegate = dreamRecordingDataSourceManager
-        dreamRecordingsView.collectionView.dataSource = dreamRecordingDataSourceManager
+//        dreamRecordingsView.collectionView.delegate = dreamRecordingDataSourceManager
+//        dreamRecordingsView.collectionView.dataSource = dreamRecordingDataSourceManager
 
 
  
@@ -71,19 +77,19 @@ class DreamRecordingsViewController:UIViewController{
         view.backgroundColor = .systemBackground
 
         
-        dreamRecordingsView.translatesAutoresizingMaskIntoConstraints = false
+        dreamRecordingView.translatesAutoresizingMaskIntoConstraints = false
 
         
-        view.addSubview(dreamRecordingsView)
+        view.addSubview(dreamRecordingView)
     }
     
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            dreamRecordingsView.leadingAnchor.constraint (equalTo: view.leadingAnchor                ),
-            dreamRecordingsView.trailingAnchor.constraint(equalTo: view.trailingAnchor               ),
-            dreamRecordingsView.topAnchor.constraint     (equalTo: view.topAnchor),
-            dreamRecordingsView.bottomAnchor.constraint  (equalTo: view.bottomAnchor                 ),
+            dreamRecordingView.leadingAnchor.constraint (equalTo: view.leadingAnchor                ),
+            dreamRecordingView.trailingAnchor.constraint(equalTo: view.trailingAnchor               ),
+            dreamRecordingView.topAnchor.constraint     (equalTo: view.topAnchor),
+            dreamRecordingView.bottomAnchor.constraint  (equalTo: view.bottomAnchor                 ),
         ])
     }
     

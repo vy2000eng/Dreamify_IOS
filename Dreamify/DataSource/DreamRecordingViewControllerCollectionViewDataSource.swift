@@ -6,6 +6,11 @@
 //
 
 import UIKit
+protocol RetrieveCurrentlySelectedDate: AnyObject{
+    
+    func retrieveCurrentlySelectedDate() -> Date
+    
+}
 
 //extension DreamRecordingsViewController:UICollectionViewDataSource{
 class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
@@ -14,7 +19,7 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     var controller:UIViewController
     var audioPlayerManager: AudioPlayerManager
     var controllerManagedByAudioPlayer:ControllerManagedByAudioPlayerClass
-    //var controller:UIViewController!
+    weak var retrieveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
     
     init(dreamRecordingView:DreamRecordsView, dreamRecordingViewModel:DreamRecordingViewModel,controller:UIViewController) {
         self.controller = controller
@@ -24,8 +29,11 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         // Cleaner type checking
         switch controller {
         case is DreamRecordingsViewController:
+            self.controller =  self.controller as! DreamRecordingsViewController
             controllerManagedByAudioPlayer = .DreamViewController
         case is CalendarViewController:
+            self.controller =  self.controller as! CalendarViewController
+
             controllerManagedByAudioPlayer = .CalendarViewController
         default:
             fatalError("Unsupported controller type")
@@ -115,6 +123,10 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     }
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         
+        print("view called")
+        print("index path: \( indexPath.section)")
+        print("dream \(dreamRecordingViewModel.dream(by: indexPath.section).title)")
+        
         let cell = collectionView.dequeueReusableSupplementaryView(ofKind:     kind, withReuseIdentifier: "headerCell", for: indexPath) as! DreamRecordingHeaderViewCell
         cell.configureDreamRecordingViewHeader(viewmodel: dreamRecordingViewModel, row: indexPath.section)
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture(gesture:)))
@@ -125,6 +137,7 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         
     }
     func numberOfSections(in collectionView: UICollectionView) -> Int {
+        print("number of sections \(dreamRecordingViewModel.dreamsCount)")
         return dreamRecordingViewModel.dreamsCount
         
     }

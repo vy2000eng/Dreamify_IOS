@@ -9,50 +9,100 @@ import Foundation
 import UIKit
 
 
-class CalendarViewController:UIViewController{
+//protocol RetrieveCurrentlySelectedDate: AnyObject{
+//    
+//    func retrieveCurrentlySelectedDate() -> Date
+//    
+//}
 
+
+class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
+    func retrieveCurrentlySelectedDate() -> Date {
+        return current_date
+    }
+    
+    
+    
+    
     
     var calendarView: CalendarView
     var dreamRecordingViewModel:DreamRecordingViewModel
     var dreamRecordingView: DreamRecordsView
-   // var dreamRecordingsViewController:DreamRecordingsViewController
-    var dreamRecordingDataSourceManage:DreamRecordingViewDataSourceManager!
+    var current_date = Date()
+    // var dreamRecordingsViewController:DreamRecordingsViewController
+    var dreamRecordingDataSourceManager:DreamRecordingViewDataSourceManager!
+    weak var retreiveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
+    // var decorations: [Date?: UICalendarView.Decoration]
     
-    init(dreamRecordingViewController:DreamRecordingsViewController){
+    
+    init(){
         //self.dre
-        self.dreamRecordingViewModel = DreamRecordingViewModel()
+        self.dreamRecordingViewModel = DreamRecordingViewModel(controllerManagedByDataSource: .CalendarViewController)
+//        do{
+//            try self.dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: current_date)
+//            
+//        }catch let err as NSError{
+//            throw NSError(domain: err.domain, code: 1, userInfo: [NSLocalizedDescriptionKey: err.localizedDescription])
+//
+//            
+//            
+//        }
+       // dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: Date.now)
         self.dreamRecordingView = DreamRecordsView(frame: .zero)
         calendarView = CalendarView()
         //self.dreamRecordingsViewController = dreamRecordingViewController
-        
-        
+
         
         super.init(nibName: nil, bundle: nil)
-    }
+        
 
+        
+        
+        
+        
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     override func viewDidLoad() {
+           super.viewDidLoad()
+           //setupDataSourceManager()
+           setupUI()
+           setupConstraints()
+           setupCalendarSelection()
+        
+           //filterDreamsForDate(current_date)
 
-        super.viewDidLoad()
-        dreamRecordingDataSourceManage = DreamRecordingViewDataSourceManager(dreamRecordingView: dreamRecordingView, dreamRecordingViewModel: dreamRecordingViewModel, controller: self)
-
-        setupUI()
-        setupConstraints()
-    }
-
-    
+       }
+//
+//    private func setupDataSourceManager() {
+//         dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(
+//             dreamRecordingView: dreamRecordingView,
+//             dreamRecordingViewModel: dreamRecordingViewModel,
+//             controller: self
+//         )
+//     }
+//    
     
     
     private func setupUI(){
         view.backgroundColor = .systemBackground
-        title = "Calendar"
-
-        calendarView.calendar.delegate = self
-        dreamRecordingView.collectionView.delegate = dreamRecordingDataSourceManage
-        dreamRecordingView.collectionView.dataSource = dreamRecordingDataSourceManage
+        navigationController?.navigationItem.largeTitleDisplayMode = .never
+        title = ""
+       // setupCalendarSelection()
+        
+        dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(
+            dreamRecordingView: self.dreamRecordingView,
+            dreamRecordingViewModel: self.dreamRecordingViewModel,
+            controller: self
+        )
+        dreamRecordingDataSourceManager.retrieveCurrentlySelectedDateDelegate = self
+        
+        
+        dreamRecordingView.collectionView.delegate = dreamRecordingDataSourceManager
+        dreamRecordingView.collectionView.dataSource = dreamRecordingDataSourceManager
         
         // Add subviews
         view.addSubview(calendarView)
@@ -60,35 +110,79 @@ class CalendarViewController:UIViewController{
         calendarView.translatesAutoresizingMaskIntoConstraints = false
         dreamRecordingView.translatesAutoresizingMaskIntoConstraints = false
     }
+ 
     
     
-    private func setupConstraints(){
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
-            calendarView.topAnchor.constraint(equalTo: view.topAnchor),
+            // Give calendar less space, collection view more
+            calendarView.topAnchor.constraint(equalTo: view.topAnchor,constant: -20),
             calendarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             calendarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            calendarView.heightAnchor.constraint(equalToConstant: 600), // Give it a fixed height
-
-           // calendarView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            calendarView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.6), // 40% instead of 50%
             
-            dreamRecordingView.topAnchor.constraint(equalTo: calendarView.bottomAnchor),
-            dreamRecordingView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            dreamRecordingView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            dreamRecordingView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-            
-            
-            
+            dreamRecordingView.topAnchor.constraint(equalTo: calendarView.bottomAnchor, constant: 4),
+            dreamRecordingView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            dreamRecordingView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            dreamRecordingView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
+    }
+    private func setupCalendarSelection() {
+        let dateSelection = UICalendarSelectionSingleDate(delegate: self)
+        
+        
+        let date = DateComponents(
+            calendar: Calendar(identifier: .gregorian),
+            year: Calendar.current.component(.year, from: Date.now),
+            month: Calendar.current.component(.month, from: Date.now),
+            day: Calendar.current.component(.day, from: Date.now)
+        )
+        
+        dateSelection.selectedDate = date
+        
+        calendarView.calendar.selectionBehavior = dateSelection
+        calendarView.calendar.delegate = self
+        let selected = Calendar.current.date(from: date)!
+       // filterDreamsForDate(selected)
         
     }
     
+     func filterDreamsForDate(_ date: Date) {
+        do{
+            try dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: date)
+
+               DispatchQueue.main.async { [weak self] in
+                   UIView.animate(withDuration: 0.1) {
+                       self?.dreamRecordingView.collectionView.alpha = 0.5
+                   } completion: { _ in
+                       self?.dreamRecordingView.collectionView.reloadData()
+                       UIView.animate(withDuration: 0.1) {
+                           self?.dreamRecordingView.collectionView.alpha = 1.0
+                       }
+                   }
+               }
+               
+               // Haptic feedback
+               let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+               impactFeedback.impactOccurred()
+            
+        }catch let err as NSError{
+            
+            let alert = UIAlertController(title: err.domain,
+                                          message: err.description,
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.present(alert, animated: true)
+            
+        }
+     
+       }
     
     
-   
+    
+    
+    
 }
 
-extension CalendarViewController:UICalendarViewDelegate{
-      //  cale
-}
 
 

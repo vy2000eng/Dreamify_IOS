@@ -29,7 +29,7 @@ class TabsViewController:UITabBarController{
       //  self.dreamRecordingViewModel      = DreamRecordingViewModel      (                                                )
         self.mainViewController           = MainViewController           ()
         self.dreamRecordingViewController = DreamRecordingsViewController()
-        self.calendarViewController       = CalendarViewController       (dreamRecordingViewController: dreamRecordingViewController)
+        self.calendarViewController       = CalendarViewController       ()
         
         self.mainViewController.navigationItem.largeTitleDisplayMode           = .automatic
         self.dreamRecordingViewController.navigationItem.largeTitleDisplayMode = .automatic
@@ -59,17 +59,37 @@ class TabsViewController:UITabBarController{
         
         for nav in [nav1, nav2, nav3] {
             
+            if nav.tabBarItem.tag !=  3{
+                
+                
+                
                 nav.navigationBar.prefersLargeTitles                             = true
                 nav.navigationController?.navigationBar.titleTextAttributes      = [.foregroundColor: UIColor.white,.font: UIFont.systemFont(ofSize: 16,weight: .regular) ]
                 nav.navigationController?.navigationBar.largeTitleTextAttributes = [.foregroundColor: UIColor.white, .font: UIFont.systemFont(ofSize: 24,weight: .bold) ]
-                nav.navigationController?.navigationBar.layoutMargins            = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
-            
-        
+                //nav.navigationController?.navigationBar.layoutMargins            = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
+                
+            }else{
+                nav.navigationBar.prefersLargeTitles                             = false
+
+            }
         }
         setViewControllers([nav1, nav2, nav3, ], animated: true)
+       // mainViewController.viewDidLayoutSubviews()
+        mainViewController.addNewRecordToDreamRecordingViewdelegate = dreamRecordingViewController.dreamRecordingDataSourceManager
+        mainViewController.addNewRecordToCalendarViewdelegate       = calendarViewController.dreamRecordingDataSourceManager
+
+        
+        
+        
+//        if(mainViewController.isViewLoaded && calendarViewController.isViewLoaded){
+//            mainViewController.addNewRecordToDreamRecordingViewdelegate = dreamRecordingViewController.dreamRecordingDataSourceManager
+//            mainViewController.addNewRecordToCalendarViewdelegate       = calendarViewController.dreamRecordingDataSourceManager
+//            
+//        }
                                              
 
-        //mainViewController.addNewRecordToDreamRecordingViewdelegate = dreamRecordingViewController.dreamRecordingDataSourceManager
+
+        
         
     }
 }

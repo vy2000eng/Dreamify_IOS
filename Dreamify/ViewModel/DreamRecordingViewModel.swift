@@ -32,6 +32,7 @@ public class DreamRecordingViewModel{
     
     private var playPauseController:PlayPauseController
     weak var presentErrIfAnalysisFailsDelagate:PresentErrIfAnalysisFails?
+    var controllerManagedByDataSource: ControllerManagedByAudioPlayerClass
 
    // private var SpeechTranscriberManager:SpeeachTranscriberManager!
     var dreams  = [DreamViewModel]()
@@ -42,10 +43,24 @@ public class DreamRecordingViewModel{
     }
     
     
-    init(){
+    init(controllerManagedByDataSource:ControllerManagedByAudioPlayerClass? = nil){
+        
+        self.controllerManagedByDataSource = controllerManagedByDataSource ?? .DreamViewController
+        self.playPauseController = PlayPauseController(dream: nil, isPlaying: false,indexThatIsCurrentlyPlaying: nil)
+
         do{
-            self.playPauseController = PlayPauseController(dream: nil, isPlaying: false,indexThatIsCurrentlyPlaying: nil)
-            try getAllDreams()
+            
+            switch(self.controllerManagedByDataSource){
+                
+            case .DreamViewController:
+                try getAllDreams()
+                break
+
+            case .CalendarViewController:
+                try getAllDreamsCreatedByDate(seleectedDate: Date.now)
+                break
+            }
+            
 
         }catch let err as NSError{
             print("Error initializing dreams in init() \(err), \(err.userInfo)")
@@ -115,12 +130,20 @@ public class DreamRecordingViewModel{
         }
         
     }
-    func getAllDreamsCreatedByDate(seleectedDate:Date) throws -> [DreamViewModel] {
+    func getAllDreamsCreatedByDate(seleectedDate:Date) throws -> Void {
         do{
             
             try getAllDreams()
-            dreams  = dreams.filter({$0.createdDate == seleectedDate})
-            return dreams
+            // Get start and end of the selected day
+                  let calendar = Calendar.current
+                  let startOfDay = calendar.startOfDay(for: seleectedDate)
+                  let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+                  
+                  // Filter dreams created within that day
+                  dreams = dreams.filter { dream in
+                      return dream.createdDate >= startOfDay && dream.createdDate < endOfDay
+                  }
+            //return dreams
 
 
             
@@ -131,6 +154,27 @@ public class DreamRecordingViewModel{
         }
         
         
+    }
+    func hasDreamsForDate(date: Date) -> Bool {
+        do {
+            var curr_dreams = dreams
+            try getAllDreams()
+            var all_dreams = dreams
+            dreams = curr_dreams
+           // dreams = prev_dreams
+            
+            let calendar = Calendar.current
+            let startOfDay = calendar.startOfDay(for: date)
+            let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+            
+            return all_dreams.contains { dream in
+                return dream.createdDate >= startOfDay && dream.createdDate < endOfDay
+            }
+            
+        } catch {
+            print("Error checking dreams for date: \(error)")
+            return false
+        }
     }
     
 //    func analyzeDream(dreamViewModel: DreamViewModel) {

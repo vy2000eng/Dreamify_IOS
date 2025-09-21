@@ -11,7 +11,7 @@ import BackgroundTasks
 
 
 protocol AddNewRecordingToCollectionView:AnyObject{
-    func updateCollection() -> Void
+    func updateCollection(controllerMangedByDataSource:ControllerManagedByAudioPlayerClass) throws -> Void
 }
 
 class MainViewController: UIViewController{
@@ -21,6 +21,9 @@ class MainViewController: UIViewController{
     var audioRecordingManager    :  AudioRecorderManager
    // var speechTranscriberManager : SpeeachTranscriberManager
     weak var addNewRecordToDreamRecordingViewdelegate: AddNewRecordingToCollectionView?
+    weak var addNewRecordToCalendarViewdelegate: AddNewRecordingToCollectionView?
+
+    
     let taskId = "dreamify.refreshAuthToken.backgroundTask"
 
     
@@ -210,34 +213,46 @@ extension MainViewController{
                                     mainContentView.stopRecording()
 
 
-                                    addNewRecordToDreamRecordingViewdelegate?.updateCollection()
+                                    try addNewRecordToDreamRecordingViewdelegate?.updateCollection(controllerMangedByDataSource: .DreamViewController)
+                                    try addNewRecordToCalendarViewdelegate?.updateCollection(controllerMangedByDataSource: .CalendarViewController)
                                     
                                 }catch let err as NSError{
                                    // try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title,transcribedText: text)
-
+                                    SpeechTranscriberManager.shared.cancelCurrentTranscription()
                                     let alert = UIAlertController(title: "An Unexpected Error Occured",
                                                                   message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
                                                                   preferredStyle: .alert)
                                     alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                                     self.present(alert, animated: true)
-                                    mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                                   // mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                                    mainContentView.stopRecording()
+
                                     
                                 }
 
                                 print("Transcribed: \(text)")
                             case .failure(let err):
+                                SpeechTranscriberManager.shared.cancelCurrentTranscription()
+
+                                mainContentView.stopRecording()
+
+
                                 let alert = UIAlertController(title: "An Unexpected Error Occured",
                                                               message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
                                                               preferredStyle: .alert)
                                 alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                                 self.present(alert, animated: true)
+
                                // mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
                                 do{
                                    // print(text)
                                     try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title,transcribedText: nil)
-                                    mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                                   // mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                                    try addNewRecordToDreamRecordingViewdelegate?.updateCollection(controllerMangedByDataSource: .DreamViewController)
+                                    try addNewRecordToCalendarViewdelegate?.updateCollection(controllerMangedByDataSource: .CalendarViewController)
                                     
-                                    addNewRecordToDreamRecordingViewdelegate?.updateCollection()
+                                    
+                                   // addNewRecordToDreamRecordingViewdelegate?.updateCollection()
                                     
                                 }catch let err as NSError{
 
@@ -246,7 +261,7 @@ extension MainViewController{
                                                                   preferredStyle: .alert)
                                     alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                                     self.present(alert, animated: true)
-                                    mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                                    //mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
                                     
                                 }
                             }

@@ -58,15 +58,10 @@ public class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
         do {
             try configureAudioSession()
             try enableBuiltInMicrophone()
-            //try setupAudioRecorder()
         } catch let err as NSError {
             throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: err.localizedDescription])
 
-            // If any errors occur during initialization,
-            // terminate the app with a fatalError.
-           // fatalError("Error: \(error)")
         }
-       // configureAudioSession()
         
         
     }
@@ -118,16 +113,13 @@ public class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
         }
     }
     public func setupAudioRecorder() throws {
-//        let tempDir = FileManager.default.temporaryDirectory
-//        let fileURL = tempDir.appendingPathComponent(recordingFileName)
+
         let dateFormatter               = DateFormatter()
         dateFormatter.dateFormat        = "d-M-yyyy.hh.mm.ss"
         let formattedDate               = dateFormatter.string(from: Date())
         uniqueFileName            = formattedDate  + ".aac"
         let local_url                   = getDocumentsDirectory().appendingPathComponent(uniqueFileName)
-       // _url                      = local_url.absoluteString
-//        file_title                      = unique_file_name
-        
+
         
         
         do {

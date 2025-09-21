@@ -84,7 +84,6 @@ class APIClientManager {
         method: String,
         body: [String: Any]? = nil,
         type: T.Type,
-     //   retryCount:Int,
         completion: @escaping (Result<T, APIError>) -> Void
     ) {
         guard let url = URL(string: baseURL + endpoint) else {
@@ -124,28 +123,6 @@ class APIClientManager {
                 return
             }
             
-//            if httpResponse.statusCode == 401 && retryCount == 0 {
-//                // Try to refresh token and retry once
-//                self.refreshToken { refreshResult in
-//                    switch refreshResult {
-//                    case .success(_):
-//                        // Retry the original request
-//                        self.authRequest(
-//                            endpoint: endpoint,
-//                            method: method,
-//                            body: body,
-//                            type: type,
-//                            retryCount: 1,
-//                            
-//                            completion: completion
-//                        )
-//                    case .failure(let error):
-//                        completion(.failure(error))
-//                    }
-//                }
-//                return
-//            }
-            
             guard httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 else {
                 completion(.failure(.serverError(httpResponse.statusCode)))
                 return
@@ -167,7 +144,7 @@ class APIClientManager {
     
     func refreshToken(completion: @escaping (Result<LoginResponse, APIError>) -> Void) {
         guard let refreshToken = TokenManager.shared.getRefreshToken() else {
-            completion(.failure(.authenticationError)) // You'll need to add this to your APIError enum
+            completion(.failure(.authenticationError)) 
             return
         }
         
@@ -184,16 +161,11 @@ class APIClientManager {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let response):
-                    // Save tokens
-//                    TokenManager.shared.saveAccessToken(response.accessToken)
-//                    TokenManager.shared.saveRefreshToken(response.refreshToken)
-//                    print("Token refreshed successfully")
                     completion(.success(response))
                     
                 case .failure(let error):
                     print("Token refresh failed: \(error)")
-                    // Handle refresh failure - maybe logout user
-//                    self.handleRefreshFailure(error)
+
                    completion(.failure(error))
                 }
             }
@@ -201,10 +173,8 @@ class APIClientManager {
     }
     
     private func handleRefreshFailure(_ error: APIError) {
-        // Clear tokens and redirect to login
         TokenManager.shared.clearTokens()
-        // Navigate to login screen
-        // self.navigateToLogin()
+
     }
     
 

@@ -9,11 +9,7 @@ import UIKit
 import SwipeCellKit
 import AVFAudio
 
-//protocol RetrieveCurrentlySelectedDate: AnyObject{
-//    
-//    func retrieveCurrentlySelectedDate() -> Date
-//    
-//}
+
 
 
 
@@ -29,6 +25,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
             try dreamRecordingViewModel.getAllDreams()
             
         }catch let err as NSError{
+            //TODO: add an actual err here
             print("An err occured")
             
             
@@ -45,10 +42,8 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
             if(controllerManagedByAudioPlayer == .DreamViewController && self.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfSections){
                 DispatchQueue.main.async{ [weak self] in
                     guard let self = self else{ return }
-                    //let vc = controller as! DreamRecordingsViewController
                     vc.dreamRecordingView.collectionView.insertSections(IndexSet(integer: section-1))
                     
-                    // self.dreamRecordingsView.collectionView.insertSections(IndexSet(integer: section-1))
                 }
                 
             }
@@ -65,18 +60,12 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 guard let  currently_selected_date = retrieveCurrentlySelectedDateDelegate?.retrieveCurrentlySelectedDate() else{
                     return
                 }
-                //try  vc.dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: currently_selected_date)
-                    // let section = vc.dreamRecordingViewModel.dreamsCount
+
                 if(controllerManagedByAudioPlayer == .CalendarViewController && vc.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfSections){
                     DispatchQueue.main.async{ [weak self] in
                         guard let self = self else{ return }
-                        //let vc = controller as! CalendarViewController
                         vc.filterDreamsForDate( currently_selected_date)
-                       // vc.dreamRecordingView.collectionView.insertSections(IndexSet(integer: section-1))
-
-                        //vc.dreamRecordingView.collectionView.insertSections(IndexSet(integer: section-1))
-                        
-                        // self.dreamRecordingsView.collectionView.insertSections(IndexSet(integer: section-1))
+                  
                     }
                     
                 }
@@ -93,19 +82,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
             
             break;
         }
-//        print("deldegate called")
-//        let section = dreamRecordingViewModel.dreamsCount
-//        
-//        DispatchQueue.main.async{ [weak self] in
-//            
-//            guard let self = self,
-//                  self.controller.isViewLoaded,
-//                  //if controllerManagedByAudioPlayer
-//                  self.dreamRecordingsView.collectionView != nil else{
-//                return
-//            }
-//            self.dreamRecordingsView.collectionView.insertSections(IndexSet(integer: section-1))
-//        }
+
 
     }
     

@@ -45,13 +45,7 @@ class MainContentView: UIView {
         view.alpha = 0
         return view
     }()
-    
-    let rippleView: RippleView = {
-        let view = RippleView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.alpha = 0
-        return view
-    }()
+
     
     private var isRecording = false
     
@@ -68,41 +62,24 @@ class MainContentView: UIView {
         backgroundColor = .systemBackground
         
         addSubview(actionButton)
-       // addSubview(pulseView)
-         addSubview(audioVisualizerView) // Alternative
-        // addSubview(rippleView) // Alternative
+         addSubview(audioVisualizerView)
         
         NSLayoutConstraint.activate([
-            // Action Button - larger and centered
             actionButton.centerXAnchor.constraint(equalTo: safeAreaLayoutGuide.centerXAnchor),
             actionButton.centerYAnchor.constraint(equalTo: safeAreaLayoutGuide.centerYAnchor),
             actionButton.widthAnchor.constraint(equalToConstant: 100),
             actionButton.heightAnchor.constraint(equalToConstant: 100),
             
-             //Pulse view - same size as button
-//            pulseView.centerXAnchor.constraint(equalTo: actionButton.centerXAnchor),
-//            pulseView.centerYAnchor.constraint(equalTo: actionButton.centerYAnchor),
-//            pulseView.widthAnchor.constraint(equalToConstant: 200),
-//            pulseView.heightAnchor.constraint(equalToConstant: 200),
-            
-            // Audio visualizer - below button
+
             audioVisualizerView.centerXAnchor.constraint(equalTo: centerXAnchor),
             audioVisualizerView.topAnchor.constraint(equalTo: actionButton.bottomAnchor, constant: 80),
             audioVisualizerView.widthAnchor.constraint(equalToConstant: 300),
             audioVisualizerView.heightAnchor.constraint(equalToConstant: 60),
-            
-//           //  Ripple view - behind button
-//            rippleView.centerXAnchor.constraint(equalTo: actionButton.centerXAnchor),
-//            rippleView.centerYAnchor.constraint(equalTo: actionButton.centerYAnchor),
-//            rippleView.widthAnchor.constraint(equalToConstant: 300),
-//            rippleView.heightAnchor.constraint(equalToConstant: 300)
+
         ])
         
-        // Send visual effects behind the button
-       //// sendSubviewToBack(pulseView)
-        sendSubviewToBack(audioVisualizerView)
-       // sendSubviewToBack(rippleView)
-    }
+     
+        sendSubviewToBack(audioVisualizerView)    }
     
     // MARK: - Recording State Methods
     func startRecording() {

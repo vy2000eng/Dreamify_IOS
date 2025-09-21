@@ -243,71 +243,7 @@ class LoginView:UIView, UITextFieldDelegate{
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-//
-//    // MARK: - Actions
-//    @objc private func togglePasswordVisibility() {
-//        passwordTextField.isSecureTextEntry.toggle()
-//        showPasswordButton.isSelected = !passwordTextField.isSecureTextEntry
-//    }
-//    
-//    @objc private func loginButtonTapped() {
-//        guard validateInput() else { return }
-//        
-//        // Show loading state
-//        setLoadingState(true)
-//        
-//        // Simulate login process
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-//            self?.setLoadingState(false)
-//            self?.handleLoginSuccess()
-//        }
-//    }
-//    private func handleLoginSuccess() {
-//           // Handle successful login
-//           let alert = UIAlertController(
-//               title: "Success",
-//               message: "Login successful!",
-//               preferredStyle: .alert
-//           )
-//           
-//           let okAction = UIAlertAction(title: "OK", style: .default) { _ in
-//               // Navigate to main app or dismiss
-//               print("Login successful - navigate to main app")
-//           }
-//           
-//           alert.addAction(okAction)
-//           present(alert, animated: true)
-//       }
-    
-//    @objc private func forgotPasswordTapped() {
-//        let alert = UIAlertController(
-//            title: "Forgot Password",
-//            message: "Please enter your email address to reset your password",
-//            preferredStyle: .alert
-//        )
-//        
-//        alert.addTextField { textField in
-//            textField.placeholder = "Email"
-//            textField.keyboardType = .emailAddress
-//        }
-//        
-//        let resetAction = UIAlertAction(title: "Reset", style: .default) { _ in
-//            // Handle password reset
-//            print("Password reset requested")
-//        }
-//        
-//        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
-//        
-//        alert.addAction(resetAction)
-//        alert.addAction(cancelAction)
-//        
-//        present(alert, animated: true)
-//    }
-    
-//    @objc private func signUpButtonTapped() {
-//        // Navigate to sign up screen
-//        print("Sign up tapped")
-//    }
+
     
     @objc private func dismissKeyboard() {
         endEditing(true)
@@ -325,56 +261,5 @@ class LoginView:UIView, UITextFieldDelegate{
         scrollView.contentInset.bottom = 0
         scrollView.verticalScrollIndicatorInsets.bottom = 0
     }
-    
-    
-//    private func validateInput() -> Bool {
-//        guard let email = emailTextField.text, !email.isEmpty else {
-//            showAlert(message: "Please enter your email or username")
-//            return false
-//        }
-//        
-//        guard let password = passwordTextField.text, !password.isEmpty else {
-//            showAlert(message: "Please enter your password")
-//            return false
-//        }
-//        
-//        if password.count < 6 {
-//            showAlert(message: "Password must be at least 6 characters")
-//            return false
-//        }
-//        
-//        return true
-//    }
-    
-    
-//    private func showAlert(message: String) {
-//           let alert = UIAlertController(
-//               title: "Error",
-//               message: message,
-//               preferredStyle: .alert
-//           )
-//           
-//           let okAction = UIAlertAction(title: "OK", style: .default)
-//           alert.addAction(okAction)
-//           
-//           present(alert, animated: true)
-//       }
-//       
-//       deinit {
-//           NotificationCenter.default.removeObserver(self)
-//       }
-////    
-//    private func setLoadingState(_ isLoading: Bool) {
-//        loginButton.isEnabled = !isLoading
-//        
-//        if isLoading {
-//            loginButton.setTitle("", for: .normal)
-//            activityIndicator.startAnimating()
-//        } else {
-//            loginButton.setTitle("Sign In", for: .normal)
-//            activityIndicator.stopAnimating()
-//        }
-//    }
-//  
     
 }

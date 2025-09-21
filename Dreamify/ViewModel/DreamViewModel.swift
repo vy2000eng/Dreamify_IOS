@@ -7,22 +7,15 @@
 
 import Foundation
 
-//struct IsPlayingAllocation{
-//    var selectedIndex:Int
-//    var isPlaying:Bool
-//}
 
 class DreamViewModel{
     private var dream:Dream
     private var isPlaying:Bool
-   // private var sizeIndexAllocation:IsPlayingAllocation
     private var isOpen:Bool
     private var isShowingTranscriptionOrAnalysis:Bool
     
     
     init(dream: Dream) {
-        //self.sizeIndexAllocation = IsPlayingAllocation(selectedIndex: -1, isPlaying: false)
-       // self.isPlaying = false
         self.dream = dream
         self.isOpen = false
         self.isPlaying = false
@@ -69,14 +62,10 @@ class DreamViewModel{
         return self.isShowingTranscriptionOrAnalysis;
     }
     
-    
     func toggleIsShowingTextTransctiptionOrAnalysis(){
         self.isShowingTranscriptionOrAnalysis = !self.isShowingTranscriptionOrAnalysis
-        
     }
     
     
-    func updateAnalyzedText(){
-        
-    }
+  
 }

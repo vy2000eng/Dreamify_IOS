@@ -30,8 +30,8 @@
             filePath = "Dreamify/DataSource/DreamRecordingViewControllerCollectionViewDataSource.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "370"
-            endingLineNumber = "370"
+            startingLineNumber = "345"
+            endingLineNumber = "345"
             landmarkName = "analyzeDream(_:)"
             landmarkType = "7">
          </BreakpointContent>

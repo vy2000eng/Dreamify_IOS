@@ -6,13 +6,6 @@
 //
 
 import UIKit
-protocol RetrieveCurrentlySelectedDate: AnyObject{
-    
-    func retrieveCurrentlySelectedDate() -> Date
-    
-}
-
-//extension DreamRecordingsViewController:UICollectionViewDataSource{
 class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     var dreamRecordingViewModel:DreamRecordingViewModel
     var dreamRecordingsView:DreamRecordsView
@@ -99,24 +92,6 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
-//        if let curr_cell = self.collectionView.cellForItem(at: indexPath) as? DreamRecordingHeaderViewCell{
-//            UIView.animate(withDuration: 0.5, delay: 0, options: .transitionCurlUp, animations: { [weak self] in
-//                guard let self = self else{
-//                    return
-//                }
-//                var  currViewModel = self.dreamRecordingViewModel.dream(by: indexPath.section)
-//                currViewModel.toggleIsOpen()
-//                
-//
-//            }, completion: {[weak self] _ in
-//                
-//                guard let self = self else{
-//                    return
-//                }
-//                self.collectionView.reloadItems(at: [ IndexPath(row: 0, section: indexPath.section)])
-//            })
-//        }
 
         
         
@@ -425,18 +400,6 @@ extension DreamRecordingViewDataSourceManager{
               }
           }
         
-       // do{
-        //dreamRecordingViewModel.analyzeDream(dreamViewModel: dream)
-        
-            
-//        }catch let err as NSError{
-//            let alert = UIAlertController(title: "An Unexpected Error Occured",
-//                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
-//                                          preferredStyle: .alert)
-//            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-//            self.present(alert, animated: true)
-//                
-//        }
         
         
 

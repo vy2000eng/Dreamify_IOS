@@ -7,15 +7,6 @@
 
 import Foundation
 import UIKit
-
-
-//protocol RetrieveCurrentlySelectedDate: AnyObject{
-//    
-//    func retrieveCurrentlySelectedDate() -> Date
-//    
-//}
-
-
 class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
     func retrieveCurrentlySelectedDate() -> Date {
         return current_date
@@ -29,33 +20,20 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
     var dreamRecordingViewModel:DreamRecordingViewModel
     var dreamRecordingView: DreamRecordsView
     var current_date = Date()
-    // var dreamRecordingsViewController:DreamRecordingsViewController
     var dreamRecordingDataSourceManager:DreamRecordingViewDataSourceManager!
     weak var retreiveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
-    // var decorations: [Date?: UICalendarView.Decoration]
     
     
     init(){
-        //self.dre
         self.dreamRecordingViewModel = DreamRecordingViewModel(controllerManagedByDataSource: .CalendarViewController)
-//        do{
-//            try self.dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: current_date)
-//            
-//        }catch let err as NSError{
-//            throw NSError(domain: err.domain, code: 1, userInfo: [NSLocalizedDescriptionKey: err.localizedDescription])
-//
-//            
-//            
-//        }
-       // dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: Date.now)
+        
         self.dreamRecordingView = DreamRecordsView(frame: .zero)
         calendarView = CalendarView()
-        //self.dreamRecordingsViewController = dreamRecordingViewController
-
+        
         
         super.init(nibName: nil, bundle: nil)
         
-
+        
         
         
         
@@ -67,31 +45,20 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
     }
     
     override func viewDidLoad() {
-           super.viewDidLoad()
-           //setupDataSourceManager()
-           setupUI()
-           setupConstraints()
-           setupCalendarSelection()
+        super.viewDidLoad()
+        setupUI()
+        setupConstraints()
+        setupCalendarSelection()
         
-           //filterDreamsForDate(current_date)
-
-       }
-//
-//    private func setupDataSourceManager() {
-//         dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(
-//             dreamRecordingView: dreamRecordingView,
-//             dreamRecordingViewModel: dreamRecordingViewModel,
-//             controller: self
-//         )
-//     }
-//    
+        
+    }
+    
     
     
     private func setupUI(){
         view.backgroundColor = .systemBackground
         navigationController?.navigationItem.largeTitleDisplayMode = .never
         title = ""
-       // setupCalendarSelection()
         
         dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(
             dreamRecordingView: self.dreamRecordingView,
@@ -110,7 +77,7 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
         calendarView.translatesAutoresizingMaskIntoConstraints = false
         dreamRecordingView.translatesAutoresizingMaskIntoConstraints = false
     }
- 
+    
     
     
     private func setupConstraints() {
@@ -143,28 +110,27 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
         calendarView.calendar.selectionBehavior = dateSelection
         calendarView.calendar.delegate = self
         let selected = Calendar.current.date(from: date)!
-       // filterDreamsForDate(selected)
         
     }
     
-     func filterDreamsForDate(_ date: Date) {
+    func filterDreamsForDate(_ date: Date) {
         do{
             try dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: date)
-
-               DispatchQueue.main.async { [weak self] in
-                   UIView.animate(withDuration: 0.1) {
-                       self?.dreamRecordingView.collectionView.alpha = 0.5
-                   } completion: { _ in
-                       self?.dreamRecordingView.collectionView.reloadData()
-                       UIView.animate(withDuration: 0.1) {
-                           self?.dreamRecordingView.collectionView.alpha = 1.0
-                       }
-                   }
-               }
-               
-               // Haptic feedback
-               let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-               impactFeedback.impactOccurred()
+            
+            DispatchQueue.main.async { [weak self] in
+                UIView.animate(withDuration: 0.1) {
+                    self?.dreamRecordingView.collectionView.alpha = 0.5
+                } completion: { _ in
+                    self?.dreamRecordingView.collectionView.reloadData()
+                    UIView.animate(withDuration: 0.1) {
+                        self?.dreamRecordingView.collectionView.alpha = 1.0
+                    }
+                }
+            }
+            
+            // Haptic feedback
+            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+            impactFeedback.impactOccurred()
             
         }catch let err as NSError{
             
@@ -175,13 +141,8 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
             self.present(alert, animated: true)
             
         }
-     
-       }
-    
-    
-    
-    
-    
+        
+    }
 }
 
 

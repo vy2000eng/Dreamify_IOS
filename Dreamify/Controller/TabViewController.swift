@@ -74,18 +74,10 @@ class TabsViewController:UITabBarController{
             }
         }
         setViewControllers([nav1, nav2, nav3, ], animated: true)
-       // mainViewController.viewDidLayoutSubviews()
         mainViewController.addNewRecordToDreamRecordingViewdelegate = dreamRecordingViewController.dreamRecordingDataSourceManager
         mainViewController.addNewRecordToCalendarViewdelegate       = calendarViewController.dreamRecordingDataSourceManager
 
-        
-        
-        
-//        if(mainViewController.isViewLoaded && calendarViewController.isViewLoaded){
-//            mainViewController.addNewRecordToDreamRecordingViewdelegate = dreamRecordingViewController.dreamRecordingDataSourceManager
-//            mainViewController.addNewRecordToCalendarViewdelegate       = calendarViewController.dreamRecordingDataSourceManager
-//            
-//        }
+
                                              
 
 

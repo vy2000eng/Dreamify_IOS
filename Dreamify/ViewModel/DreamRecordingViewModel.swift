@@ -7,36 +7,13 @@
 
 import Foundation
 
-struct PlayPauseController{
-    var dream:DreamViewModel?
-    var isPlaying:Bool
-    var indexThatIsCurrentlyPlaying:Int?
-
-        
-}
-
-protocol PresentErrIfAnalysisFails:AnyObject{
-    func presentUiAlertErr(title:String, errMessage:String) -> Void
-}
-
-
-
-//weak var :PresentErrIfAnalysisFails?
-
-
-
-
-
 
 public class DreamRecordingViewModel{
     
     private var playPauseController:PlayPauseController
     weak var presentErrIfAnalysisFailsDelagate:PresentErrIfAnalysisFails?
     var controllerManagedByDataSource: ControllerManagedByAudioPlayerClass
-
-   // private var SpeechTranscriberManager:SpeeachTranscriberManager!
     var dreams  = [DreamViewModel]()
-   // var dreamByDate = [DreamViewModel]()
     
      var dreamsCount:Int {
         dreams.count
@@ -73,7 +50,6 @@ public class DreamRecordingViewModel{
     func getSelectedIndex() -> Int?{
         return playPauseController.indexThatIsCurrentlyPlaying
         
-        //return playPauseController.selectedIndex
         
     }
     
@@ -177,31 +153,6 @@ public class DreamRecordingViewModel{
         }
     }
     
-//    func analyzeDream(dreamViewModel: DreamViewModel) {
-//        
-//        
-//        APIClientManager.shared.authRequest(
-//            
-//            endpoint: "/Analysis/analyzeDream",
-//            method: "POST",
-//            body:["textToAnalyze": dreamViewModel.transcribedText],
-//            type: AnalysisRespone.self){
-//                [weak self] result in
-//                    guard let self  = self else {return}
-//                    switch result{
-//                    case .success(let response):
-//                        updateAnalyzedText(dreamId: dreamViewModel.id, analyzedText: response.dreamAnalysisResponse)
-//                        
-//                    case .failure(let err):
-//                        let (title, message) = getErrorMessage(for: err)
-//                        presentErrIfAnalysisFailsDelagate?.presentUiAlertErr(title: title, errMessage: message)
-//                        
-//                    }
-//                    
-//                }
-//        
-//    }
-    
     
     func analyzeDream(dreamViewModel: DreamViewModel, completion: @escaping (Result<AnalysisRespone, APIError>) -> Void) {
         APIClientManager.shared.authRequest(
@@ -248,7 +199,6 @@ public class DreamRecordingViewModel{
         
     }
     
-    
     func addDream(url:String, title:String, transcribedText:String?)throws -> Void{
         do{
             try CoreDataManager.shared.addDream(title: title, url: url,transribedText: transcribedText)
@@ -272,10 +222,5 @@ public class DreamRecordingViewModel{
             print("Error adding dreams in addDream(url:String, title:String) \(err), \(err.userInfo)")
         }
     }
-    
-    func transcribeAudioFile(){
-        
-    }
-    
     
 }

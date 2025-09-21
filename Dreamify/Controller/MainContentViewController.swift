@@ -10,16 +10,11 @@ import AVFoundation
 import BackgroundTasks
 
 
-protocol AddNewRecordingToCollectionView:AnyObject{
-    func updateCollection(controllerMangedByDataSource:ControllerManagedByAudioPlayerClass) throws -> Void
-}
-
 class MainViewController: UIViewController{
     
     var mainContentView          :  MainContentView
     var dreamsRecordingViewModel :  DreamRecordingViewModel
     var audioRecordingManager    :  AudioRecorderManager
-   // var speechTranscriberManager : SpeeachTranscriberManager
     weak var addNewRecordToDreamRecordingViewdelegate: AddNewRecordingToCollectionView?
     weak var addNewRecordToCalendarViewdelegate: AddNewRecordingToCollectionView?
 
@@ -66,13 +61,6 @@ class MainViewController: UIViewController{
         
         setupUI()
         setupConstraints()
-      
-       
-      
-     
-     
-        
-      
         
         do {
             try audioRecordingManager.configureAudioSessionAndConfigureRecorderExternally()
@@ -121,12 +109,6 @@ class MainViewController: UIViewController{
             self.present(alert, animated: true)
             
         }
-    
-        //schedule()
-       
-
-        
-        
         
     }
     
@@ -243,16 +225,12 @@ extension MainViewController{
                                 alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                                 self.present(alert, animated: true)
 
-                               // mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
                                 do{
-                                   // print(text)
                                     try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title,transcribedText: nil)
-                                   // mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
                                     try addNewRecordToDreamRecordingViewdelegate?.updateCollection(controllerMangedByDataSource: .DreamViewController)
                                     try addNewRecordToCalendarViewdelegate?.updateCollection(controllerMangedByDataSource: .CalendarViewController)
                                     
                                     
-                                   // addNewRecordToDreamRecordingViewdelegate?.updateCollection()
                                     
                                 }catch let err as NSError{
 

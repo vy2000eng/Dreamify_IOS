@@ -34,13 +34,6 @@ class DreamRecordingsViewController:UIViewController{
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    //MARK: not sure why this is here
-//    override func viewDidDisappear(_ animated: Bool) {
-//      //  if audioPlayer
-//       // print("recording view is not in the viewing context")
-//    }
-    
 
 
     
@@ -50,22 +43,12 @@ class DreamRecordingsViewController:UIViewController{
         print("dream recording view loaded")
         super.viewDidLoad           ()
         title = "All Recordings"
-        //dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(dreamRecordingView: dreamRecordingsView, dreamRecordingViewModel: dreamRecordingViewModel, controller: self)
-
-
         dreamRecordingView.collectionView.delegate = dreamRecordingDataSourceManager
         dreamRecordingView.collectionView.dataSource = dreamRecordingDataSourceManager
         self.dreamRecordingViewModel.presentErrIfAnalysisFailsDelagate = dreamRecordingDataSourceManager
         setupUI                     ()
         setupConstraints            ()
         listFilesFromDocumentsFolder()
-//        dreamRecordingsView.collectionView.delegate = dreamRecordingDataSourceManager
-//        dreamRecordingsView.collectionView.dataSource = dreamRecordingDataSourceManager
-
-
- 
-
-        
 
     }
 
@@ -125,50 +108,6 @@ class DreamRecordingsViewController:UIViewController{
     }
     
 }
-
-
-// utilily functions for audio player
-extension DreamRecordingsViewController{
-//    func  playAudio(fileName:String)  throws -> Void{
-//        
-//        let url = getDocumentsDirectory().appendingPathComponent(fileName)
-//        
-//        do{
-//                
-//                audioPlayer = try  AVAudioPlayer(contentsOf: url) //AVAudioPlayer(contentsOf: url!)
-//         
-//            
-//                audioPlayer?.delegate = self
-//                audioPlayer?.volume = 1.0
-//                audioPlayer?.play()
-//
-//        
-//            
-//        }catch let err as NSError {
-//            throw NSError(domain: "AudioPlayingError", code: 1, userInfo: [NSLocalizedDescriptionKey: err.localizedDescription])
-//
-//            
-//       }
-//       
-//     
-//    }
-//    func stopAudio() throws ->Void {
-//            audioPlayer?.stop()
-//            audioPlayer = nil
-//    }
-
-
-    
-//    func getDocumentsDirectory() -> URL {
-//        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-//        return paths[0]
-//    }
-}
-
-    
-
-
-
 extension URL {
     var typeIdentifier: String? { (try? resourceValues(forKeys: [.typeIdentifierKey]))?.typeIdentifier }
     var isMP3: Bool { typeIdentifier == "public.mp3" }
@@ -181,10 +120,6 @@ extension URL {
             try? setResourceValues(resourceValues)
         }
     }
-//    func getDocumentsDirectory() -> URL {
-//        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-//        return paths[0]
-//    }
 }
 
 

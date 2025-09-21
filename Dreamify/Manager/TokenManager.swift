@@ -31,10 +31,6 @@ class TokenManager {
     func clearTokens() -> Void{
         keychain["refresh_token"] = nil
         keychain["access_token"] = nil
-
-
-        
-        
     }
     
     

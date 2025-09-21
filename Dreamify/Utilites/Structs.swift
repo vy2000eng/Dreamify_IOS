@@ -12,3 +12,8 @@ struct PlayPauseController{
 
         
 }
+enum ControllerManagedByAudioPlayerClass:Int{
+    
+   case DreamViewController
+   case  CalendarViewController
+}

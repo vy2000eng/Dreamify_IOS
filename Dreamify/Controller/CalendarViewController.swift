@@ -8,13 +8,10 @@
 import Foundation
 import UIKit
 class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
+    
     func retrieveCurrentlySelectedDate() -> Date {
         return current_date
     }
-    
-    
-    
-    
     
     var calendarView: CalendarView
     var dreamRecordingViewModel:DreamRecordingViewModel
@@ -26,18 +23,15 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
     
     init(){
         self.dreamRecordingViewModel = DreamRecordingViewModel(controllerManagedByDataSource: .CalendarViewController)
-        
         self.dreamRecordingView = DreamRecordsView(frame: .zero)
         calendarView = CalendarView()
-        
+     
         
         super.init(nibName: nil, bundle: nil)
-        
-        
-        
-        
-        
-        
+        dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(
+            dreamRecordingView: self.dreamRecordingView,
+            dreamRecordingViewModel: self.dreamRecordingViewModel,
+            controller: self)
     }
     
     required init?(coder: NSCoder) {
@@ -60,11 +54,7 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
         navigationController?.navigationItem.largeTitleDisplayMode = .never
         title = ""
         
-        dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(
-            dreamRecordingView: self.dreamRecordingView,
-            dreamRecordingViewModel: self.dreamRecordingViewModel,
-            controller: self
-        )
+    
         dreamRecordingDataSourceManager.retrieveCurrentlySelectedDateDelegate = self
         
         
@@ -114,6 +104,7 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
     }
     
     func filterDreamsForDate(_ date: Date) {
+        print("refresh called")
         do{
             try dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: date)
             

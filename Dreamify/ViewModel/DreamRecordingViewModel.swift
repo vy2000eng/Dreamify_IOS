@@ -137,7 +137,6 @@ public class DreamRecordingViewModel{
             try getAllDreams()
             var all_dreams = dreams
             dreams = curr_dreams
-           // dreams = prev_dreams
             
             let calendar = Calendar.current
             let startOfDay = calendar.startOfDay(for: date)

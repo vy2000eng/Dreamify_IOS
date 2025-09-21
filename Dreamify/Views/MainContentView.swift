@@ -32,13 +32,7 @@ class MainContentView: UIView {
     }()
     
     // Choose one of these visual effects:
-    let pulseView: PulseView = {
-        let view = PulseView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.alpha = 0
-        return view
-    }()
-    
+
     let audioVisualizerView: AudioVisualizerView = {
         let view = AudioVisualizerView()
         view.translatesAutoresizingMaskIntoConstraints = false

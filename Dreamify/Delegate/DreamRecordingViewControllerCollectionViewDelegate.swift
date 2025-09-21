@@ -15,12 +15,11 @@ import AVFAudio
 
 
 extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCollectionViewCellDelegate,AVAudioPlayerDelegate,AddNewRecordingToCollectionView, PresentErrIfAnalysisFails{
-//
 
     // explicitly defined delegates
     func updateCollection(controllerMangedByDataSource :ControllerManagedByAudioPlayerClass) throws -> Void{
         print("delegate called")
-
+        
         do{
             try dreamRecordingViewModel.getAllDreams()
             
@@ -30,7 +29,6 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
             
             
         }
-        print("delegate Called")
         
         switch(controllerMangedByDataSource){
         case .DreamViewController:
@@ -39,7 +37,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 
             }
             let section = dreamRecordingViewModel.dreamsCount
-            if(controllerManagedByAudioPlayer == .DreamViewController && self.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfSections){
+            if(controllerManagedByAudioPlayer == .DreamViewController && self.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfSections && vc.isViewLoaded){
                 DispatchQueue.main.async{ [weak self] in
                     guard let self = self else{ return }
                     vc.dreamRecordingView.collectionView.insertSections(IndexSet(integer: section-1))
@@ -60,30 +58,20 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 guard let  currently_selected_date = retrieveCurrentlySelectedDateDelegate?.retrieveCurrentlySelectedDate() else{
                     return
                 }
-
-                if(controllerManagedByAudioPlayer == .CalendarViewController && vc.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfSections){
+                
+                if(controllerManagedByAudioPlayer == .CalendarViewController && vc.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfSections && vc.isViewLoaded){
                     DispatchQueue.main.async{ [weak self] in
                         guard let self = self else{ return }
                         vc.filterDreamsForDate( currently_selected_date)
-                  
                     }
-                    
                 }
-                
-                
-                
-                
             }catch let err as NSError{
                 throw NSError(domain: err.domain, code: 1, userInfo: [NSLocalizedDescriptionKey:err.localizedDescription])
-                
-                
             }
             
             
             break;
         }
-
-
     }
     
     
@@ -110,6 +98,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
         case .left:
             
             let deleteAction = SwipeAction(style: .destructive, title: nil) { action, indexPath in
+                
                 
             }
             deleteAction.image = UIImage(systemName: "trash")

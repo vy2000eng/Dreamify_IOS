@@ -9,11 +9,6 @@ import  UIKit
 import Foundation
 import AVFAudio
 
-enum ControllerManagedByAudioPlayerClass:Int{
-    
-   case DreamViewController
-   case  CalendarViewController
-}
 
 class AudioPlayerManager: NSObject{
     private var audioPlayer: AVAudioPlayer!

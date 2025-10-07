@@ -12,7 +12,11 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     var controller:UIViewController
     var audioPlayerManager: AudioPlayerManager
     var controllerManagedByAudioPlayer:ControllerManagedByAudioPlayerClass
+   
     weak var retrieveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
+    weak var deleteSectionFromCollectionViewDelegateInCalendarViewController:DeleteSectionFromCollectionView?
+    weak var deleteSectionFromCollectionViewInMainViewControllerDelegate:DeleteSectionFromCollectionView?
+    weak var deleteSectionFromCollectionViewInDreamViewControllerDelegate:DeleteSectionFromCollectionView?
     
     init(dreamRecordingView:DreamRecordsView, dreamRecordingViewModel:DreamRecordingViewModel,controller:UIViewController) {
         self.controller = controller

@@ -220,6 +220,7 @@
 			packageReferences = (
 				C00B12192E22EF8400B4704D /* XCRemoteSwiftPackageReference "swipecellkit" */,
 				C00B12B52E67F7FF00B4704D /* XCRemoteSwiftPackageReference "KeychainAccess" */,
+				C0A8865D2E95DC3D007163EC /* XCRemoteSwiftPackageReference "CalendarKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C0A893612E087364008B1730 /* Products */;
@@ -606,6 +607,14 @@
 			requirement = {
 				branch = master;
 				kind = branch;
+			};
+		};
+		C0A8865D2E95DC3D007163EC /* XCRemoteSwiftPackageReference "CalendarKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/richardtop/CalendarKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.11;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

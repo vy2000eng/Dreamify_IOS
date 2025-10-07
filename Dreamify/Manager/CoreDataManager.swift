@@ -131,14 +131,64 @@ class CoreDataManager{
     func deleteAllDreams(){
         
     }
-    func getDreamByID(){
+    func getDreamByID(id:UUID) throws -> DreamViewModel{
+        let fetchRequest : NSFetchRequest<Dream> = Dream.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id==%@", id as CVarArg)
+        
+        
+        do{
+            guard let dream = try context.fetch(fetchRequest).first else {
+                throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Dream not found"])
+            }
+            var dreamViewModel = DreamViewModel(dream: dream)
+            return dreamViewModel
+            //return dream
+            
+        }
+        catch{
+            throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unable to delete dream"])
+
+            
+        }
+     
+        
+
+        
         
     }
     
-    func deleteDreamVyId() {
+    func deleteDreamById(dreamId:UUID)throws -> Void {
+        let fetchRequest: NSFetchRequest<Dream> = Dream.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id==%@", dreamId as CVarArg)
+        do{
+            //let topic = try context.fetch(fetchRequest)
+            guard let dream = try context.fetch(fetchRequest).first else {
+                throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Dream not found"])
+            }
+            context.delete(dream)
+            try context.save()
+        }catch let error as NSError{
+            throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unable to delete dream"])
+        }
+        
+        
 
         
     }
+    //    func deleteTopic( topicID: UUID){
+    //        let fetchRequest: NSFetchRequest<Topic> = Topic.fetchRequest()
+    //        fetchRequest.predicate = NSPredicate(format: "id==%@", topicID as CVarArg)
+    //        do{
+    //            //let topic = try context.fetch(fetchRequest)
+    //            guard let topic = try context.fetch(fetchRequest).first else {
+    //                throw NSError(domain: "CoreDataManager", code: 8000, userInfo: [NSLocalizedDescriptionKey: "Topic not found"])
+    //            }
+    //            context.delete(topic)
+    //            try context.save()
+    //        }catch let error as NSError{
+    //            print("Error deleting topic: \(error.userInfo), \(error.localizedDescription)")
+    //        }
+    //    }
     
     
 }

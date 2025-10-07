@@ -13,3 +13,8 @@ extension NSAttributedString {
         return NSAttributedString(string: string, attributes: [.font: font, .foregroundColor: color])
     }
 }
+
+func getDocumentsDirectory() -> URL {
+    let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+    return paths[0]
+}

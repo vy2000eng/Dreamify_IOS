@@ -22,7 +22,7 @@ class DreamViewModel{
         self.isShowingTranscriptionOrAnalysis = false
     }
     var id:UUID{
-        dream.id
+        return self.dream.id
     }
     func setIsPlaying(isPlaying: Bool){
         self.isPlaying = isPlaying

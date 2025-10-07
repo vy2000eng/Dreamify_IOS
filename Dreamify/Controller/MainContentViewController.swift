@@ -50,6 +50,8 @@ class MainViewController: UIViewController{
           }
       }
     
+
+    
     
     // MARK: - Lifecycle
 
@@ -165,10 +167,10 @@ extension MainViewController{
         }
     }
     
-    private func getDocumentsDirectory() -> URL {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        return paths[0]
-    }
+//    private func getDocumentsDirectory() -> URL {
+//        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+//        return paths[0]
+//    }
     
     func finishRecording(success: Bool) {
         audioRecordingManager.stop()

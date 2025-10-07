@@ -76,8 +76,14 @@ class TabsViewController:UITabBarController{
         setViewControllers([nav1, nav2, nav3, ], animated: true)
         mainViewController.addNewRecordToDreamRecordingViewdelegate = dreamRecordingViewController.dreamRecordingDataSourceManager
         mainViewController.addNewRecordToCalendarViewdelegate       = calendarViewController.dreamRecordingDataSourceManager
-
-
+        
+        dreamRecordingViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewDelegateInCalendarViewController = calendarViewController
+        dreamRecordingViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewInMainViewControllerDelegate = mainViewController
+        
+        calendarViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewInDreamViewControllerDelegate = dreamRecordingViewController
+        calendarViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewInMainViewControllerDelegate = mainViewController
+        
+        calendarViewController.dreamRecordingDataSourceManager.retrieveCurrentlySelectedDateDelegate = calendarViewController
                                              
 
 

@@ -7,11 +7,12 @@
 import UIKit
 import Foundation
 
+
 class CalendarView: UIView {
     
     let calendar: UICalendarView = {
         let calendarV = UICalendarView()
-        let gregorianCalendar = Calendar(identifier: .gregorian)
+        let gregorianCalendar = Calendar(identifier: .iso8601)
         calendarV.calendar = gregorianCalendar
         calendarV.tintColor = .systemBlue
         calendarV.fontDesign = .rounded
@@ -23,7 +24,16 @@ class CalendarView: UIView {
         calendarV.layer.shadowOpacity = 0.1
         calendarV.availableDateRange = DateInterval(start: .distantPast, end: Date())
         calendarV.translatesAutoresizingMaskIntoConstraints = false
+        //calendarV.calendar.
+      //  calendarV.
         return calendarV
+    }()
+    let headerLabel: UIButton = {
+        let label = UIButton()
+        label.setTitle("dream calendar", for: .normal)
+ 
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
     override init(frame: CGRect) {
@@ -38,12 +48,17 @@ class CalendarView: UIView {
     private func setupUI() {
         backgroundColor = .clear
         addSubview(calendar)
+        addSubview(headerLabel)
+
         
         NSLayoutConstraint.activate([
-            calendar.topAnchor.constraint(equalTo: topAnchor, constant: 16),
-            calendar.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            calendar.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            calendar.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16)
+            headerLabel.topAnchor.constraint(equalTo: topAnchor),
+            headerLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 5),
+            
+            calendar.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 8),
+            calendar.leadingAnchor.constraint(equalTo: leadingAnchor),
+            calendar.trailingAnchor.constraint(equalTo: trailingAnchor),
+            calendar.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
 }

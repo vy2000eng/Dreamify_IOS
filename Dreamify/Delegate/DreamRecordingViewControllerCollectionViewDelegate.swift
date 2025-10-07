@@ -7,6 +7,7 @@
 
 import UIKit
 import SwipeCellKit
+import Foundation
 import AVFAudio
 
 
@@ -20,28 +21,24 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
     func updateCollection(controllerMangedByDataSource :ControllerManagedByAudioPlayerClass) throws -> Void{
         print("delegate called")
         
-        do{
-            try dreamRecordingViewModel.getAllDreams()
-            
-        }catch let err as NSError{
-            //TODO: add an actual err here
-            print("An err occured")
-            
-            
-        }
-        
         switch(controllerMangedByDataSource){
         case .DreamViewController:
             guard let  vc = self.controller as? DreamRecordingsViewController else{
                 throw NSError(domain: "DreamCiewController Casting Exception", code: 1, userInfo: [NSLocalizedDescriptionKey: "could not cast controller to DreamViewContoller"])
                 
             }
+            do{
+                vc.dreamRecordingViewModel.dreams = try vc.dreamRecordingViewModel.getAllDreams()
+            }catch {
+                print("An err occured in datasource manager")
+                
+            }
+            
             let section = dreamRecordingViewModel.dreamsCount
             if(controllerManagedByAudioPlayer == .DreamViewController && self.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfSections && vc.isViewLoaded){
                 DispatchQueue.main.async{ [weak self] in
                     guard let self = self else{ return }
                     vc.dreamRecordingView.collectionView.insertSections(IndexSet(integer: section-1))
-                    
                 }
                 
             }
@@ -52,6 +49,11 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
             guard let  vc = self.controller as? CalendarViewController else{
                 throw NSError(domain: "CalendarViewController Casting Exception", code: 1, userInfo: [NSLocalizedDescriptionKey: "could not cast controller to CalendarViewContoller"])
                 
+            }
+            do{
+                vc.dreamRecordingViewModel.dreams = try vc.dreamRecordingViewModel.getAllDreams()
+            }catch {
+                print("An err occured in datasource manager")
             }
             
             do{
@@ -96,8 +98,19 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
     func collectionView(_ collectionView: UICollectionView, editActionsForItemAt indexPath: IndexPath, for orientation: SwipeCellKit.SwipeActionsOrientation) -> [SwipeCellKit.SwipeAction]? {
         switch(orientation){
         case .left:
-            
-            let deleteAction = SwipeAction(style: .destructive, title: nil) { action, indexPath in
+            let deleteAction = SwipeAction(style: .destructive, title: nil) { [weak self] action, indexPath in
+                
+                guard let self = self else { return }
+                
+                let dream = self.dreamRecordingViewModel.dream(by: indexPath.section)
+                let filename = dream.url
+                do {
+                    try deleteSection(indexPath: indexPath)
+                    
+                } catch {
+                    print("Error deleting file '\(filename)': \(error.localizedDescription)")
+                }
+
                 
                 
             }
@@ -116,6 +129,69 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
         }
 
     }
+    
+    
+    func deleteSection(indexPath:IndexPath) throws ->Void{
+        do{
+            let dream = dreamRecordingViewModel.dream(by:indexPath.section)
+            //let dream = try self.dreamRecordingViewModel.retreiveDreamById(id: id)
+            let filename = dream.url
+            let url = getDocumentsDirectory().appendingPathComponent(filename)
+            let fileExists = FileManager.default.fileExists(atPath: url.path)
+
+            if fileExists{
+               // deleteItemFromCollectionView(id:id)
+//                var currDreams = dreamRecordingViewModel.dreams
+//                var allDreams = try dreamRecordingViewModel.getAllDreams()
+                
+                
+                
+//                let indexPathInCurrentViewController = indexPath.section
+//                let indexPathInRegardsToTheEntiretyOfTheDreams = IndexPath(row: 0, section: <#T##Int#>)
+
+                
+                switch controller {
+                    case is DreamRecordingsViewController:
+                    try deleteSectionFromCollectionViewDelegateInCalendarViewController?.deleteRecording(id:dream.id)
+                    try deleteSectionFromCollectionViewInMainViewControllerDelegate?.deleteRecording(id:dream.id)
+                        break
+                        
+                    case is CalendarViewController:
+                    try deleteSectionFromCollectionViewInDreamViewControllerDelegate?.deleteRecording(id:dream.id)
+                    try deleteSectionFromCollectionViewInMainViewControllerDelegate?.deleteRecording(id:dream.id)
+                        break
+                        
+                    default:
+                        // TODO: add an actual error
+                        print("an unexpected error occured")
+                        break
+
+                }
+
+              
+
+
+
+                try FileManager.default.removeItem(atPath: url.path)
+                try dreamRecordingViewModel.removeDreamFromArray(id: dream.id)
+                try dreamRecordingViewModel.deleteDreamById(id: dream.id)
+                
+                DispatchQueue.main.async{ [weak self ] in
+                    guard let self = self else {return}
+                    self.dreamRecordingsView.collectionView.deleteSections(IndexSet(integer: indexPath.section))
+                }
+
+            }
+            
+        }catch{
+            print("Error deleting file: \(error.localizedDescription)")
+
+            
+        }
+
+    }
+    
+
     
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
                 print("audio finished")

@@ -11,13 +11,37 @@ import AVFAudio
 
 
 //MARK: note the delegated and datasources are in there designated folders
-class DreamRecordingsViewController:UIViewController{
+class DreamRecordingsViewController:UIViewController, DeleteSectionFromCollectionView{
 
-    var dreamRecordingView    : DreamRecordsView
-    var dreamRecordingViewModel: DreamRecordingViewModel
-    var audioPlayer : AVAudioPlayer?
-    private var loadingOverlay: LoadingOverlayView?
+
+    func deleteRecording(id:UUID) {
+        print("dream vc delegate called")
+        do{
+            try self.dreamRecordingViewModel.removeDreamFromArray(id: id)//removeDreamByIDFromArray(id:id)//removeDreamFromArray(id: dream.id)
+            DispatchQueue.main.async {[weak self] in
+                guard let self = self else { return }
+                self.dreamRecordingView.collectionView.reloadData()//deleteSections(IndexSet(integer: indexPath.section))
+            }
+            
+        }catch let err{
+            print("an error occured whilst removing dream from collection view in dreamRecordingViewController: \(err)")
+        }
+      
+  
+       // self.
+        
+        
+        
+       
+    }
+
+
+    var dreamRecordingView             : DreamRecordsView
+    var dreamRecordingViewModel        : DreamRecordingViewModel
+    var audioPlayer                    : AVAudioPlayer?
+    private var loadingOverlay         : LoadingOverlayView?
     var dreamRecordingDataSourceManager: DreamRecordingViewDataSourceManager!
+    
 
     
     init() {

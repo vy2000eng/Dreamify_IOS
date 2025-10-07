@@ -7,7 +7,29 @@
 
 import Foundation
 import UIKit
-class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
+class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, DeleteSectionFromCollectionView {
+
+    func deleteRecording(id:UUID) {
+        print("calendar vc delegate called")
+        do{
+            try self.dreamRecordingViewModel.removeDreamFromArray(id: id)//removeDreamByIDFromArray(id:id)//removeDreamFromArray(id: dream.id)
+            DispatchQueue.main.async {[weak self] in
+                guard let self = self else { return }
+                self.dreamRecordingView.collectionView.reloadData()//deleteSections(IndexSet(integer: indexPath.section))
+            }
+            
+        }catch let err{
+            print("an error occured whilst removing dream from collection view in dreamRecordingViewController: \(err)")
+        }
+      
+  
+       // self.
+        
+        
+        
+       
+    }
+    
     
     func retrieveCurrentlySelectedDate() -> Date {
         return current_date
@@ -18,20 +40,22 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
     var dreamRecordingView: DreamRecordsView
     var current_date = Date()
     var dreamRecordingDataSourceManager:DreamRecordingViewDataSourceManager!
-    weak var retreiveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
+    private var calendarHeightConstraint: NSLayoutConstraint!
+    private var isCalendarExpanded = true
+    //weak var retreiveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
+
+    
+    
     
     
     init(){
-        self.dreamRecordingViewModel = DreamRecordingViewModel(controllerManagedByDataSource: .CalendarViewController)
+        self.dreamRecordingViewModel = DreamRecordingViewModel(controllerManagedByDataSource: .CalendarViewController,curentlySelectedDate: current_date)
         self.dreamRecordingView = DreamRecordsView(frame: .zero)
         calendarView = CalendarView()
      
         
         super.init(nibName: nil, bundle: nil)
-        dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(
-            dreamRecordingView: self.dreamRecordingView,
-            dreamRecordingViewModel: self.dreamRecordingViewModel,
-            controller: self)
+        dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(dreamRecordingView: self.dreamRecordingView,dreamRecordingViewModel: self.dreamRecordingViewModel, controller: self)
     }
     
     required init?(coder: NSCoder) {
@@ -46,7 +70,7 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
         
         
     }
-    
+
     
     
     private func setupUI(){
@@ -55,7 +79,8 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
         title = ""
         
     
-        dreamRecordingDataSourceManager.retrieveCurrentlySelectedDateDelegate = self
+       // dreamRecordingDataSourceManager.retrieveCurrentlySelectedDateDelegate = self
+        //dreamRecordingDataSourceManager.deleteSectionFromCollectionViewDelegateInCalendarViewController = self
         
         
         dreamRecordingView.collectionView.delegate = dreamRecordingDataSourceManager
@@ -71,18 +96,23 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
     
     
     private func setupConstraints() {
+        calendarHeightConstraint = calendarView.heightAnchor.constraint(equalToConstant: 470)
+        
         NSLayoutConstraint.activate([
-            // Give calendar less space, collection view more
-            calendarView.topAnchor.constraint(equalTo: view.topAnchor,constant: -20),
+            calendarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             calendarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             calendarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            calendarView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.6), // 40% instead of 50%
+            calendarHeightConstraint,
             
-            dreamRecordingView.topAnchor.constraint(equalTo: calendarView.bottomAnchor, constant: 4),
-            dreamRecordingView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            dreamRecordingView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            dreamRecordingView.topAnchor.constraint(equalTo: calendarView.bottomAnchor, constant: 8),
+            dreamRecordingView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            dreamRecordingView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             dreamRecordingView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
+        
+        // Add tap gesture to collapse/expand
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleCalendar))
+        calendarView.headerLabel.addGestureRecognizer(tapGesture)
     }
     private func setupCalendarSelection() {
         let dateSelection = UICalendarSelectionSingleDate(delegate: self)
@@ -106,7 +136,7 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
     func filterDreamsForDate(_ date: Date) {
         print("refresh called")
         do{
-            try dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: date)
+            dreamRecordingViewModel.dreams = try dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: date)
             
             DispatchQueue.main.async { [weak self] in
                 UIView.animate(withDuration: 0.1) {
@@ -134,6 +164,15 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate {
         }
         
     }
+    @objc private func toggleCalendar() {
+        isCalendarExpanded.toggle()
+        
+        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5) {
+            self.calendarHeightConstraint.constant = self.isCalendarExpanded ? 470 : 50
+            self.view.layoutIfNeeded()
+        }
+    }
+    
 }
 
 

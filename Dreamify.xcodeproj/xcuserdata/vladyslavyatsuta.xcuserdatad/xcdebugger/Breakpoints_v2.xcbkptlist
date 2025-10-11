@@ -66,6 +66,36 @@
             endingLineNumber = "161"
             landmarkName = "deleteSection(indexPath:)"
             landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "CB977249-B9D2-4C96-8F26-3502E82874D5 - 15faf57e54c70b93"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Dreamify.DreamRecordingViewDataSourceManager.deleteSection(indexPath: Foundation.IndexPath) throws -&gt; ()"
+                  moduleName = "Dreamify.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/vladyslavyatsuta/Documents/ios_development/Dreamify/Dreamify/Delegate/DreamRecordingViewControllerCollectionViewDelegate.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "177"
+                  endingLineNumber = "177">
+               </Location>
+               <Location
+                  uuid = "CB977249-B9D2-4C96-8F26-3502E82874D5 - 15faf57e54c6f583"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Dreamify.DreamRecordingViewDataSourceManager.deleteSection(indexPath: Foundation.IndexPath) throws -&gt; ()"
+                  moduleName = "Dreamify.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/vladyslavyatsuta/Documents/ios_development/Dreamify/Dreamify/Delegate/DreamRecordingViewControllerCollectionViewDelegate.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "161"
+                  endingLineNumber = "161">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -82,6 +112,36 @@
             endingLineNumber = "230"
             landmarkName = "deleteDreamById(id:)"
             landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "39D512DF-878F-46EC-A193-7D8504613DAE - 3d02941242886a1"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Dreamify.DreamRecordingViewModel.deleteDreamById(id: Foundation.UUID) throws -&gt; ()"
+                  moduleName = "Dreamify.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/vladyslavyatsuta/Documents/ios_development/Dreamify/Dreamify/ViewModel/DreamRecordingViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "258"
+                  endingLineNumber = "258">
+               </Location>
+               <Location
+                  uuid = "39D512DF-878F-46EC-A193-7D8504613DAE - 3d0294124288205"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Dreamify.DreamRecordingViewModel.deleteDreamById(id: Foundation.UUID) throws -&gt; ()"
+                  moduleName = "Dreamify.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/vladyslavyatsuta/Documents/ios_development/Dreamify/Dreamify/ViewModel/DreamRecordingViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "230"
+                  endingLineNumber = "230">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

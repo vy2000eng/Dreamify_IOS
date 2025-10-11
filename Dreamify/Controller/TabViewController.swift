@@ -20,22 +20,16 @@ class TabsViewController:UITabBarController{
     var mainViewController           : MainViewController
     var dreamRecordingViewController : DreamRecordingsViewController
     var calendarViewController       : CalendarViewController
-    //var dreamRecordingViewModel      : DreamRecordingViewModel
-    
-    
     
     init() {
         
-      //  self.dreamRecordingViewModel      = DreamRecordingViewModel      (                                                )
-        self.mainViewController           = MainViewController           ()
-        self.dreamRecordingViewController = DreamRecordingsViewController()
-        self.calendarViewController       = CalendarViewController       ()
-        
+        self.mainViewController                                                = MainViewController           ()
+        self.dreamRecordingViewController                                      = DreamRecordingsViewController()
+        self.calendarViewController                                            = CalendarViewController       ()
         self.mainViewController.navigationItem.largeTitleDisplayMode           = .automatic
         self.dreamRecordingViewController.navigationItem.largeTitleDisplayMode = .automatic
         self.calendarViewController.navigationItem.largeTitleDisplayMode       = .automatic
-        
-        super.init                                                       (nibName                : nil, bundle: nil       )
+        super.init                                                               (nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
@@ -66,7 +60,6 @@ class TabsViewController:UITabBarController{
                 nav.navigationBar.prefersLargeTitles                             = true
                 nav.navigationController?.navigationBar.titleTextAttributes      = [.foregroundColor: UIColor.white,.font: UIFont.systemFont(ofSize: 16,weight: .regular) ]
                 nav.navigationController?.navigationBar.largeTitleTextAttributes = [.foregroundColor: UIColor.white, .font: UIFont.systemFont(ofSize: 24,weight: .bold) ]
-                //nav.navigationController?.navigationBar.layoutMargins            = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
                 
             }else{
                 nav.navigationBar.prefersLargeTitles                             = false
@@ -74,20 +67,15 @@ class TabsViewController:UITabBarController{
             }
         }
         setViewControllers([nav1, nav2, nav3, ], animated: true)
-        mainViewController.addNewRecordToDreamRecordingViewdelegate = dreamRecordingViewController.dreamRecordingDataSourceManager
-        mainViewController.addNewRecordToCalendarViewdelegate       = calendarViewController.dreamRecordingDataSourceManager
+        mainViewController.addNewRecordToDreamRecordingViewdelegate                                                                  = dreamRecordingViewController.dreamRecordingDataSourceManager
+        mainViewController.addNewRecordToCalendarViewdelegate                                                                        = calendarViewController.dreamRecordingDataSourceManager
         
         dreamRecordingViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewDelegateInCalendarViewController = calendarViewController
-        dreamRecordingViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewInMainViewControllerDelegate = mainViewController
+        dreamRecordingViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewInMainViewControllerDelegate     = mainViewController
         
-        calendarViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewInDreamViewControllerDelegate = dreamRecordingViewController
-        calendarViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewInMainViewControllerDelegate = mainViewController
-        
-        calendarViewController.dreamRecordingDataSourceManager.retrieveCurrentlySelectedDateDelegate = calendarViewController
-                                             
-
-
-        
+        calendarViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewInDreamViewControllerDelegate          = dreamRecordingViewController
+        calendarViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewInMainViewControllerDelegate           = mainViewController
+        calendarViewController.dreamRecordingDataSourceManager.retrieveCurrentlySelectedDateDelegate                                 = calendarViewController
         
     }
 }

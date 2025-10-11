@@ -33,12 +33,6 @@ extension CalendarViewController:UICalendarViewDelegate,UICalendarSelectionSingl
         
         self.current_date = selectedDate
         filterDreamsForDate(selectedDate)
-        
-
-        
-            
     }
-    
-    
     
 }

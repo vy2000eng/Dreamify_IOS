@@ -134,22 +134,11 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
     func deleteSection(indexPath:IndexPath) throws ->Void{
         do{
             let dream = dreamRecordingViewModel.dream(by:indexPath.section)
-            //let dream = try self.dreamRecordingViewModel.retreiveDreamById(id: id)
             let filename = dream.url
             let url = getDocumentsDirectory().appendingPathComponent(filename)
             let fileExists = FileManager.default.fileExists(atPath: url.path)
 
             if fileExists{
-               // deleteItemFromCollectionView(id:id)
-//                var currDreams = dreamRecordingViewModel.dreams
-//                var allDreams = try dreamRecordingViewModel.getAllDreams()
-                
-                
-                
-//                let indexPathInCurrentViewController = indexPath.section
-//                let indexPathInRegardsToTheEntiretyOfTheDreams = IndexPath(row: 0, section: <#T##Int#>)
-
-                
                 switch controller {
                     case is DreamRecordingsViewController:
                     try deleteSectionFromCollectionViewDelegateInCalendarViewController?.deleteRecording(id:dream.id)
@@ -167,11 +156,6 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                         break
 
                 }
-
-              
-
-
-
                 try FileManager.default.removeItem(atPath: url.path)
                 try dreamRecordingViewModel.removeDreamFromArray(id: dream.id)
                 try dreamRecordingViewModel.deleteDreamById(id: dream.id)
@@ -185,7 +169,6 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
             
         }catch{
             print("Error deleting file: \(error.localizedDescription)")
-
             
         }
 

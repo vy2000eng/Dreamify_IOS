@@ -19,11 +19,6 @@ extension MainViewController:AVAudioRecorderDelegate, DeleteSectionFromCollectio
         }catch let err{
             print("an error occured whilst removing dream from collection view in dreamRecordingViewController: \(err)")
         }
-      
-    
-        
-        
-       
     }
     
 

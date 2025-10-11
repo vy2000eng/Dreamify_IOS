@@ -62,8 +62,8 @@
             filePath = "Dreamify/Delegate/DreamRecordingViewControllerCollectionViewDelegate.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "177"
-            endingLineNumber = "177"
+            startingLineNumber = "161"
+            endingLineNumber = "161"
             landmarkName = "deleteSection(indexPath:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -78,8 +78,8 @@
             filePath = "Dreamify/ViewModel/DreamRecordingViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "258"
-            endingLineNumber = "258"
+            startingLineNumber = "230"
+            endingLineNumber = "230"
             landmarkName = "deleteDreamById(id:)"
             landmarkType = "7">
          </BreakpointContent>

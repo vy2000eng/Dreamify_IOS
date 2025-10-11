@@ -16,7 +16,7 @@ public class DreamRecordingViewModel{
     var dreams  = [DreamViewModel]()
     var currentlySelectedDate:Date?
     
-     var dreamsCount:Int {
+    var dreamsCount:Int {
         dreams.count
     }
     
@@ -27,23 +27,18 @@ public class DreamRecordingViewModel{
         self.playPauseController = PlayPauseController(dream: nil, isPlaying: false,indexThatIsCurrentlyPlaying: nil)
         if(curentlySelectedDate != nil){
             self.currentlySelectedDate = curentlySelectedDate
-            
         }
-
         do{
-            
             switch(self.controllerManagedByDataSource){
                 
             case .DreamViewController:
                 try dreams = getAllDreams()
                 break
-
+                
             case .CalendarViewController:
                 try dreams =  getAllDreamsCreatedByDate(seleectedDate: Date.now)
                 break
             }
-            
-
         }catch let err as NSError{
             print("Error initializing dreams in init() \(err), \(err.userInfo)")
         }
@@ -62,17 +57,9 @@ public class DreamRecordingViewModel{
         do{
             let dream = try CoreDataManager.shared.getDreamByID(id: id)
             return dream
-            
-
-            
         }catch{
-            
             throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unable to delete dream"])
-
-            
         }
-        
-        
     }
     
     
@@ -89,7 +76,7 @@ public class DreamRecordingViewModel{
         dream.setIsPlaying(isPlaying: !dream.getIsPlaying())
         
         
-
+        
         
     }
     
@@ -101,15 +88,15 @@ public class DreamRecordingViewModel{
     
     func getAllDreams()throws -> [DreamViewModel]{
         var previousOpenStates:[String:Bool] = [:]
-
+        
         var previousTranscribedStates:[String:Bool] = [:]
-
+        
         for (_, dream) in dreams.enumerated(){
             
             previousOpenStates[dream.id.uuidString] = dream.retrieveIsOpen()
             previousTranscribedStates[dream.id.uuidString] = dream.retrieveIsShowingTextTranscriptionOrAnalysis()
         }
-    
+        
         do{
             
             let alldreams = try CoreDataManager.shared.getAllDreams().map(DreamViewModel.init )
@@ -130,7 +117,7 @@ public class DreamRecordingViewModel{
             throw err
         }
         
-    
+        
         
     }
     func getAllDreamsCreatedByDate(seleectedDate:Date) throws -> [DreamViewModel] {
@@ -138,19 +125,16 @@ public class DreamRecordingViewModel{
             
             var allDreams =  try getAllDreams()
             // Get start and end of the selected day
-                  let calendar = Calendar.current
-                  let startOfDay = calendar.startOfDay(for: seleectedDate)
-                  let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
-                  
-                  // Filter dreams created within that day
+            let calendar = Calendar.current
+            let startOfDay = calendar.startOfDay(for: seleectedDate)
+            let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+            
+            // Filter dreams created within that day
             var filteredDreams = allDreams.filter { dream in
-                      return dream.createdDate >= startOfDay && dream.createdDate < endOfDay
-                  }
+                return dream.createdDate >= startOfDay && dream.createdDate < endOfDay
+            }
             return filteredDreams
             //return dreams
-
-
-            
         }catch let err as NSError{
             print("Error initializing dreams in getAllDreams() \(err), \(err.userInfo)")
             throw err
@@ -161,11 +145,7 @@ public class DreamRecordingViewModel{
     }
     func hasDreamsForDate(date: Date) -> Bool {
         do {
-            //var curr_dreams = dreams
-            
             var alldreams = try getAllDreams()
-       
-            
             let calendar = Calendar.current
             let startOfDay = calendar.startOfDay(for: date)
             let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
@@ -214,10 +194,10 @@ public class DreamRecordingViewModel{
             return ("Data Error", "Unable to process server response.")
         case .invalidURL:
             return ("Invalid Url", "Unable to process server response.")
-
+            
         case .authenticationError:
             return ("Authentication Error", "Unable to process server response.")
-
+            
         }
     }
     
@@ -229,10 +209,7 @@ public class DreamRecordingViewModel{
     func addDream(url:String, title:String, transcribedText:String?)throws -> Void{
         do{
             try CoreDataManager.shared.addDream(title: title, url: url,transribedText: transcribedText)
-            
-            try getAllDreams()
-            
-            
+            dreams = try getAllDreams()
         }catch let err as NSError{
             print("Error adding dreams in addDream(url:String, title:String) \(err), \(err.userInfo)")
         }
@@ -241,10 +218,7 @@ public class DreamRecordingViewModel{
     func addDreamWithNoTextTranscription(url:String, title:String, transcribedText:String)throws -> Void{
         do{
             try CoreDataManager.shared.addDream(title: title, url: url,transribedText: transcribedText)
-            
-            try getAllDreams()
-            
-            
+            dreams = try getAllDreams()
         }catch let err as NSError{
             print("Error adding dreams in addDream(url:String, title:String) \(err), \(err.userInfo)")
         }
@@ -252,90 +226,30 @@ public class DreamRecordingViewModel{
     
     func deleteDreamById(id:UUID)throws -> Void{
         do{
-            //removeDreamFromArray(id: dream.id)
-            
             try CoreDataManager.shared.deleteDreamById(dreamId: id)
             if currentlySelectedDate == nil{
                 dreams = try getAllDreams()
-                
             }else{
                 dreams = try getAllDreamsCreatedByDate(seleectedDate: currentlySelectedDate!)
-                
             }
-            
-            
-       
         }catch let err as NSError{
             throw NSError(domain: err.domain, code: 1, userInfo: [NSLocalizedDescriptionKey: err.localizedDescription])
-
         }
-        
     }
     
     func removeDreamFromArray(id:UUID) throws -> Void {
         if(currentlySelectedDate == nil){
             dreams = try getAllDreams()
-            
-            
-            
         }
         else{
             dreams = try getAllDreamsCreatedByDate(seleectedDate: currentlySelectedDate!)
         }
-        
         if(dreams.contains(where:   { $0.id == id } )){
-            
             for (index, curr_dream) in dreams.enumerated(){
                 if(curr_dream.id == id ){
                     dreams.remove(at: index)
                 }
-                
             }
-            
         }
-            
-            
-            
-    
-        
     }
-    
-//    func removeDreamByIDFromArray(indexPath:IndexPath){
-//        do{
-//            //gets copy of current dreams, this is important for if the class is currently managing the Calendar view controller
-//            var currDreams = dreams
-//            // point dreams to ALL dreams recorded
-//            var allDreams = try getAllDreams()
-//            
-//            // get the dream that is to be deleted
-//            do{
-//                var dream = allDreams[indexPath.section]// try retreiveDreamById(id: id)//dreams//dreams[indexPath.section]
-//                removeDreamFromArray(id: id)
-//                // point dreams to previously copied dreams again important for Calendar view
-//                dreams = currDreams
-//                // check if dream exists in the currently selected date for calendar view
-//                if(currDreams.contains(where: {$0.id == id})){
-//                    removeDreamFromArray(id: id)
-//                }
-//            
-//            }catch{
-//                // TODO: put an actual err here
-//                print("an err occured ")
-//                
-//            }
-//            // remove that fream from ALL dreams
-//       
-//         
-//
-//            
-//        }catch{
-//            print("Error removing dream")
-//            
-//        }
-//       
-//        
-//        
-//    }
-
-    
 }

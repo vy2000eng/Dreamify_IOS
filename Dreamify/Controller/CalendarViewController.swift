@@ -15,30 +15,18 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
     func deleteRecording(id:UUID) {
         print("calendar vc delegate called")
         do{
-            try self.dreamRecordingViewModel.removeDreamFromArray(id: id)//removeDreamByIDFromArray(id:id)//removeDreamFromArray(id: dream.id)
+            try self.dreamRecordingViewModel.removeDreamFromArray(id: id)
             DispatchQueue.main.async {[weak self] in
                 guard let self = self else { return }
-                self.dreamRecordingView.collectionView.reloadData()//deleteSections(IndexSet(integer: indexPath.section))
+                self.dreamRecordingView.collectionView.reloadData()
             }
             
         }catch let err{
             print("an error occured whilst removing dream from collection view in dreamRecordingViewController: \(err)")
         }
-      
-  
-       // self.
-        
-        
-        
-       
+
     }
-//    private lazy var scrollView: UIScrollView = {
-//        let sv = UIScrollView()
-//        sv.translatesAutoresizingMaskIntoConstraints = false
-//        sv.showsVerticalScrollIndicator = false
-//        return sv
-//    }()
-    
+
     
     func retrieveCurrentlySelectedDate() -> Date {
         return current_date
@@ -51,11 +39,6 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
     var dreamRecordingDataSourceManager:DreamRecordingViewDataSourceManager!
     private var scrollViewHeightConstraint: NSLayoutConstraint!
     private var isCalendarExpanded = true
-    //weak var retreiveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
-
-    
-    
-    
     
     init(){
         self.dreamRecordingViewModel = DreamRecordingViewModel(controllerManagedByDataSource: .CalendarViewController,curentlySelectedDate: current_date)
@@ -77,70 +60,28 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
         setupConstraints()
         setupCalendarSelection()
         navigationController?.setToolbarHidden(true, animated: false)
-
-        
-        
     }
+    
 
-    
-    
     private func setupUI(){
         view.backgroundColor = .systemBackground
         navigationController?.navigationItem.largeTitleDisplayMode = .never
-        title = ""
-        
-    
-       // dreamRecordingDataSourceManager.retrieveCurrentlySelectedDateDelegate = self
-        //dreamRecordingDataSourceManager.deleteSectionFromCollectionViewDelegateInCalendarViewController = self
-        
-        
+        title = "Calendar"
+   
         dreamRecordingView.collectionView.delegate = dreamRecordingDataSourceManager
         dreamRecordingView.collectionView.dataSource = dreamRecordingDataSourceManager
-        
-        // Add subviews
-       // view.addSubview(scrollView)
-        //scrollView.addSubview(calendarView)
+
         view.addSubview(calendarView)
         view.addSubview(dreamRecordingView)
         calendarView.translatesAutoresizingMaskIntoConstraints = false
         dreamRecordingView.translatesAutoresizingMaskIntoConstraints = false
     }
     
-    
-    
-//    private func setupConstraints() {
-//        calendarHeightConstraint = calendarView.heightAnchor.constraint(equalToConstant: 470)
-//        
-//        NSLayoutConstraint.activate([
-//            calendarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-//            calendarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-//            calendarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-//            calendarHeightConstraint,
-//            
-//            dreamRecordingView.topAnchor.constraint(equalTo: calendarView.bottomAnchor, constant: 8),
-//            dreamRecordingView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-//            dreamRecordingView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-//            dreamRecordingView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-//        ])
-//        
-//        // Add tap gesture to collapse/expand
-//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleCalendar))
-//        calendarView.headerLabel.addGestureRecognizer(tapGesture)
-//    }
+
     private func setupConstraints() {
         scrollViewHeightConstraint = calendarView.heightAnchor.constraint(equalToConstant: 350)
         
         NSLayoutConstraint.activate([
-            
-//            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
-//            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-//            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-//            scrollViewHeightConstraint,
-
-            
-            
-            
-            
             calendarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             calendarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             calendarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -207,14 +148,7 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
         }
         
     }
-//    @objc private func toggleCalendar() {
-//        isCalendarExpanded.toggle()
-//        
-//        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5) {
-//            self.calendarHeightConstraint.constant = self.isCalendarExpanded ? 470 : 50
-//            self.view.layoutIfNeeded()
-//        }
-//    }
+
     @objc private func toggleCalendar() {
         isCalendarExpanded.toggle()
         

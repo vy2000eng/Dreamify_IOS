@@ -32,6 +32,12 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
         
        
     }
+//    private lazy var scrollView: UIScrollView = {
+//        let sv = UIScrollView()
+//        sv.translatesAutoresizingMaskIntoConstraints = false
+//        sv.showsVerticalScrollIndicator = false
+//        return sv
+//    }()
     
     
     func retrieveCurrentlySelectedDate() -> Date {
@@ -43,7 +49,7 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
     var dreamRecordingView: DreamRecordsView
     var current_date = Date()
     var dreamRecordingDataSourceManager:DreamRecordingViewDataSourceManager!
-    private var calendarHeightConstraint: NSLayoutConstraint!
+    private var scrollViewHeightConstraint: NSLayoutConstraint!
     private var isCalendarExpanded = true
     //weak var retreiveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
 
@@ -70,6 +76,8 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
         setupUI()
         setupConstraints()
         setupCalendarSelection()
+        navigationController?.setToolbarHidden(true, animated: false)
+
         
         
     }
@@ -90,6 +98,8 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
         dreamRecordingView.collectionView.dataSource = dreamRecordingDataSourceManager
         
         // Add subviews
+       // view.addSubview(scrollView)
+        //scrollView.addSubview(calendarView)
         view.addSubview(calendarView)
         view.addSubview(dreamRecordingView)
         calendarView.translatesAutoresizingMaskIntoConstraints = false
@@ -98,24 +108,54 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
     
     
     
+//    private func setupConstraints() {
+//        calendarHeightConstraint = calendarView.heightAnchor.constraint(equalToConstant: 470)
+//        
+//        NSLayoutConstraint.activate([
+//            calendarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+//            calendarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//            calendarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+//            calendarHeightConstraint,
+//            
+//            dreamRecordingView.topAnchor.constraint(equalTo: calendarView.bottomAnchor, constant: 8),
+//            dreamRecordingView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//            dreamRecordingView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+//            dreamRecordingView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+//        ])
+//        
+//        // Add tap gesture to collapse/expand
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleCalendar))
+//        calendarView.headerLabel.addGestureRecognizer(tapGesture)
+//    }
     private func setupConstraints() {
-        calendarHeightConstraint = calendarView.heightAnchor.constraint(equalToConstant: 470)
+        scrollViewHeightConstraint = calendarView.heightAnchor.constraint(equalToConstant: 350)
         
         NSLayoutConstraint.activate([
+            
+//            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+//            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+//            scrollViewHeightConstraint,
+
+            
+            
+            
+            
             calendarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             calendarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             calendarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            calendarHeightConstraint,
+            scrollViewHeightConstraint,
             
-            dreamRecordingView.topAnchor.constraint(equalTo: calendarView.bottomAnchor, constant: 8),
+            dreamRecordingView.topAnchor.constraint(equalTo: calendarView.bottomAnchor, constant: 2),
             dreamRecordingView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             dreamRecordingView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             dreamRecordingView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
         
-        // Add tap gesture to collapse/expand
+        // Add tap gesture to the entire header stack
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleCalendar))
-        calendarView.headerLabel.addGestureRecognizer(tapGesture)
+        calendarView.headerStack.addGestureRecognizer(tapGesture)
+        calendarView.chevronButton.addTarget(self, action: #selector(toggleCalendar), for: .touchUpInside)
     }
     private func setupCalendarSelection() {
         let dateSelection = UICalendarSelectionSingleDate(delegate: self)
@@ -167,11 +207,22 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
         }
         
     }
+//    @objc private func toggleCalendar() {
+//        isCalendarExpanded.toggle()
+//        
+//        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5) {
+//            self.calendarHeightConstraint.constant = self.isCalendarExpanded ? 470 : 50
+//            self.view.layoutIfNeeded()
+//        }
+//    }
     @objc private func toggleCalendar() {
         isCalendarExpanded.toggle()
         
-        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5) {
-            self.calendarHeightConstraint.constant = self.isCalendarExpanded ? 470 : 50
+        let targetHeight: CGFloat = isCalendarExpanded ? 350 : 60
+        
+        UIView.animate(withDuration: 0.35, delay: 0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0.5) {
+            self.scrollViewHeightConstraint.constant = targetHeight
+            self.calendarView.setExpanded(self.isCalendarExpanded)
             self.view.layoutIfNeeded()
         }
     }

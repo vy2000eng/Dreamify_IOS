@@ -103,7 +103,13 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
 //            cell.configure(with: dream)
 //        }
         
-        collectionView.reconfigureItems(at: [indexPath])
+       // collectionView.reconfigureItems(at: [indexPath])
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+            collectionView.performBatchUpdates({
+                //collectionView.reconfigureItems(at: [indexPath])
+                collectionView.reloadItems(at: [indexPath])
+            }, completion: nil)
+        }
 
         
         
@@ -460,35 +466,43 @@ extension DreamRecordingViewDataSourceManager{
             
         }
         
+
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) { [weak self] in
+            guard let self = self else {return}
+             dreamRecordingsView.collectionView.performBatchUpdates({[weak self] in
+                 guard let self = self else {return}
+  
+                 if(dream.retrieveIsShowingTextTranscriptionOrAnalysis()){
+                     curr_cell.transcriptionAnalysisButton.setTitle("Transcription", for: .normal)
+                     curr_cell.transcriptionAnalysisButton.backgroundColor = .systemCyan
+                     curr_cell.textView.attributedText =  .create(
+                         string: dream.transcribedText,
+                         font: .systemFont(ofSize: 16, weight: .regular),
+                         color: .label
+                     )
+                     
+                   
+
+                 }else{
+                     curr_cell.transcriptionAnalysisButton.setTitle("Analysis", for: .normal)
+                     curr_cell.transcriptionAnalysisButton.backgroundColor = .systemOrange
+                     curr_cell.textView.attributedText =  .create(
+                         string: dream.analyzedText,
+                         font: .systemFont(ofSize: 16, weight: .regular),
+                         color: .label
+                     )
+                  
+
+                     
+                 }
+                 dream.toggleIsShowingTextTransctiptionOrAnalysis()
+                 dreamRecordingsView.collectionView.reconfigureItems(at: [indexPath])
+             }, completion: nil)
+         }
         
-        //dream.toggleIsShowingTextTransctiptionOrAnalysis()
-        if(dream.retrieveIsShowingTextTranscriptionOrAnalysis()){
-            curr_cell.transcriptionAnalysisButton.setTitle("Transcription", for: .normal)
-            curr_cell.transcriptionAnalysisButton.backgroundColor = .systemCyan
-            curr_cell.textView.attributedText =  .create(
-                string: dream.transcribedText,
-                font: .systemFont(ofSize: 16, weight: .regular),
-                color: .label
-            )
-            
-          
-
-        }else{
-            curr_cell.transcriptionAnalysisButton.setTitle("Analysis", for: .normal)
-            curr_cell.transcriptionAnalysisButton.backgroundColor = .systemOrange
-            curr_cell.textView.attributedText =  .create(
-                string: dream.analyzedText,
-                font: .systemFont(ofSize: 16, weight: .regular),
-                color: .label
-            )
-         
-
-            
-        }
-        dream.toggleIsShowingTextTransctiptionOrAnalysis()
+        
 
         
-        dreamRecordingsView.collectionView.reloadItems(at: [indexPath])
 
         
         

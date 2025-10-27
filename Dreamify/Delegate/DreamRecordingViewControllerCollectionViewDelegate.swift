@@ -102,10 +102,12 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 
                 guard let self = self else { return }
                 
-                let dream = self.dreamRecordingViewModel.dream(by: indexPath.section)
+                let dream = self.dreamRecordingViewModel.dream(by: indexPath.row)
                 let filename = dream.url
                 do {
+                    print("item to be deleted at indexpath: \(indexPath)")
                     try deleteSection(indexPath: indexPath)
+                        //collectionView.deleteItems(at: [indexPath])
                     
                 } catch {
                     print("Error deleting file '\(filename)': \(error.localizedDescription)")
@@ -133,7 +135,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
     
     func deleteSection(indexPath:IndexPath) throws ->Void{
         do{
-            let dream = dreamRecordingViewModel.dream(by:indexPath.section)
+            let dream = dreamRecordingViewModel.dream(by:indexPath.row)
             let filename = dream.url
             let url = getDocumentsDirectory().appendingPathComponent(filename)
             let fileExists = FileManager.default.fileExists(atPath: url.path)
@@ -142,12 +144,12 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 switch controller {
                     case is DreamRecordingsViewController:
                     try deleteSectionFromCollectionViewDelegateInCalendarViewController?.deleteRecording(id:dream.id)
-                    try deleteSectionFromCollectionViewInMainViewControllerDelegate?.deleteRecording(id:dream.id)
+                    //try deleteSectionFromCollectionViewInMainViewControllerDelegate?.deleteRecording(id:dream.id)
                         break
                         
                     case is CalendarViewController:
                     try deleteSectionFromCollectionViewInDreamViewControllerDelegate?.deleteRecording(id:dream.id)
-                    try deleteSectionFromCollectionViewInMainViewControllerDelegate?.deleteRecording(id:dream.id)
+                   // try deleteSectionFromCollectionViewInMainViewControllerDelegate?.deleteRecording(id:dream.id)
                         break
                         
                     default:
@@ -162,7 +164,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 
                 DispatchQueue.main.async{ [weak self ] in
                     guard let self = self else {return}
-                    self.dreamRecordingsView.collectionView.deleteSections(IndexSet(integer: indexPath.section))
+                    self.dreamRecordingsView.collectionView.deleteItems(at:    [indexPath])
                 }
 
             }

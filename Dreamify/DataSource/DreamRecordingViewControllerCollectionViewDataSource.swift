@@ -56,15 +56,15 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         else{
             fatalError("Unable to dequeue TopicViewCell. This is a developer error.")
         }
-        let dream = dreamRecordingViewModel.dream(by: indexPath.section)
+        let dream = dreamRecordingViewModel.dream(by: indexPath.row)
         cell.configure(with: dream)
-        cell.playPauseButton.tag    = indexPath.section
+        cell.playPauseButton.tag    = indexPath.row
         cell.playPauseButton.addTarget(self, action: #selector(handlePlayPause( _:)) , for: .touchUpInside)
         
-        cell.analyzeButton.tag    = indexPath.section
+        cell.analyzeButton.tag    = indexPath.row
         cell.analyzeButton.addTarget(self, action: #selector(analyzeDream(_:)), for: .touchUpInside)
         
-        cell.transcriptionAnalysisButton.tag = indexPath.section
+        cell.transcriptionAnalysisButton.tag = indexPath.row
         cell.transcriptionAnalysisButton.addTarget(self, action: #selector(handleAnalysisTranscriptionButton), for: .touchUpInside)
         
         
@@ -72,7 +72,7 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
         
         if let currentPlayIndex = dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying{
-            if (currentPlayIndex == indexPath.section){
+            if (currentPlayIndex == indexPath.row){
                 cell.playPauseButton.setImage(UIImage(systemName: "pause",withConfiguration: config), for: .normal)
             }else{
                 cell.playPauseButton.setImage(UIImage(systemName: "play" ,withConfiguration: config), for: .normal)
@@ -89,44 +89,75 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        return dreamCell(indexPath: IndexPath(row: 0, section: indexPath.section))
+        return dreamCell(indexPath: indexPath)
         
         
     }
     
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print("tapped item at \(indexPath.row)")
+        let dream = dreamRecordingViewModel.dream(by: indexPath.row)
+        dream.toggleIsOpen()
+//        if let cell = collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell {
+//            cell.configure(with: dream)
+//        }
+        
+        collectionView.reconfigureItems(at: [indexPath])
+
+        
+        
+//        collectionView.performBatchUpdates({
+//              collectionView.reloadItems(at: [indexPath])
+//          }, completion: nil)
+//        guard let cell = dreamRecordingsView.collectionView.dequeueReusableCell(withReuseIdentifier: "dreamCell", for: indexPath) as? DreamRecordingViewCell
+//        else{
+//            fatalError("Unable to dequeue TopicViewCell. This is a developer error.")
+//        }
+       // cell.configure(with: dream)
+        
+        //return dreamCell(indexPath: indexPath)
+
+        
+
+        
+        
+        
 
         
         
     }
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        
-        print("view called")
-        print("index path: \( indexPath.section)")
-        print("dream \(dreamRecordingViewModel.dream(by: indexPath.section).title)")
-        
-        let cell = collectionView.dequeueReusableSupplementaryView(ofKind:     kind, withReuseIdentifier: "headerCell", for: indexPath) as! DreamRecordingHeaderViewCell
-        cell.configureDreamRecordingViewHeader(viewmodel: dreamRecordingViewModel, row: indexPath.section)
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture(gesture:)))
-        cell.headerView.isUserInteractionEnabled = true
-        cell.headerView.addGestureRecognizer(tapGesture)
-        cell.headerView.tag = indexPath.section
-        return cell
-        
-    }
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
-        print("number of sections \(dreamRecordingViewModel.dreamsCount)")
+    
+//    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+//        
+//        print("view called")
+//        print("index path: \( indexPath.section)")
+//        print("dream \(dreamRecordingViewModel.dream(by: indexPath.section).title)")
+//        
+//        let cell = collectionView.dequeueReusableSupplementaryView(ofKind:     kind, withReuseIdentifier: "headerCell", for: indexPath) as! DreamRecordingHeaderViewCell
+//        cell.configureDreamRecordingViewHeader(viewmodel: dreamRecordingViewModel, row: indexPath.section)
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture(gesture:)))
+//        cell.headerView.isUserInteractionEnabled = true
+//        cell.headerView.addGestureRecognizer(tapGesture)
+//        cell.headerView.tag = indexPath.section
+//        return cell
+//        
+//    }
+    
+//    func numberOfSections(in collectionView: UICollectionView) -> Int {
+//        print("number of sections \(dreamRecordingViewModel.dreamsCount)")
+//        return dreamRecordingViewModel.dreamsCount
+//        
+//    }
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return dreamRecordingViewModel.dreamsCount
         
-    }
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        let dream = dreamRecordingViewModel.dream(by: section)
-        if(dream.retrieveIsOpen()){
-            return 1
-        }
-        return 0;
+//        let dream = dreamRecordingViewModel.dream(by: section)
+//        if(dream.retrieveIsOpen()){
+//            return 1
+//        }
+//        return 0;
         
     }
     
@@ -140,7 +171,7 @@ extension DreamRecordingViewDataSourceManager{
         
         
         
-        let indexPath                                  = IndexPath                               (row: 0, section: sender.tag)
+        let indexPath                                  = IndexPath                               (row: sender.tag, section: 0)
         let indexThatIsCurrentlyPlaying                = dreamRecordingViewModel.getSelectedIndex()
         let isTheCurrentlySelectedIndexPlayingRightNow = dreamRecordingViewModel.getIsPlaying    ()
         
@@ -333,9 +364,9 @@ extension DreamRecordingViewDataSourceManager{
          
             
             if(dream.retrieveIsOpen()){
-                dreamRecordingsView.collectionView.insertItems(at:[ IndexPath(row: 0, section: id)])
+                dreamRecordingsView.collectionView.insertItems(at:[ IndexPath(row: id, section: 0)])
             }else{
-                dreamRecordingsView.collectionView.deleteItems(at:[ IndexPath(row: 0, section: id)])
+                dreamRecordingsView.collectionView.deleteItems(at:[ IndexPath(row: id, section: 0)])
 
             }
             
@@ -345,7 +376,7 @@ extension DreamRecordingViewDataSourceManager{
     @objc
     func analyzeDream(_ sender:UIButton) {
         print("analyzze tapped")
-        let indexPath = IndexPath (row: 0, section: sender.tag)
+        let indexPath = IndexPath (row: sender.tag, section: 0)
         let dream    = dreamRecordingViewModel.dream(by: indexPath.section)
         
         let loading = LoadingOverlayView(
@@ -416,8 +447,8 @@ extension DreamRecordingViewDataSourceManager{
     
     @objc
     func handleAnalysisTranscriptionButton(_ sender:UIButton){
-        let indexPath = IndexPath (row: 0, section: sender.tag)
-        let dream = dreamRecordingViewModel.dream(by: indexPath.section)
+        let indexPath = IndexPath (row: sender.tag, section: 0)
+        let dream = dreamRecordingViewModel.dream(by: indexPath.row)
         
         guard let curr_cell = dreamRecordingsView.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell else{
             let alert = UIAlertController(title: "An Unexpected Error Occured",

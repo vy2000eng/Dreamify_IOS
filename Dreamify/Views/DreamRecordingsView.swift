@@ -21,14 +21,14 @@ class DreamRecordsView:UIView{
             // Main content item
             let itemSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1.0),
-                heightDimension: .estimated(150)
+                heightDimension: .estimated(400)
             )
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             
             // Group
             let groupSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1.0),
-                heightDimension: .estimated(150)
+                heightDimension: .estimated(200)
             )
             let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
             
@@ -38,17 +38,17 @@ class DreamRecordsView:UIView{
             section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0)
             
             // Header
-            let headerSize = NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1.0),
-                heightDimension: .estimated(60)
-            )
-            let header = NSCollectionLayoutBoundarySupplementaryItem(
-                layoutSize: headerSize,
-                elementKind: UICollectionView.elementKindSectionHeader,
-                alignment: .top
-            )
-            header.pinToVisibleBounds = false // Less aggressive pinning
-            section.boundarySupplementaryItems = [header]
+//            let headerSize = NSCollectionLayoutSize(
+//                widthDimension: .fractionalWidth(1.0),
+//                heightDimension: .estimated(60)
+//            )
+//            let header = NSCollectionLayoutBoundarySupplementaryItem(
+//                layoutSize: headerSize,
+//                elementKind: UICollectionView.elementKindSectionHeader,
+//                alignment: .top
+//            )
+//            header.pinToVisibleBounds = false // Less aggressive pinning
+//            section.boundarySupplementaryItems = [header]
             
             return section
         }
@@ -57,7 +57,7 @@ class DreamRecordsView:UIView{
         collectionView.backgroundColor = .systemBackground
         collectionView.contentInsetAdjustmentBehavior = .automatic
         collectionView.register(DreamRecordingViewCell.self, forCellWithReuseIdentifier: "dreamCell")
-        collectionView.register(DreamRecordingHeaderViewCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "headerCell")
+        //collectionView.register(DreamRecordingHeaderViewCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "headerCell")
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.showsVerticalScrollIndicator = false // Cleaner look
         

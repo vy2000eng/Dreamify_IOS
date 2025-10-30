@@ -39,6 +39,8 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
     var dreamRecordingDataSourceManager:DreamRecordingViewDataSourceManager!
     private var scrollViewHeightConstraint: NSLayoutConstraint!
     private var isCalendarExpanded = true
+    private var calendarButton: UIButton?
+
     
     init(){
         self.dreamRecordingViewModel = DreamRecordingViewModel(controllerManagedByDataSource: .CalendarViewController,curentlySelectedDate: current_date)
@@ -59,14 +61,18 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
         setupUI()
         setupConstraints()
         setupCalendarSelection()
-        navigationController?.setToolbarHidden(true, animated: false)
+            //navigationController?.setToolbarHidden(true, animated: false)
+        navigationItem.leftBarButtonItem = createLeftOptionsBarButtonItem()
+        //navigationItem.rightBarButtonItem = createRightOptionsBarButtonItem()
+
+
     }
     
 
     private func setupUI(){
         view.backgroundColor = .systemBackground
         navigationController?.navigationItem.largeTitleDisplayMode = .never
-        title = "Calendar"
+        //title = "Calendar"
    
         dreamRecordingView.collectionView.delegate = dreamRecordingDataSourceManager
         dreamRecordingView.collectionView.dataSource = dreamRecordingDataSourceManager
@@ -149,10 +155,69 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
         
     }
 
+
+    
+        func createLeftOptionsBarButtonItem() -> UIBarButtonItem {
+            let button = UIButton(type: .system)
+
+            var config = UIButton.Configuration.plain()
+            config.image = UIImage(systemName: "chevron.down")
+            config.imagePlacement = .trailing
+            config.imagePadding = 8
+            config.baseForegroundColor = .systemBlue
+            config.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+
+            var titleAttr = AttributedString("Dream Calendar")
+            titleAttr.font = .systemFont(ofSize: 15, weight: .semibold)
+            config.attributedTitle = titleAttr
+
+            let imageConfig = UIImage.SymbolConfiguration(pointSize: 15, weight: .bold)
+            config.preferredSymbolConfigurationForImage = imageConfig
+
+            button.configuration = config
+            button.addTarget(self, action: #selector(toggleCalendar), for: .touchUpInside)
+            
+            // Store reference
+            self.calendarButton = button
+            
+            return UIBarButtonItem(customView: button)
+        
+
+//
+        //return UIBarButtonItem(title: "Dream Calendar", style: .done, target: self, action: #selector(toggleCalendar))
+       // let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .semibold)
+      //  return UIBarButtonItem(title: "Dream Calendar", image: UIImage(systemName: "chevron.down", withConfiguration: config), target: self, action: #selector(toggleCalendar))
+
+    }
+//    func createRightOptionsBarButtonItem() -> UIBarButtonItem {
+//       // return UIBarButtonItem(title: "Add", image: UIImage(systemName: "plus"), target: self, action: #selector(addDream))
+//
+//
+//        //return UIBarButtonItem(title: "Dream Calendar", style: .done, target: self, action: #selector(toggleCalendar))
+//    }
+    
+    
     @objc private func toggleCalendar() {
         isCalendarExpanded.toggle()
+        if (isCalendarExpanded){
+            guard var config = calendarButton?.configuration else { return }
+            
+            // Change the chevron (example)
+            config.image = UIImage(systemName: "chevron.down") // or whatever you need
+            
+            calendarButton?.configuration = config
+            
+        }else{
+            guard var config = calendarButton?.configuration else { return }
+            
+            // Change the chevron (example)
+            config.image = UIImage(systemName: "chevron.up") // or whatever you need
+            
+            calendarButton?.configuration = config
+            
+        }
         
-        let targetHeight: CGFloat = isCalendarExpanded ? 350 : 60
+        let targetHeight: CGFloat = isCalendarExpanded ? 350 : 0
         
         UIView.animate(withDuration: 0.35, delay: 0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0.5) {
             self.scrollViewHeightConstraint.constant = targetHeight

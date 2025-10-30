@@ -38,7 +38,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
             if(controllerManagedByAudioPlayer == .DreamViewController && self.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfSections && vc.isViewLoaded){
                 DispatchQueue.main.async{ [weak self] in
                     guard let self = self else{ return }
-                    vc.dreamRecordingView.collectionView.insertSections(IndexSet(integer: section-1))
+                    vc.dreamRecordingView.collectionView.insertItems(at: [IndexPath(row: section-1, section: 0)])
                 }
                 
             }

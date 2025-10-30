@@ -349,10 +349,10 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         
         // Setup header constraints
         headerCellConstraints = [
-            headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            headerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor,constant: 2),
+            headerView.topAnchor.constraint(equalTo: contentView.topAnchor,constant: 2),
+            headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor,constant: 2),
+            headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor,constant: 2),
             
             sectionTitle.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
             sectionTitle.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
@@ -367,10 +367,10 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         // Setup section constraints
         sectionCellConstraints = [
             // Main content view
-            mainContentView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            mainContentView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            mainContentView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            mainContentView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            mainContentView.topAnchor.constraint(equalTo: contentView.topAnchor,constant: 2),
+            mainContentView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor,constant: 2),
+            mainContentView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor,constant: 2),
+            mainContentView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor,constant: 2),
             
             // Section title (in mainContentView)
             mainSectionTitle.topAnchor.constraint(equalTo: mainContentView.topAnchor, constant: 8),

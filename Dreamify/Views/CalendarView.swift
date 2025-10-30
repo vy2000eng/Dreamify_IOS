@@ -18,6 +18,7 @@ class CalendarView: UIView {
         return stack
     }()
     
+    
     let headerLabel: UILabel = {
         let label = UILabel()
         label.text = "dream calendar"
@@ -70,20 +71,20 @@ class CalendarView: UIView {
         backgroundColor = .systemBackground
         
         // Add header stack
-        headerStack.addArrangedSubview(headerLabel)
-        headerStack.addArrangedSubview(chevronButton)
-        
-        addSubview(headerStack)
+//        headerStack.addArrangedSubview(headerLabel)
+//        headerStack.addArrangedSubview(chevronButton)
+//        
+//        addSubview(headerStack)
         addSubview(scrollView)
         scrollView.addSubview(calendar)
         //addSubview(calendar)
         
         NSLayoutConstraint.activate([
-            headerStack.topAnchor.constraint(equalTo: topAnchor),
-            headerStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            headerStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+//            headerStack.topAnchor.constraint(equalTo: topAnchor),
+//            headerStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+//            headerStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             
-            scrollView.topAnchor.constraint(equalTo: headerStack.bottomAnchor, constant: 8),
+            scrollView.topAnchor.constraint(equalTo: topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
             scrollView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4),
             scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -2),
@@ -102,12 +103,12 @@ class CalendarView: UIView {
         
         if animated {
             UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5) {
-                self.chevronButton.transform = CGAffineTransform(rotationAngle: rotation)
+               // self.chevronButton.transform = CGAffineTransform(rotationAngle: rotation)
                 self.calendar.isHidden = !expanded
                 self.layoutIfNeeded()
             }
         } else {
-            chevronButton.transform = CGAffineTransform(rotationAngle: rotation)
+           // chevronButton.transform = CGAffineTransform(rotationAngle: rotation)
             calendar.isHidden = !expanded
         }
     }

@@ -6,49 +6,157 @@
 //
 
 import UIKit
+import AVFAudio
 
-class DreamRecordingsViewController:UIViewController{
-    var dreamRecordingsView:DreamRecordsView
+
+
+//MARK: note the delegated and datasources are in there designated folders
+class DreamRecordingsViewController:UIViewController, DeleteSectionFromCollectionView{
+
+
+    func deleteRecording(id:UUID) {
+        print("dream vc delegate called")
+        do{
+            try self.dreamRecordingViewModel.removeDreamFromArray(id: id)//removeDreamByIDFromArray(id:id)//removeDreamFromArray(id: dream.id)
+            DispatchQueue.main.async {[weak self] in
+                guard let self = self else { return }
+                self.dreamRecordingView.collectionView.reloadData()//deleteSections(IndexSet(integer: indexPath.section))
+            }
+            
+        }catch let err{
+            print("an error occured whilst removing dream from collection view in dreamRecordingViewController: \(err)")
+        }
+
+       
+    }
+
+
+    var dreamRecordingView             : DreamRecordsView
+    var dreamRecordingViewModel        : DreamRecordingViewModel
+    var audioPlayer                    : AVAudioPlayer?
+    private var loadingOverlay         : LoadingOverlayView?
+    var dreamRecordingDataSourceManager: DreamRecordingViewDataSourceManager!
     
-    
+
     
     init() {
-        
-        dreamRecordingsView = DreamRecordsView()
-        super.init(nibName: nil, bundle: nil)
+        self.dreamRecordingViewModel = DreamRecordingViewModel(controllerManagedByDataSource: .DreamViewController)
+        dreamRecordingView          = DreamRecordsView(frame: .zero)
+
+        super.init                     (nibName: nil, bundle: nil)
+        dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(dreamRecordingView: dreamRecordingView, dreamRecordingViewModel: dreamRecordingViewModel, controller: self)
+
+
+
     }
   
-
-
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+
     
     override func viewDidLoad() {
-        setupUI()
-        setupConstraints()
-        super.viewDidLoad()
+        
+        
+        print("dream recording view loaded")
+        super.viewDidLoad           ()
+        title = "All Recordings"
+        dreamRecordingView.collectionView.delegate = dreamRecordingDataSourceManager
+        dreamRecordingView.collectionView.dataSource = dreamRecordingDataSourceManager
+        self.dreamRecordingViewModel.presentErrIfAnalysisFailsDelagate = dreamRecordingDataSourceManager
+        setupUI                     ()
+        setupConstraints            ()
+        listFilesFromDocumentsFolder()
+
     }
+
+
     
+
+
     private func setupUI() {
         view.backgroundColor = .systemBackground
-        title = "Dreams"
-        
-        // Add subviews
-        view.addSubview(dreamRecordingsView.titleLabel)
 
+        
+        dreamRecordingView.translatesAutoresizingMaskIntoConstraints = false
+
+        
+        view.addSubview(dreamRecordingView)
     }
     
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // Title Label
-            dreamRecordingsView.titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            dreamRecordingsView.titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
-            dreamRecordingsView.titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 20),
-            dreamRecordingsView.titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -20),
+            dreamRecordingView.leadingAnchor.constraint (equalTo: view.leadingAnchor                ),
+            dreamRecordingView.trailingAnchor.constraint(equalTo: view.trailingAnchor               ),
+            dreamRecordingView.topAnchor.constraint     (equalTo: view.topAnchor),
+            dreamRecordingView.bottomAnchor.constraint  (equalTo: view.bottomAnchor                 ),
         ])
     }
     
+    
+    func listFilesFromDocumentsFolder(){
+        do {
+            // Get the document directory url
+            let documentDirectory = try FileManager.default.url(
+                for: .documentDirectory,
+                in: .userDomainMask,
+                appropriateFor: nil,
+                create: true
+            )
+            
+            print("documentDirectory", documentDirectory.path)
+            // Get the directory contents urls (including subfolders urls)
+            let directoryContents = try FileManager.default.contentsOfDirectory(
+                at: documentDirectory,
+                includingPropertiesForKeys: nil
+            )
+
+            for var url in directoryContents {
+                url.hasHiddenExtension = true
+            }
+            for url in directoryContents {
+                print(url.localizedName ?? url.lastPathComponent)
+            }
+
+            
+        } catch {
+            print(error)
+        }
+    }
+    
+}
+extension URL {
+    var typeIdentifier: String? { (try? resourceValues(forKeys: [.typeIdentifierKey]))?.typeIdentifier }
+    var isMP3: Bool { typeIdentifier == "public.mp3" }
+    var localizedName: String? { (try? resourceValues(forKeys: [.localizedNameKey]))?.localizedName }
+    var hasHiddenExtension: Bool {
+        get { (try? resourceValues(forKeys: [.hasHiddenExtensionKey]))?.hasHiddenExtension == true }
+        set {
+            var resourceValues = URLResourceValues()
+            resourceValues.hasHiddenExtension = newValue
+            try? setResourceValues(resourceValues)
+        }
+    }
+}
+
+
+extension DreamRecordingsViewController{
+    private func showLoading() {
+           hideLoading() // Remove any existing overlay
+           
+           let loading = LoadingOverlayView(
+               title: "Analyzing dream...",
+               subtitle: "Please wait while we analyze your dream"
+           )
+           loading.show(in: view)
+           loadingOverlay = loading
+       }
+       
+       private func hideLoading() {
+           loadingOverlay?.hide()
+           loadingOverlay = nil
+       }
 }
 

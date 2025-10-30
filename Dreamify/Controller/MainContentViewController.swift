@@ -7,97 +7,128 @@
 
 import UIKit
 import AVFoundation
+import BackgroundTasks
 
 
-
-class MainViewController: UIViewController, AVAudioRecorderDelegate{
+class MainViewController: UIViewController{
     
-    var mainContentView:MainContentView
-    //var recordButton: UIButton!
-    var recordingSession: AVAudioSession!
-    var audioRecorder: AVAudioRecorder!
+    var mainContentView          :  MainContentView
+    var dreamsRecordingViewModel :  DreamRecordingViewModel
+    var audioRecordingManager    :  AudioRecorderManager
+    weak var addNewRecordToDreamRecordingViewdelegate: AddNewRecordingToCollectionView?
+    weak var addNewRecordToCalendarViewdelegate: AddNewRecordingToCollectionView?
     
+    
+    let taskId = "dreamify.refreshAuthToken.backgroundTask"
+    
+    private var windowOrientation: UIInterfaceOrientation {
+        return view.window?.windowScene?.interfaceOrientation ?? .portrait
+    }
     init(){
-        self.mainContentView = MainContentView()
         
-        super.init(nibName: nil, bundle: nil)
-
+        self.mainContentView            = MainContentView()
+        self.dreamsRecordingViewModel   = DreamRecordingViewModel()
+        audioRecordingManager           = AudioRecorderManager()
+        //self.speechTranscriberManager = SpeeachTranscriberManager()
+        super.init                        (nibName: nil, bundle: nil)
+        
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        Task {
+            if audioRecordingManager.getState() == .recording{
+                try? await audioRecordingManager.updateOrientation(interfaceOrientation: windowOrientation)
+                
+                
+            }
+        }
+    }
     
-
+    
+    
+    
     // MARK: - Lifecycle
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
- 
         
         setupUI()
         setupConstraints()
-        recordingSession = AVAudioSession.sharedInstance()
-
-
+        
         do {
-            try recordingSession.setCategory(.playAndRecord, mode: .default)
-            try recordingSession.setActive(true)
+            try audioRecordingManager.configureAudioSessionAndConfigureRecorderExternally()
+            
+            let recordingSession = audioRecordingManager.getRecordingSession()
+            
             recordingSession.requestRecordPermission() { [unowned self] allowed in
                 DispatchQueue.main.async {
+                    
                     if allowed {
                         self.setupActions()
                     } else {
                         // failed to record!
                         let alert = UIAlertController(title: "action failed",
-                                                    message: "You tapped the start recording button, but the action failed",
+                                                      message: "Please Enable Microphone Settings to start Recording",
                                                       preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                         self.present(alert, animated: true)
                     }
                 }
             }
-        } catch {
-            // failed to record!
+            SpeechTranscriberManager.shared.requestSpeechRecognizerPermission(){[weak self] result in
+                guard let self = self else{
+                    return
+                }
+                switch result{
+                case.success:
+                    print("success")
+                    
+                case .failure(let err):
+                    let alert = UIAlertController(title: "action failed",
+                                                  message: err.localizedDescription,
+                                                  preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                    self.present(alert, animated: true)
+                }
+                
+                
+                
+            }
+        } catch let err as NSError{
+            let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.present(alert, animated: true)
+            
         }
-  
-        //setupActions()
-
-
+        
     }
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        mainContentView.actionButton.layer.cornerRadius =  mainContentView.actionButton.frame.width / 2
-    }
+    
+    
+    
+    
     
     // MARK: - Setup Methods
     private func setupUI() {
         view.backgroundColor = .systemBackground
         title = "Home"
+        view.addSubview(mainContentView)
+        mainContentView.translatesAutoresizingMaskIntoConstraints = false
         
-        // Add subviews
-        view.addSubview(mainContentView.titleLabel)
-        view.addSubview(mainContentView.descriptionLabel)
-        view.addSubview(mainContentView.actionButton)
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            // Title Label
-            mainContentView.titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            mainContentView.titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
-            mainContentView.titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 20),
-            mainContentView.titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -20),
+            mainContentView.topAnchor.constraint(equalTo: view.topAnchor),
+            mainContentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            mainContentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
-            // Description Label
-            mainContentView.descriptionLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            mainContentView.descriptionLabel.topAnchor.constraint(equalTo: mainContentView.titleLabel.bottomAnchor, constant: 20),
-            mainContentView.descriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            mainContentView.descriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            mainContentView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            // Action Button
-            mainContentView.actionButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            mainContentView.actionButton.topAnchor.constraint(equalTo: mainContentView.descriptionLabel.bottomAnchor, constant: 40),
-            mainContentView.actionButton.widthAnchor.constraint(equalToConstant: 200),
-            mainContentView.actionButton.heightAnchor.constraint(equalToConstant: 200)
         ])
     }
     
@@ -105,68 +136,134 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate{
         mainContentView.actionButton.addTarget(self, action: #selector(recordTapped), for: .touchUpInside)
         
     }
-    
-    
-//    func loadRecordingUI() {
-//        recordButton = UIButton(frame: CGRect(x: 64, y: 64, width: 128, height: 64))
-//        recordButton.setTitle("Tap to Record", for: .normal)
-//        recordButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .title1)
-//        recordButton.addTarget(self, action: #selector(recordTapped), for: .touchUpInside)
-//        view.addSubview(recordButton)
-//    }
-    func startRecording() {
-        let audioFilename = getDocumentsDirectory().appendingPathComponent("recording.m4a")
+}
 
-        let settings = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 12000,
-            AVNumberOfChannelsKey: 1,
-            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
-        ]
-
-        do {
-            audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
-            audioRecorder.delegate = self
-            audioRecorder.record()
-
-            mainContentView.actionButton.setTitle("Tap to Stop", for: .normal)
-        } catch {
-            finishRecording(success: false)
+extension MainViewController{
+    private func startRecording(){
+        do{
+            try audioRecordingManager.setupAudioRecorder()
+            audioRecordingManager.getRecorder ().delegate = self
+            
+            audioRecordingManager.record()
+            mainContentView.startRecording()
+            
+            
+        }catch let err as NSError{
+            let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.present(alert, animated: true)
         }
     }
-    func getDocumentsDirectory() -> URL {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        return paths[0]
-    }
+    
+    
+    
     func finishRecording(success: Bool) {
-        audioRecorder.stop()
-        audioRecorder = nil
-
-        if success {
-            mainContentView.actionButton.setTitle("Tap to Re-record", for: .normal)
-        } else {
-            mainContentView.actionButton.setTitle("recording failed", for: .normal)
-            // recording failed :(
+        audioRecordingManager.stop()
+        do{
+            
+            if success{
+                
+                guard let unwrapped_file_title =  audioRecordingManager.getUniqueFileName() else {
+                    throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid FileName"])
+                }
+                
+                
+                
+                
+                SpeechTranscriberManager.shared.transcribeAudio(url: self.audioRecordingManager.getDocumentsDirectory().appending(component: unwrapped_file_title)) { [weak self] transcriptionResult in
+                    guard let self = self else{
+                        return
+                    }
+                    switch transcriptionResult {
+                    case .success(let text):
+                        do{
+                            print(text)
+                            try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title,transcribedText: text)
+                            mainContentView.stopRecording()
+                            
+                            
+                            try addNewRecordToDreamRecordingViewdelegate?.updateCollection(controllerMangedByDataSource: .DreamViewController)
+                            try addNewRecordToCalendarViewdelegate?.updateCollection(controllerMangedByDataSource: .CalendarViewController)
+                            
+                        }catch let err as NSError{
+                            // try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title,transcribedText: text)
+                            SpeechTranscriberManager.shared.cancelCurrentTranscription()
+                            let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                                          preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                            self.present(alert, animated: true)
+                            // mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                            mainContentView.stopRecording()
+                            
+                            
+                        }
+                        
+                        print("Transcribed: \(text)")
+                    case .failure(let err):
+                        SpeechTranscriberManager.shared.cancelCurrentTranscription()
+                        
+                        mainContentView.stopRecording()
+                        
+                        
+                        let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                                      message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                                      preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                        self.present(alert, animated: true)
+                        
+                        do{
+                            try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title,transcribedText: nil)
+                            try addNewRecordToDreamRecordingViewdelegate?.updateCollection(controllerMangedByDataSource: .DreamViewController)
+                            try addNewRecordToCalendarViewdelegate?.updateCollection(controllerMangedByDataSource: .CalendarViewController)
+                            
+                            
+                            
+                        }catch let err as NSError{
+                            
+                            let alert = UIAlertController(title: "An Error occured while saving your recording",
+                                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                                          preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                            self.present(alert, animated: true)
+                            //mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+                            
+                        }
+                    }
+                }
+            }
+        }catch let err as NSError{
+            let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.present(alert, animated: true)
+            mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
+            
+            
+            
         }
+        audioRecordingManager.deInitRecorder()
+        
+        
+        
     }
     
+}
 
-    
-    @objc func recordTapped() {
-        if audioRecorder == nil {
+extension MainViewController{
+    @objc private func recordTapped() {
+        
+        
+        if audioRecordingManager.getState()  == .stopped {
+            
             startRecording()
         } else {
             finishRecording(success: true)
         }
     }
     
-    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-        if !flag {
-            finishRecording(success: false)
-        }
-    }
-    
-   
-
-
 }
+

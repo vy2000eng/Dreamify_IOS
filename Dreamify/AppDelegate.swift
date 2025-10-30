@@ -7,16 +7,52 @@
 
 import UIKit
 import CoreData
+import BackgroundTasks
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-
+    
+    let taskId = "dreamify.refreshAuthToken.backgroundTask"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: taskId, using: nil){ task in
+            guard let newTask = task as? BGAppRefreshTask  else {return}
+            self.handleTask(task: newTask)
+            
+        }
+//        let count = UserDefaults.standard.integer(forKey: "task_run_count")
+//        print("task ran \(count) times!")
+        
+         schedule()
+        
+        
+        
+        
         return true
     }
+    
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        // Schedule when app goes to background
+           schedule()
+    }
+    
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        // Optionally reschedule when app comes to foreground
+        checkIfLoginNeeded()
+
+        schedule()
+    }
+    
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // Also check when app becomes active
+        checkIfLoginNeeded()
+    }
+
+    
+
 
     // MARK: UISceneSession Lifecycle
 
@@ -76,6 +112,79 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     }
+    //MARK: - tasks
+    private func schedule(){
+        // BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: taskId)
+        BGTaskScheduler.shared.getPendingTaskRequests{ requests in
+            print("scheduled tasks  \(requests.count)")
+            
+            
+            guard requests.isEmpty else{
+                
+                return
+            }
+            
+            do{
+                let newTask = BGAppRefreshTaskRequest(identifier: self.taskId)
+                newTask.earliestBeginDate = Date().addingTimeInterval(15 * 60)
+                try BGTaskScheduler.shared.submit(newTask)
+                
+                print("task scheduled")
+                
+                
+            }catch{
+                print("failed to schedule \(error)")
+                
+            }
+            
+            
+        }
+    }
+    private func handleTask(task:BGAppRefreshTask){
+        task.expirationHandler = {
+               print("Background task expired")
+               task.setTaskCompleted(success: false)
+           }
+       
+        
+        APIClientManager.shared.refreshToken{ refreshResult in
+            switch refreshResult{
+                
+            case .success(let response):
+                print("token refresh was executed successfully")
+                TokenManager.shared.saveAccessToken(response.accessToken)
+                TokenManager.shared.saveRefreshToken(response.refreshToken)
+                
+                self.schedule()
+                
+                task.setTaskCompleted(success: true)
 
+           
+                
+            case .failure(let err):
+                print("Token refresh failed: \(err)")
+                TokenManager.shared.clearTokens()
+                UserSettings.shared.setLoginState(false)
+                task.setTaskCompleted(success: false)
+            }
+            
+        }
+    }
+    internal func checkIfLoginNeeded() {
+        if !UserSettings.shared.userLoginState {
+            DispatchQueue.main.async {
+                self.navigateToLogin()
+            }
+        }
+    }
+    private func navigateToLogin() {
+        let loginViewController = LoginViewController()
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            window.rootViewController = UINavigationController(rootViewController: loginViewController)
+            window.makeKeyAndVisible()
+        }
+    }
 }
 

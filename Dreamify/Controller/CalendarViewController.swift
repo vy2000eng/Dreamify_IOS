@@ -61,9 +61,7 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
         setupUI()
         setupConstraints()
         setupCalendarSelection()
-            //navigationController?.setToolbarHidden(true, animated: false)
         navigationItem.leftBarButtonItem = createLeftOptionsBarButtonItem()
-        //navigationItem.rightBarButtonItem = createRightOptionsBarButtonItem()
 
 
     }
@@ -72,7 +70,6 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
     private func setupUI(){
         view.backgroundColor = .systemBackground
         navigationController?.navigationItem.largeTitleDisplayMode = .never
-        //title = "Calendar"
    
         dreamRecordingView.collectionView.delegate = dreamRecordingDataSourceManager
         dreamRecordingView.collectionView.dataSource = dreamRecordingDataSourceManager
@@ -183,18 +180,9 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
             return UIBarButtonItem(customView: button)
         
 
-//
-        //return UIBarButtonItem(title: "Dream Calendar", style: .done, target: self, action: #selector(toggleCalendar))
-       // let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .semibold)
-      //  return UIBarButtonItem(title: "Dream Calendar", image: UIImage(systemName: "chevron.down", withConfiguration: config), target: self, action: #selector(toggleCalendar))
 
     }
-//    func createRightOptionsBarButtonItem() -> UIBarButtonItem {
-//       // return UIBarButtonItem(title: "Add", image: UIImage(systemName: "plus"), target: self, action: #selector(addDream))
-//
-//
-//        //return UIBarButtonItem(title: "Dream Calendar", style: .done, target: self, action: #selector(toggleCalendar))
-//    }
+
     
     
     @objc private func toggleCalendar() {

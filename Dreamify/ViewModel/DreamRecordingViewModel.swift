@@ -209,20 +209,13 @@ public class DreamRecordingViewModel{
     func addDream(url:String, title:String, transcribedText:String?)throws -> Void{
         do{
             try CoreDataManager.shared.addDream(title: title, url: url,transribedText: transcribedText)
-            dreams = try getAllDreams()
+            //dreams = try getAllDreams()
         }catch let err as NSError{
             print("Error adding dreams in addDream(url:String, title:String) \(err), \(err.userInfo)")
         }
     }
     
-    func addDreamWithNoTextTranscription(url:String, title:String, transcribedText:String)throws -> Void{
-        do{
-            try CoreDataManager.shared.addDream(title: title, url: url,transribedText: transcribedText)
-            dreams = try getAllDreams()
-        }catch let err as NSError{
-            print("Error adding dreams in addDream(url:String, title:String) \(err), \(err.userInfo)")
-        }
-    }
+
     
     func deleteDreamById(id:UUID)throws -> Void{
         do{

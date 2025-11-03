@@ -15,7 +15,6 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
    
     weak var retrieveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
     weak var deleteSectionFromCollectionViewDelegateInCalendarViewController:DeleteSectionFromCollectionView?
-    weak var deleteSectionFromCollectionViewInMainViewControllerDelegate:DeleteSectionFromCollectionView?
     weak var deleteSectionFromCollectionViewInDreamViewControllerDelegate:DeleteSectionFromCollectionView?
     
     init(dreamRecordingView:DreamRecordsView, dreamRecordingViewModel:DreamRecordingViewModel,controller:UIViewController) {
@@ -99,30 +98,14 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         print("tapped item at \(indexPath.row)")
         let dream = dreamRecordingViewModel.dream(by: indexPath.row)
         dream.toggleIsOpen()
-//        if let cell = collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell {
-//            cell.configure(with: dream)
-//        }
-        
-       // collectionView.reconfigureItems(at: [indexPath])
+
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
             collectionView.performBatchUpdates({
-                //collectionView.reconfigureItems(at: [indexPath])
                 collectionView.reloadItems(at: [indexPath])
             }, completion: nil)
         }
 
-        
-        
-//        collectionView.performBatchUpdates({
-//              collectionView.reloadItems(at: [indexPath])
-//          }, completion: nil)
-//        guard let cell = dreamRecordingsView.collectionView.dequeueReusableCell(withReuseIdentifier: "dreamCell", for: indexPath) as? DreamRecordingViewCell
-//        else{
-//            fatalError("Unable to dequeue TopicViewCell. This is a developer error.")
-//        }
-       // cell.configure(with: dream)
-        
-        //return dreamCell(indexPath: indexPath)
+
 
         
 
@@ -134,36 +117,11 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         
     }
     
-//    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-//        
-//        print("view called")
-//        print("index path: \( indexPath.section)")
-//        print("dream \(dreamRecordingViewModel.dream(by: indexPath.section).title)")
-//        
-//        let cell = collectionView.dequeueReusableSupplementaryView(ofKind:     kind, withReuseIdentifier: "headerCell", for: indexPath) as! DreamRecordingHeaderViewCell
-//        cell.configureDreamRecordingViewHeader(viewmodel: dreamRecordingViewModel, row: indexPath.section)
-//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture(gesture:)))
-//        cell.headerView.isUserInteractionEnabled = true
-//        cell.headerView.addGestureRecognizer(tapGesture)
-//        cell.headerView.tag = indexPath.section
-//        return cell
-//        
-//    }
-    
-//    func numberOfSections(in collectionView: UICollectionView) -> Int {
-//        print("number of sections \(dreamRecordingViewModel.dreamsCount)")
-//        return dreamRecordingViewModel.dreamsCount
-//        
-//    }
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return dreamRecordingViewModel.dreamsCount
         
-        
-//        let dream = dreamRecordingViewModel.dream(by: section)
-//        if(dream.retrieveIsOpen()){
-//            return 1
-//        }
-//        return 0;
+
         
     }
     
@@ -365,7 +323,6 @@ extension DreamRecordingViewDataSourceManager{
             let dream = dreamRecordingViewModel.dream(by: id)
             
             dream.toggleIsOpen()
-            //speechTranscriberManager.transcribeAudio(url: <#T##URL#>)
 
          
             

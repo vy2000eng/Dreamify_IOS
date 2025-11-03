@@ -14,7 +14,6 @@ class CoreDataManager{
 
 
 
-        //ValueTransformer.setValueTransformer(UIColorTransformer(), forName: NSValueTransformerName("UIColorTransformer"))
         
         persistentContainer = NSPersistentContainer(name: "Dreamify")
         if inMemory {
@@ -142,7 +141,6 @@ class CoreDataManager{
             }
             var dreamViewModel = DreamViewModel(dream: dream)
             return dreamViewModel
-            //return dream
             
         }
         catch{
@@ -161,7 +159,6 @@ class CoreDataManager{
         let fetchRequest: NSFetchRequest<Dream> = Dream.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id==%@", dreamId as CVarArg)
         do{
-            //let topic = try context.fetch(fetchRequest)
             guard let dream = try context.fetch(fetchRequest).first else {
                 throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Dream not found"])
             }
@@ -175,20 +172,7 @@ class CoreDataManager{
 
         
     }
-    //    func deleteTopic( topicID: UUID){
-    //        let fetchRequest: NSFetchRequest<Topic> = Topic.fetchRequest()
-    //        fetchRequest.predicate = NSPredicate(format: "id==%@", topicID as CVarArg)
-    //        do{
-    //            //let topic = try context.fetch(fetchRequest)
-    //            guard let topic = try context.fetch(fetchRequest).first else {
-    //                throw NSError(domain: "CoreDataManager", code: 8000, userInfo: [NSLocalizedDescriptionKey: "Topic not found"])
-    //            }
-    //            context.delete(topic)
-    //            try context.save()
-    //        }catch let error as NSError{
-    //            print("Error deleting topic: \(error.userInfo), \(error.localizedDescription)")
-    //        }
-    //    }
+
     
     
 }

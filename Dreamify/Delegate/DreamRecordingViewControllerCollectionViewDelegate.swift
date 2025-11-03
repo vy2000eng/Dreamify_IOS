@@ -34,8 +34,8 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 
             }
             
-            let section = dreamRecordingViewModel.dreamsCount
-            if(controllerManagedByAudioPlayer == .DreamViewController && self.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfSections && vc.isViewLoaded){
+            let section = vc.dreamRecordingViewModel.dreamsCount
+            if(controllerManagedByAudioPlayer == .DreamViewController && self.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfItems(inSection: 0) && vc.isViewLoaded){
                 DispatchQueue.main.async{ [weak self] in
                     guard let self = self else{ return }
                     vc.dreamRecordingView.collectionView.insertItems(at: [IndexPath(row: section-1, section: 0)])
@@ -144,12 +144,10 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 switch controller {
                     case is DreamRecordingsViewController:
                     try deleteSectionFromCollectionViewDelegateInCalendarViewController?.deleteRecording(id:dream.id)
-                    //try deleteSectionFromCollectionViewInMainViewControllerDelegate?.deleteRecording(id:dream.id)
                         break
                         
                     case is CalendarViewController:
                     try deleteSectionFromCollectionViewInDreamViewControllerDelegate?.deleteRecording(id:dream.id)
-                   // try deleteSectionFromCollectionViewInMainViewControllerDelegate?.deleteRecording(id:dream.id)
                         break
                         
                     default:
@@ -158,10 +156,10 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                         break
 
                 }
-                try FileManager.default.removeItem(atPath: url.path)
+                
                 try dreamRecordingViewModel.removeDreamFromArray(id: dream.id)
                 try dreamRecordingViewModel.deleteDreamById(id: dream.id)
-                
+                try FileManager.default.removeItem(atPath: url.path)
                 DispatchQueue.main.async{ [weak self ] in
                     guard let self = self else {return}
                     self.dreamRecordingsView.collectionView.deleteItems(at:    [indexPath])

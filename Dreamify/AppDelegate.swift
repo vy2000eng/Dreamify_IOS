@@ -14,17 +14,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     let taskId = "dreamify.refreshAuthToken.backgroundTask"
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {        
         
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskId, using: nil){ task in
             guard let newTask = task as? BGAppRefreshTask  else {return}
             self.handleTask(task: newTask)
             
         }
-//        let count = UserDefaults.standard.integer(forKey: "task_run_count")
-//        print("task ran \(count) times!")
+
         
          schedule()
         

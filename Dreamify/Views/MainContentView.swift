@@ -106,7 +106,6 @@ class MainContentView: UIView {
         let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .medium)
         actionButton.setImage(UIImage(systemName: "mic.fill", withConfiguration: config), for: .normal)
         
-        //pulseView.stopAnimating()
         audioVisualizerView.stopAnimating()
     }
 }

@@ -29,7 +29,6 @@ class MainViewController: UIViewController{
         self.mainContentView            = MainContentView()
         self.dreamsRecordingViewModel   = DreamRecordingViewModel()
         audioRecordingManager           = AudioRecorderManager()
-        //self.speechTranscriberManager = SpeeachTranscriberManager()
         super.init                        (nibName: nil, bundle: nil)
         
     }
@@ -195,7 +194,6 @@ extension MainViewController{
                                                           preferredStyle: .alert)
                             alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                             self.present(alert, animated: true)
-                            // mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
                             mainContentView.stopRecording()
                             
                             
@@ -216,9 +214,7 @@ extension MainViewController{
                         
                         do{
                             try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title,transcribedText: nil)
-                            try addNewRecordToDreamRecordingViewdelegate?.updateCollection(controllerMangedByDataSource: .DreamViewController)
-                            try addNewRecordToCalendarViewdelegate?.updateCollection(controllerMangedByDataSource: .CalendarViewController)
-                            
+
                             
                             
                         }catch let err as NSError{
@@ -228,7 +224,6 @@ extension MainViewController{
                                                           preferredStyle: .alert)
                             alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                             self.present(alert, animated: true)
-                            //mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
                             
                         }
                     }

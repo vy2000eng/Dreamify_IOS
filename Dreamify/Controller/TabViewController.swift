@@ -20,9 +20,10 @@ class TabsViewController:UITabBarController{
     var mainViewController           : MainViewController
     var dreamRecordingViewController : DreamRecordingsViewController
     var calendarViewController       : CalendarViewController
+    var accountManagerViewController       : AccountManagerViewController
     
     init() {
-        
+        self.accountManagerViewController                                      = AccountManagerViewController ()
         self.mainViewController                                                = MainViewController           ()
         self.dreamRecordingViewController                                      = DreamRecordingsViewController()
         self.calendarViewController                                            = CalendarViewController       ()
@@ -40,6 +41,8 @@ class TabsViewController:UITabBarController{
     override func viewDidLoad() {
         print("actual vc appeared")
         super.viewDidLoad()
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "gear") , style: .plain, target: self, action: #selector(invokeSettingsController))
 
         
         let nav1 = UINavigationController(rootViewController: mainViewController)
@@ -74,6 +77,14 @@ class TabsViewController:UITabBarController{
         
         calendarViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewInDreamViewControllerDelegate          = dreamRecordingViewController
         calendarViewController.dreamRecordingDataSourceManager.retrieveCurrentlySelectedDateDelegate                                 = calendarViewController
+        
+    }
+    
+    
+    
+    
+    @objc private func invokeSettingsController(){
+        navigationController?.pushViewController(accountManagerViewController, animated: true)
         
     }
 }

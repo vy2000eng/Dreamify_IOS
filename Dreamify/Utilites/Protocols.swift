@@ -25,3 +25,8 @@ protocol RetrieveCurrentlySelectedDate: AnyObject{
 protocol DeleteSectionFromCollectionView:AnyObject{
     func deleteRecording(id:UUID) throws -> Void
 }
+
+protocol UserIsLoggedInChangeAccountMAnagementOptions:AnyObject{
+    func userIsLoggedInChangeAccountMAnagementOptions() ->Void
+    
+}

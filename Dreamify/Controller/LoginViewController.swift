@@ -11,11 +11,13 @@ import KeychainAccess
 class LoginViewController:UIViewController{
     
     var loginView : LoginView;
+    let alert :UIAlertController;
+    weak var userIsLoggedInChangeAccountMAnagementOptionsDelegate:UserIsLoggedInChangeAccountMAnagementOptions?
     
     init(){
         
         loginView = LoginView(frame: .zero)
-        
+        alert = UIAlertController(title: "", message: "", preferredStyle: .alert)
         
         super.init(nibName: nil, bundle: nil)
         
@@ -100,9 +102,12 @@ extension LoginViewController{
     @objc private func signUpButtonTapped() {
         // Navigate to sign up screen
         print("Sign up tapped")
+        loginView.isSignUpMode.toggle()
+        print(loginView.isSignUpMode ? "Sign up mode" : "Sign in mode")
     }
     //used in delegate so not private
     @objc func loginButtonTapped() {
+        print("login tapped")
         guard validateInput() else { return }
         
         // Show loading state
@@ -110,49 +115,114 @@ extension LoginViewController{
         let email = loginView.emailTextField.text
         let password = loginView.passwordTextField.text
         
+    
         
-        APIClientManager.shared.request(
-            endpoint: "/account/login",
-            method: "POST",
-            body: ["email": email, "password": password],
-            type: LoginResponse.self) {[weak self] result in
-            guard let self = self else {return}
-            DispatchQueue.main.async{
-                switch result {
-                case .success(let response):
-             
-                    TokenManager.shared.saveAccessToken(response.accessToken)
-                    TokenManager.shared.saveRefreshToken(response.refreshToken)
-                    UserSettings.shared.setLoginState(true)
-                    
-                    
-                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                         let window = windowScene.windows.first {
-                          let mainViewController = TabsViewController()
-                          window.rootViewController = UINavigationController(rootViewController: mainViewController)
-                          window.makeKeyAndVisible()
+        if(!loginView.isSignUpMode){
+            APIClientManager.shared.request(
+                endpoint: "/account/login",
+                method: "POST",
+                body: ["email": email, "password": password],
+                type: LoginResponse.self) {[weak self] result in
+                guard let self = self else {return}
+                DispatchQueue.main.async{
+                    switch result {
+                    case .success(let response):
+                 
+                        TokenManager.shared.saveAccessToken(response.accessToken)
+                        TokenManager.shared.saveRefreshToken(response.refreshToken)
+                        UserSettings.shared.setLoginState(true)
+                        
+                        
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                             let window = windowScene.windows.first {
+                              let mainViewController = TabsViewController()
+                              window.rootViewController = UINavigationController(rootViewController: mainViewController)
+                              window.makeKeyAndVisible()
+                        }
+                        
+                        self.setLoadingState(false)
+                        print("Success: \(response.accessToken)")
+                    case .failure(let error):
+                        //TODO: add an actual error lol
+                        print("Error: \(error)")
+                        self.setLoadingState(false)
+                        
+                        self.createAlert(title: "login Error", msg: error.localizedDescription)
+                        self.present(self.alert,animated: true)
+                        
+                        
                     }
                     
-                    self.setLoadingState(false)
-
-                    
-
-                    
-                    print("Success: \(response.accessToken)")
-                case .failure(let error):
-                    print("Error: \(error)")
-                    self.setLoadingState(false)
-
                 }
-                
+             
             }
-         
+            
+        }else{
+//            let fname = loginView.fNameTextField.text;
+//            let lname = loginView.LNameTextField.text;
+        
+            
+            APIClientManager.shared.request(
+                endpoint: "/account/register",
+                method: "POST",
+                body: ["email": email, "password": password],
+                type: LoginResponse.self) {[weak self] result in
+                guard let self = self else {return}
+                DispatchQueue.main.async{
+                    switch result {
+                    case .success(let response):
+                 
+                        TokenManager.shared.saveAccessToken(response.accessToken)
+                        TokenManager.shared.saveRefreshToken(response.refreshToken)
+                        UserSettings.shared.setLoginState(true)
+                        //navigationController?.
+                        
+                        
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                             let window = windowScene.windows.first {
+                              let mainViewController = TabsViewController()
+                              window.rootViewController = UINavigationController(rootViewController: mainViewController)
+                              window.makeKeyAndVisible()
+                        }
+                        
+                        self.setLoadingState(false)
+                        print("Success: \(response.accessToken)")
+                    case .failure(let error):
+                        //TODO: add an actual error lol
+                        print("Error: \(error)")
+                        self.setLoadingState(false)
+                        self.createAlert(title: "registration Error", msg: error.localizedDescription)
+                        self.present(self.alert,animated: true)
+                     
+                        //alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                        //self.present(alert, animated: true)
+                        
+                    }
+                    
+                }
+             
+            }
         }
+        userIsLoggedInChangeAccountMAnagementOptionsDelegate?.userIsLoggedInChangeAccountMAnagementOptions()
+
         
     }
 }
 // MARK: utililty functions
 extension LoginViewController{
+    private func createAlert(title:String, msg:String){
+        alert.title = title
+        alert.message = msg
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        
+        
+        
+//        let alert = UIAlertController(title: title,
+//                                      message: msg,
+//                                      preferredStyle: .alert)
+    }
+    
+    
     
     private func handleLoginSuccess() {
         // Handle successful login

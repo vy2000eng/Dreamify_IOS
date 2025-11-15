@@ -18,10 +18,8 @@ class DreamRecordingsViewController:UIViewController, DeleteSectionFromCollectio
         print("dream vc delegate called")
         do{
             try self.dreamRecordingViewModel.removeDreamFromArray(id: id)//removeDreamByIDFromArray(id:id)//removeDreamFromArray(id: dream.id)
-            DispatchQueue.main.async {[weak self] in
-                guard let self = self else { return }
+
                 self.dreamRecordingView.collectionView.reloadData()//deleteSections(IndexSet(integer: indexPath.section))
-            }
             
         }catch let err{
             print("an error occured whilst removing dream from collection view in dreamRecordingViewController: \(err)")
@@ -36,6 +34,28 @@ class DreamRecordingsViewController:UIViewController, DeleteSectionFromCollectio
     var audioPlayer                    : AVAudioPlayer?
     private var loadingOverlay         : LoadingOverlayView?
     var dreamRecordingDataSourceManager: DreamRecordingViewDataSourceManager!
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        print("exitting Dream View Recodings")
+        guard let previosulyOpenDreamID = dreamRecordingViewModel.previouslyOpenedDreamId else {
+     
+            return
+        }
+        
+        let dream = dreamRecordingViewModel.dream(by:previosulyOpenDreamID)
+        dream.toggleIsOpen()
+
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) { [weak self] in
+            guard let self = self else {return}
+            
+            self.dreamRecordingView.collectionView.performBatchUpdates({
+                self.dreamRecordingView.collectionView.reloadItems(at: [IndexPath(row: previosulyOpenDreamID, section: 0)])
+            }, completion: nil)
+        }
+        dreamRecordingViewModel.previouslyOpenedDreamId = nil
+
+        
+    }
     
 
     

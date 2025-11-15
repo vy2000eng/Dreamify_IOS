@@ -25,6 +25,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
          schedule()
         
+//        do {
+//            let calendar = Calendar.current
+//            let today = Date()
+//            
+//            let dreamText = "I was soaring above crystal blue waters, feeling completely free and weightless."
+//            
+//            for i in 0..<100 {
+//                // Distribute dreams across 7 days (0-6 days ago)
+//                let daysAgo = i % 7
+//                
+//                if let dreamDate = calendar.date(byAdding: .day, value: -daysAgo, to: today) {
+//                    try CoreDataManager.shared.addDreamTestDream(
+//                        title: "Dream \(i + 1)",
+//                        url: "https://www.youtube.com/watch?v=example\(i + 1)",
+//                        transribedText: dreamText,
+//                        date: dreamDate
+//                    )
+//                }
+//            }
+//            
+//        } catch let err {
+//            print("Error adding dreams: \(err.localizedDescription)")
+//        }
+
+        
         
         
         

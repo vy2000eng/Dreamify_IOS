@@ -93,6 +93,21 @@ class CoreDataManager{
         }
     }
     
+    func addDreamTestDream(title:String, url:String, transribedText:String?, date:Date) throws{
+        let newDream          = Dream(context: context)
+        newDream.title        = title
+        newDream.url          = url
+        newDream.id           = UUID()
+        newDream.created_date = date
+        newDream.transcribedText = transribedText
+        do{
+            try context.save()
+        }catch let err as NSError{
+            print("Error saving a dream from funciton call addDream(title:String, url:String) \(err), \(err.userInfo)")
+            throw err
+        }
+    }
+    
     func updateAnalyzedTextForDream(analyzedText:String, dreamId:UUID){
         let fetchRequest: NSFetchRequest<Dream> = Dream.fetchRequest()
         fetchRequest.predicate = NSPredicate(format:"id == %@", dreamId.uuidString)

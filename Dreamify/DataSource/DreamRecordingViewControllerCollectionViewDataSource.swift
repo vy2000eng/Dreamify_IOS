@@ -8,7 +8,7 @@
 import UIKit
 class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     var dreamRecordingViewModel:DreamRecordingViewModel
-    var dreamRecordingsView:DreamRecordsView
+    //var dreamRecordingsView:DreamRecordsView
     var controller:UIViewController
     var audioPlayerManager: AudioPlayerManager
     var controllerManagedByAudioPlayer:ControllerManagedByAudioPlayerClass
@@ -20,17 +20,19 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     init(dreamRecordingView:DreamRecordsView, dreamRecordingViewModel:DreamRecordingViewModel,controller:UIViewController) {
         self.controller = controller
         
-        self.dreamRecordingsView = dreamRecordingView
+        //self.dreamRecordingsView = dreamRecordingView
         self.dreamRecordingViewModel = dreamRecordingViewModel
         // Cleaner type checking
         switch controller {
         case is DreamRecordingsViewController:
             self.controller =  self.controller as! DreamRecordingsViewController
             controllerManagedByAudioPlayer = .DreamViewController
+            break
         case is CalendarViewController:
             self.controller =  self.controller as! CalendarViewController
 
             controllerManagedByAudioPlayer = .CalendarViewController
+            break
         default:
             fatalError("Unsupported controller type")
             
@@ -51,7 +53,9 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     }
     
     func dreamCell(indexPath:IndexPath) -> UICollectionViewCell{
+        print("index path at which the cell is being returned is: [\(indexPath.row),\(indexPath.section)]")
         guard let cell = dreamRecordingsView.collectionView.dequeueReusableCell(withReuseIdentifier: "dreamCell", for: indexPath) as? DreamRecordingViewCell
+        
         else{
             fatalError("Unable to dequeue TopicViewCell. This is a developer error.")
         }
@@ -97,25 +101,68 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         print("tapped item at \(indexPath.row)")
         let dream = dreamRecordingViewModel.dream(by: indexPath.row)
-        dream.toggleIsOpen()
-
-        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
-            collectionView.performBatchUpdates({
-                collectionView.reloadItems(at: [indexPath])
-            }, completion: nil)
+        if(dreamRecordingViewModel.previouslyOpenedDreamId == indexPath.row){
+            dream.toggleIsOpen()
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+                collectionView.performBatchUpdates({
+                    collectionView.reloadItems(at: [indexPath])
+                }, completion: nil)
+            }
+            return
+            
         }
-
-
-
-        
-
         
         
-        
-
-        
+        //if there are no open dreams
+        if(dreamRecordingViewModel.previouslyOpenedDreamId == nil){
+            dreamRecordingViewModel.previouslyOpenedDreamId = indexPath.row
+            dream.toggleIsOpen()
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+                collectionView.performBatchUpdates({
+                    collectionView.reloadItems(at: [indexPath])
+                }, completion: nil)
+            }
+            return
+        }
+        //if there is an open dream
+        //1.) close the first one
+        //2.) open the second one
+        else{
+            guard let previosulyOpenDreamID = dreamRecordingViewModel.previouslyOpenedDreamId else {
+                
+                dream.toggleIsOpen()
+                dreamRecordingViewModel.previouslyOpenedDreamId = indexPath.row
+                UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
+                    collectionView.performBatchUpdates({
+                        collectionView.reloadItems(at: [indexPath])
+                    }, completion: nil)
+                }
+                return
+            }
+            var previouslyOpenedDream = dreamRecordingViewModel.dream(by: previosulyOpenDreamID)
+            previouslyOpenedDream.toggleIsOpen()
+            dream.toggleIsOpen()
+            UIView.animate(
+                withDuration: 0.3,
+                delay: 0,
+                options: [.curveLinear],
+                animations: {
+                    collectionView.performBatchUpdates({
+                        collectionView.reloadItems(at: [
+                            IndexPath(row: previosulyOpenDreamID, section: 0),
+                            indexPath
+                        ])
+                    }, completion: nil)
+                    collectionView.layoutIfNeeded()
+                }
+            )
+            dreamRecordingViewModel.previouslyOpenedDreamId = indexPath.row
+            return
+            
+        }
         
     }
+    
     
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -154,11 +201,11 @@ extension DreamRecordingViewDataSourceManager{
         }
         
         let config    = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
-        let dream     = dreamRecordingViewModel.dream(by: indexPath.section)
+        let dream     = dreamRecordingViewModel.dream(by: indexPath.row)
         
         
         // if it is the same index, so pausing the current recording
-        if(dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying == indexPath.section){
+        if(dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying == indexPath.row){
             curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
             //stopAudio()
             do{
@@ -191,7 +238,7 @@ extension DreamRecordingViewDataSourceManager{
                     
                     
                     curr_cell.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
-                    dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.section,isPlaying: true)
+                    dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.row,isPlaying: true)
                     let url = dream.url//URL(string: dream.url)
                     try     self.audioPlayerManager.playAudio(fileName: url)
                     
@@ -244,7 +291,7 @@ extension DreamRecordingViewDataSourceManager{
                 return
             }
             
-            guard let prev_cell = dreamRecordingsView.collectionView.cellForItem(at: IndexPath(row: 0, section: currentPlayingIndex) ) as? DreamRecordingViewCell else{
+            guard let prev_cell = dreamRecordingsView.collectionView.cellForItem(at: IndexPath(row: currentPlayingIndex, section: 0) ) as? DreamRecordingViewCell else{
                 let alert = UIAlertController(title: "An Unexpected Error Occured",
                                               message: "Cannot Stop Playing the previous Recording",//"You tapped the start recording button, but the action failed",
                                               preferredStyle: .alert)
@@ -255,6 +302,7 @@ extension DreamRecordingViewDataSourceManager{
             }
             
             prev_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+            
             do{
                 try self.audioPlayerManager.stopAudio()
 
@@ -274,7 +322,7 @@ extension DreamRecordingViewDataSourceManager{
             
             
             curr_cell.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
-            dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.section,isPlaying: true)
+            dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.row,isPlaying: true)
             let url = dream.url
             
             do{
@@ -340,7 +388,7 @@ extension DreamRecordingViewDataSourceManager{
     func analyzeDream(_ sender:UIButton) {
         print("analyzze tapped")
         let indexPath = IndexPath (row: sender.tag, section: 0)
-        let dream    = dreamRecordingViewModel.dream(by: indexPath.section)
+        let dream    = dreamRecordingViewModel.dream(by: indexPath.row)
         
         let loading = LoadingOverlayView(
                title: "Analyzing dream...",

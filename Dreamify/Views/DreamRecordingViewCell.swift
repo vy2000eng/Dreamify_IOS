@@ -10,13 +10,13 @@ import SwipeCellKit
 class DreamRecordingViewCell: SwipeCollectionViewCell {
     
     //section cell elements
-    lazy var mainSectionTitle: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 18, weight: .semibold)
-        label.textColor = .label
-        return label
-    }()
+//    lazy var mainSectionTitle: UILabel = {
+//        let label = UILabel()
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        label.font = .systemFont(ofSize: 18, weight: .semibold)
+//        label.textColor = .label
+//        return label
+//    }()
 
     lazy var mainCreatedOnLabel: UILabel = {
         let label = UILabel()
@@ -92,13 +92,13 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         return view
     }()
     
-    lazy var sectionTitle: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 18, weight: .semibold)
-        label.textColor = .label
-        return label
-    }()
+//    lazy var sectionTitle: UILabel = {
+//        let label = UILabel()
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        label.font = .systemFont(ofSize: 18, weight: .semibold)
+//        label.textColor = .label
+//        return label
+//    }()
     
     lazy var createdOnLabel: UILabel = {
         let label = UILabel()
@@ -108,10 +108,30 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         return label
     }()
     
+    lazy var sectionTitle: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 18, weight: .semibold)
+        label.textColor = .label
+        label.isUserInteractionEnabled = true // Enable interaction
+        return label
+    }()
+    
+    lazy var mainSectionTitle: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 18, weight: .semibold)
+        label.textColor = .label
+        label.isUserInteractionEnabled = true // Enable interaction
+        return label
+    }()
+    
     private var scrollViewHeightConstraint: NSLayoutConstraint!
     private var sectionCellConstraints: [NSLayoutConstraint] = []
     private var headerCellConstraints: [NSLayoutConstraint] = []
     private var isHeaderSetup = false
+    var onTitleLongPress: ((Int) -> Void)?
+    private var cellIndex: Int = 0
 
 
 
@@ -126,6 +146,25 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupGestures() {
+        // Add long press gesture to both title labels
+        let headerLongPress = UILongPressGestureRecognizer(target: self, action: #selector(handleTitleLongPress))
+        sectionTitle.addGestureRecognizer(headerLongPress)
+        
+        let mainLongPress = UILongPressGestureRecognizer(target: self, action: #selector(handleTitleLongPress))
+        mainSectionTitle.addGestureRecognizer(mainLongPress)
+    }
+    
+    @objc private func handleTitleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        if gesture.state == .began {
+            // Add haptic feedback
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+            
+            onTitleLongPress?(cellIndex)
+        }
     }
 
 

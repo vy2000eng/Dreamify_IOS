@@ -61,6 +61,20 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         }
         let dream = dreamRecordingViewModel.dream(by: indexPath.row)
         cell.configure(with: dream)
+
+        
+        // Create separate gesture recognizers
+        let headerLongPress = UILongPressGestureRecognizer(target: self, action: #selector(handleTitleLongPress))
+        let mainLongPress = UILongPressGestureRecognizer(target: self, action: #selector(handleTitleLongPress))
+
+        // Set tags
+        cell.headerView.tag = indexPath.row
+        cell.mainContentView.tag = indexPath.row
+
+        // Add gesture recognizers to their respective views
+        cell.headerView.addGestureRecognizer(headerLongPress)
+        cell.mainContentView.addGestureRecognizer(mainLongPress)
+        
         cell.playPauseButton.tag    = indexPath.row
         cell.playPauseButton.addTarget(self, action: #selector(handlePlayPause( _:)) , for: .touchUpInside)
         
@@ -89,6 +103,7 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         return cell
     }
 
+
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
@@ -100,23 +115,15 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         print("tapped item at \(indexPath.row)")
+        
         let dream = dreamRecordingViewModel.dream(by: indexPath.row)
-        if(dreamRecordingViewModel.previouslyOpenedDreamId == indexPath.row){
+        let previouslyOpenedId = dreamRecordingViewModel.previouslyOpenedDreamId
+        
+        // Case 1: Tapping the already open dream (toggle close)
+        if previouslyOpenedId == indexPath.row {
             dream.toggleIsOpen()
-            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
-                collectionView.performBatchUpdates({
-                    collectionView.reloadItems(at: [indexPath])
-                }, completion: nil)
-            }
-            return
+            dreamRecordingViewModel.previouslyOpenedDreamId = nil
             
-        }
-        
-        
-        //if there are no open dreams
-        if(dreamRecordingViewModel.previouslyOpenedDreamId == nil){
-            dreamRecordingViewModel.previouslyOpenedDreamId = indexPath.row
-            dream.toggleIsOpen()
             UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
                 collectionView.performBatchUpdates({
                     collectionView.reloadItems(at: [indexPath])
@@ -124,45 +131,28 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
             }
             return
         }
-        //if there is an open dream
-        //1.) close the first one
-        //2.) open the second one
-        else{
-            guard let previosulyOpenDreamID = dreamRecordingViewModel.previouslyOpenedDreamId else {
-                
-                dream.toggleIsOpen()
-                dreamRecordingViewModel.previouslyOpenedDreamId = indexPath.row
-                UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
-                    collectionView.performBatchUpdates({
-                        collectionView.reloadItems(at: [indexPath])
-                    }, completion: nil)
-                }
-                return
-            }
-            var previouslyOpenedDream = dreamRecordingViewModel.dream(by: previosulyOpenDreamID)
-            previouslyOpenedDream.toggleIsOpen()
-            dream.toggleIsOpen()
-            UIView.animate(
-                withDuration: 0.3,
-                delay: 0,
-                options: [.curveLinear],
-                animations: {
-                    collectionView.performBatchUpdates({
-                        collectionView.reloadItems(at: [
-                            IndexPath(row: previosulyOpenDreamID, section: 0),
-                            indexPath
-                        ])
-                    }, completion: nil)
-                    collectionView.layoutIfNeeded()
-                }
-            )
-            dreamRecordingViewModel.previouslyOpenedDreamId = indexPath.row
-            return
-            
+        
+        // Case 2: Opening a new dream
+        var indexPathsToReload: [IndexPath] = [indexPath]
+        
+        // Close previously opened dream if exists
+        if let previousId = previouslyOpenedId {
+            let previousDream = dreamRecordingViewModel.dream(by: previousId)
+            previousDream.toggleIsOpen()
+            indexPathsToReload.append(IndexPath(row: previousId, section: 0))
         }
         
+        // Open the selected dream
+        dream.toggleIsOpen()
+        dreamRecordingViewModel.previouslyOpenedDreamId = indexPath.row
+        
+        // Animate the changes
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+            collectionView.performBatchUpdates({
+                collectionView.reloadItems(at: indexPathsToReload)
+            }, completion: nil)
+        }
     }
-    
     
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -177,8 +167,31 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
 }
 
 extension DreamRecordingViewDataSourceManager{
+    @objc private func handleTitleLongPress(_ gesture:UILongPressGestureRecognizer) {
+        if gesture.state == .began {
+            print("long press tapped")
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+            
+            // Access the tag from the gesture's view
+            let index = gesture.view?.tag ?? 0
+            
+            let indexPath = IndexPath(row: index, section: 0)
+            let dream = dreamRecordingViewModel.dream(by: indexPath.row)
+            let vc = EditDreamViewController(dream: dream)
+            let navController = UINavigationController(rootViewController: vc)
+
+            self.controller.present(navController, animated: true)
+
+        }
+
+    }
+    
+    
+    
     @objc
     func handlePlayPause(_ sender:UIButton)  throws -> Void{
+        
         
         
         

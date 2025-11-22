@@ -61,7 +61,7 @@ class DreamRecordingsViewController:UIViewController, DeleteSectionFromCollectio
     
     init() {
         self.dreamRecordingViewModel = DreamRecordingViewModel(controllerManagedByDataSource: .DreamViewController)
-        dreamRecordingView          = DreamRecordsView(frame: .zero)
+        dreamRecordingView           = DreamRecordsView(frame: .zero)
 
         super.init                     (nibName: nil, bundle: nil)
         dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(dreamRecordingView: dreamRecordingView, dreamRecordingViewModel: dreamRecordingViewModel, controller: self)
@@ -163,6 +163,7 @@ extension URL {
 
 
 extension DreamRecordingsViewController{
+
     private func showLoading() {
            hideLoading() // Remove any existing overlay
            

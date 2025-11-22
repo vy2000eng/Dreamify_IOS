@@ -42,17 +42,15 @@ class AccountManagerView: UIView {
         title: "Subscription",
         items: [
             SettingsItem(icon: "crown.fill", title: "Manage Subscription", color: .systemOrange),
-            SettingsItem(icon: "creditcard.fill", title: "Payment Method", color: .systemGreen),
-            SettingsItem(icon: "receipt.fill", title: "Billing History", color: .systemTeal)
+
         ]
     )
     
     private lazy var privacySection = createSection(
         title: "Privacy & Policy",
         items: [
-            SettingsItem(icon: "hand.raised.fill", title: "Privacy Policy", color: .systemGray),
-            SettingsItem(icon: "doc.text.fill", title: "Terms of Service", color: .systemGray2),
-            SettingsItem(icon: "shield.fill", title: "Data & Privacy", color: .systemBlue)
+            SettingsItem(icon: "hand.raised.fill", title: "Privacy Policy", color: .systemTeal),
+            SettingsItem(icon: "doc.text.fill", title: "Terms of Service", color: .systemTeal),
         ]
     )
     

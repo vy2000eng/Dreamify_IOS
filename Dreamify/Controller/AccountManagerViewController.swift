@@ -18,6 +18,7 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
         view.addSubview(accountManagerView)
         accountManagerView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -38,14 +39,45 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
 
                 return
             }
-            var loginViewController = LoginViewController()
-            loginViewController.userIsLoggedInChangeAccountMAnagementOptionsDelegate = self
-            self.navigationController?.pushViewController(loginViewController, animated: true)
+            if(itemTitle == "Create An Account"){
+                var loginViewController = LoginViewController()
+                loginViewController.userIsLoggedInChangeAccountMAnagementOptionsDelegate = self
+                self.navigationController?.pushViewController(loginViewController, animated: true)
+                return
+            }
+        
             
             if(itemTitle == "Log Out"){
                 TokenManager.shared.clearTokens()
             }
+            if(itemTitle == "Manage Account"){
+                var userInfo = UserInfoViewController()
+                
+                
+                
+                
+               // userInfo.retrieveUserInfo()
+                //loginViewController.userIsLoggedInChangeAccountMAnagementOptionsDelegate = self
+                self.navigationController?.pushViewController(userInfo, animated: true)
+                return
+                
+            }
+            
+            
+            if(itemTitle == "Privacy Policy"){
+                var privacyPolicyViewController = PrivacyPolicyTermsOfServiceController(privacyPolicyTermsOfService: 0)
+                
+                self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
+                return
+            }
+            if(itemTitle == "Terms of Service"){
+                var privacyPolicyViewController = PrivacyPolicyTermsOfServiceController(privacyPolicyTermsOfService: 1)
+                
+                self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
+                return
+            }
         }
+        
     }
     
 

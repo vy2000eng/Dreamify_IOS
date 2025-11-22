@@ -15,7 +15,8 @@ import Foundation
 class APIClientManager {
     
     static let shared = APIClientManager()
-    private let baseURL = "https://api.dream-if-y.us/api"
+   private let baseURL = "https://api.dream-if-y.us/api"
+
     private var authToken: String?
     
     private init() {}

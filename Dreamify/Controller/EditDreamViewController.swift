@@ -9,6 +9,8 @@ import UIKit
 class EditDreamViewController:UIViewController {
     var editDreamView:EditDreamView
     var dream:DreamViewModel
+    var editDreamRecordingViewModel: EditDreamRecordingViewModel
+    weak var updateDreamTitleAndTranscriptipnViewFromDelegate:updateDreamTitleAndTranscription?
     
     
     
@@ -16,6 +18,7 @@ class EditDreamViewController:UIViewController {
     init( dream: DreamViewModel) {
         self.dream = dream
         self.editDreamView = EditDreamView(frame: .zero,dream: dream)
+        self.editDreamRecordingViewModel = EditDreamRecordingViewModel(dream: dream)
         super.init(nibName: nil, bundle: nil)
         
         
@@ -86,6 +89,10 @@ class EditDreamViewController:UIViewController {
          }
          
          let newDescription = editDreamView.descriptionTextView.text ?? ""
+         
+         editDreamRecordingViewModel.updateDream(dreamTitle: newTitle, dreamTranscription:  newDescription)
+         
+         //updateDreamTitleAndTranscriptipnViewFromDelegate.
          
          dismiss(animated: true)
 //         { [weak self] in

@@ -251,6 +251,8 @@ class AccountManagerView: UIView {
                 items: [
                     SettingsItem(icon: "person.circle.fill", title: "Manage Account", color: .systemBlue),
                     SettingsItem(icon: "person.circle.fill", title: "Log Out", color: .systemBlue),
+                    SettingsItem(icon: "person.circle.fill", title: "Delete All Data", color: .systemBlue),
+
                 ]
             )
         }

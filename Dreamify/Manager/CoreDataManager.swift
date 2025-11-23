@@ -118,13 +118,42 @@ class CoreDataManager{
         }catch let error as NSError{
             print("Error updating dream: \(error.userInfo), \(error.localizedDescription)")
         }
-        
-
-        
-
-        
-        
     }
+    //TODO: this function should throw, all of these funcitons should throw
+    func updateDream(dreamId: UUID, dreamTitle: String? = nil, dreamTranscription: String? = nil) {
+        // Check if at least one parameter is provided
+        guard dreamTitle != nil || dreamTranscription != nil else {
+            print("No updates provided - both dreamTitle and dreamTranscription are nil")
+            return
+        }
+        
+        let fetchRequest: NSFetchRequest<Dream> = Dream.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", dreamId.uuidString)
+        
+        do {
+            guard let dream = try context.fetch(fetchRequest).first else {
+                print("Dream not found with id: \(dreamId)")
+                return
+            }
+            
+            // Update title if provided
+            if let newTitle = dreamTitle {
+                dream.title = newTitle
+            }
+            
+            // Update transcription if provided
+            if let newTranscription = dreamTranscription {
+                dream.transcribedText = newTranscription // or whatever your property name is
+            }
+            
+            try context.save()
+            print("Dream updated successfully")
+            
+        } catch let error as NSError {
+            print("Error updating dream: \(error.userInfo), \(error.localizedDescription)")
+        }
+    }
+    
     
     func addDreamWithOutTextTranscription(title:String, url:String) throws{
         let newDream          = Dream(context: context)

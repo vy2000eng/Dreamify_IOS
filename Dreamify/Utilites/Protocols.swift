@@ -30,3 +30,7 @@ protocol UserIsLoggedInChangeAccountMAnagementOptions:AnyObject{
     func userIsLoggedInChangeAccountMAnagementOptions() ->Void
     
 }
+
+protocol updateDreamTitleAndTranscription:AnyObject{
+    func updateCollection(controllerMangedByDataSource:ControllerManagedByAudioPlayerClass) throws -> Void
+}

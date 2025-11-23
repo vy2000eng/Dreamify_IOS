@@ -146,6 +146,9 @@ public class DreamRecordingViewModel{
     }
     
     
+    
+    
+    
     func analyzeDream(dreamViewModel: DreamViewModel, completion: @escaping (Result<AnalysisRespone, APIError>) -> Void) {
         APIClientManager.shared.authRequest(
             endpoint: "/Analysis/analyzeDream",
@@ -198,6 +201,13 @@ public class DreamRecordingViewModel{
             print("Error adding dreams in addDream(url:String, title:String) \(err), \(err.userInfo)")
         }
     }
+    
+    
+//  
+//    //TODO: all instances which are accesing core data should throw
+//    func updateDream(dreamId: UUID, dreamTitle: String? = nil, dreamTranscription: String? = nil){
+//        CoreDataManager.shared.updateDream(dreamId: dreamId,dreamTitle: dreamTitle, dreamTranscription: dreamTranscription )
+//    }
     
 
     

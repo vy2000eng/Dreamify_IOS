@@ -10,7 +10,13 @@ import UIKit
 import CalendarKit
 
 
-class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, DeleteSectionFromCollectionView {
+class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, DeleteSectionFromCollectionView ,UpdateDreamTitleAndTranscription{
+    func updateTitleAndDescriptionInCollection() throws {
+        //print("update delegate called in CalendarViewController")
+        dreamRecordingView.collectionView.reloadData()
+
+    }
+
 
     func deleteRecording(id:UUID) {
         print("calendar vc delegate called")

@@ -76,6 +76,11 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
                 self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
                 return
             }
+            
+            if(itemTitle == "Delete All Data"){
+                
+                
+            }
         }
         
     }

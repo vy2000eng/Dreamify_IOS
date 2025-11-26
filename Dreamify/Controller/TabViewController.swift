@@ -73,7 +73,10 @@ class TabsViewController:UITabBarController{
         mainViewController.addNewRecordToDreamRecordingViewdelegate                                                                  = dreamRecordingViewController.dreamRecordingDataSourceManager
         mainViewController.addNewRecordToCalendarViewdelegate                                                                        = calendarViewController.dreamRecordingDataSourceManager
         
-        dreamRecordingViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewDelegateInCalendarViewController = calendarViewController
+        dreamRecordingViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewDelegateInCalendarViewController  = calendarViewController
+        dreamRecordingViewController.dreamRecordingDataSourceManager.updateDreamTitleAndTranscriptionDelegate                        = calendarViewController
+        calendarViewController.dreamRecordingDataSourceManager.updateDreamTitleAndTranscriptionDelegate                                = dreamRecordingViewController
+        
         
         calendarViewController.dreamRecordingDataSourceManager.deleteSectionFromCollectionViewInDreamViewControllerDelegate          = dreamRecordingViewController
         calendarViewController.dreamRecordingDataSourceManager.retrieveCurrentlySelectedDateDelegate                                 = calendarViewController

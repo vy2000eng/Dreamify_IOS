@@ -10,7 +10,7 @@ class EditDreamViewController:UIViewController {
     var editDreamView:EditDreamView
     var dream:DreamViewModel
     var editDreamRecordingViewModel: EditDreamRecordingViewModel
-    weak var updateDreamTitleAndTranscriptipnViewFromDelegate:updateDreamTitleAndTranscription?
+    //weak var updateDreamTitleAndTranscriptipnViewFromDelegate:updateDreamTitleAndTranscription?
     
     
     
@@ -24,7 +24,8 @@ class EditDreamViewController:UIViewController {
         
         
     }
-    
+    var onSaveButtomTapped: (() throws -> Void)?
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -92,13 +93,17 @@ class EditDreamViewController:UIViewController {
          
          editDreamRecordingViewModel.updateDream(dreamTitle: newTitle, dreamTranscription:  newDescription)
          
-         //updateDreamTitleAndTranscriptipnViewFromDelegate.
+         do{
+             try onSaveButtomTapped?()
+             
+
+             
+         }catch let err as NSError {
+             print("\(err)")
+         }
          
          dismiss(animated: true)
-//         { [weak self] in
-//             guard let self = self else { return }
-//             self.onSave?(self.dream, newTitle, newDescription)
-//         }
+
      }
      
      @objc private func cancelButtonTapped() {

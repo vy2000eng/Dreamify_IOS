@@ -7,6 +7,44 @@
 
 import UIKit
 class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
+
+    
+//    func updateTitleAndDescriptionInCollection(controllerMangedByDataSource :ControllerManagedByAudioPlayerClass) throws {
+//        
+//        switch(controllerMangedByDataSource){
+//        case .CalendarViewController:
+//            guard let  cvc = self.controller as? CalendarViewController else{
+//                throw NSError(domain: "CalendarViewController Casting Exception", code: 1, userInfo: [NSLocalizedDescriptionKey: "could not cast controller to DreamViewContoller"])
+//                
+//            }
+//           // do{
+//            DispatchQueue.main.async{ [weak self] in
+//                guard let self = self else{ return }
+//                cvc.dreamRecordingView.collectionView.reloadData()//.insertItems(at: [IndexPath(row: section-1, section: 0)])
+//            }
+//            
+//            break
+//        case .DreamViewController:
+//            guard let  dvc = self.controller as? DreamRecordingsViewController else{
+//                throw NSError(domain: "DreamViewController Casting Exception", code: 1, userInfo: [NSLocalizedDescriptionKey: "could not cast controller to DreamViewContoller"])
+//                
+//            }
+//
+//            DispatchQueue.main.async{ [weak self] in
+//                guard let self = self else{ return }
+//                dvc.dreamRecordingView.collectionView.reloadData()//.insertItems(at: [IndexPath(row: section-1, section: 0)])
+//            }
+//            break
+//        }
+//        
+//
+//            
+//        //}
+//  
+//            
+//
+//    }
+
     var dreamRecordingViewModel:DreamRecordingViewModel
     //var dreamRecordingsView:DreamRecordsView
     var controller:UIViewController
@@ -16,6 +54,7 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     weak var retrieveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
     weak var deleteSectionFromCollectionViewDelegateInCalendarViewController:DeleteSectionFromCollectionView?
     weak var deleteSectionFromCollectionViewInDreamViewControllerDelegate:DeleteSectionFromCollectionView?
+    weak var updateDreamTitleAndTranscriptionDelegate:UpdateDreamTitleAndTranscription?
     
     init(dreamRecordingView:DreamRecordsView, dreamRecordingViewModel:DreamRecordingViewModel,controller:UIViewController) {
         self.controller = controller
@@ -167,7 +206,8 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
 }
 
 extension DreamRecordingViewDataSourceManager{
-    @objc private func handleTitleLongPress(_ gesture:UILongPressGestureRecognizer) {
+    @objc
+    private func handleTitleLongPress(_ gesture:UILongPressGestureRecognizer) {
         if gesture.state == .began {
             print("long press tapped")
             let generator = UIImpactFeedbackGenerator(style: .medium)
@@ -179,9 +219,45 @@ extension DreamRecordingViewDataSourceManager{
             let indexPath = IndexPath(row: index, section: 0)
             let dream = dreamRecordingViewModel.dream(by: indexPath.row)
             let vc = EditDreamViewController(dream: dream)
+           // vc.updateDreamTitleAndTranscriptipnViewFromDelegate = self
             let navController = UINavigationController(rootViewController: vc)
-
             self.controller.present(navController, animated: true)
+
+            vc.onSaveButtomTapped = {[weak self] in
+                guard let self = self else{return}
+                
+                
+                if(controllerManagedByAudioPlayer == .DreamViewController){
+                    guard let controllerToUpdateCollectionInsideOf = controller as? DreamRecordingsViewController else{
+                        throw NSError(domain: "Could not cast controller to DreamRecordingsViewController", code: 0, userInfo: nil)
+                    }
+                    controllerToUpdateCollectionInsideOf.dreamRecordingView.collectionView.reloadItems(at: [indexPath])
+                    try updateDreamTitleAndTranscriptionDelegate?.updateTitleAndDescriptionInCollection()
+                    
+                    
+                    
+                    print("Edit occured in DreamViewController")
+                }
+                
+                if(controllerManagedByAudioPlayer == .CalendarViewController){
+                    guard let controllerToUpdateCollectionInsideOf = controller as? CalendarViewController else{
+                        throw NSError(domain: "Could not cast controller to CalendarViewController", code: 0, userInfo: nil)
+                    }
+                    controllerToUpdateCollectionInsideOf.dreamRecordingView.collectionView.reloadItems(at: [indexPath])
+                    
+                    try updateDreamTitleAndTranscriptionDelegate?.updateTitleAndDescriptionInCollection()
+
+                    print("Edit occured in CalendaarViewController")
+
+                }
+                
+            
+                
+            
+            }
+            
+            
+
 
         }
 

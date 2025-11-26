@@ -67,7 +67,7 @@ class AccountManagerView: UIView {
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        setupUI()
+        //setupUI()
     }
     
     // MARK: - Setup

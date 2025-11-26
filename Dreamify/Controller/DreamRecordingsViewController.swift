@@ -11,7 +11,12 @@ import AVFAudio
 
 
 //MARK: note the delegated and datasources are in there designated folders
-class DreamRecordingsViewController:UIViewController, DeleteSectionFromCollectionView{
+class DreamRecordingsViewController:UIViewController, DeleteSectionFromCollectionView, UpdateDreamTitleAndTranscription{
+    func updateTitleAndDescriptionInCollection() throws {
+        print("update delegate called in dream recordingViewController")
+        dreamRecordingView.collectionView.reloadData()
+    }
+
 
 
     func deleteRecording(id:UUID) {

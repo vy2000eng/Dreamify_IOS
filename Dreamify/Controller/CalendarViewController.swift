@@ -10,7 +10,13 @@ import UIKit
 import CalendarKit
 
 
-class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, DeleteSectionFromCollectionView {
+class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, DeleteSectionFromCollectionView ,UpdateDreamTitleAndTranscription{
+    func updateTitleAndDescriptionInCollection() throws {
+        //print("update delegate called in CalendarViewController")
+        dreamRecordingView.collectionView.reloadData()
+
+    }
+
 
     func deleteRecording(id:UUID) {
         print("calendar vc delegate called")
@@ -25,6 +31,31 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
             print("an error occured whilst removing dream from collection view in dreamRecordingViewController: \(err)")
         }
 
+    }
+    override func viewWillDisappear(_ animated: Bool) {
+        // TODO: add some audio player management here, so when switching b/w controllers, audio stops playing in one
+        print("leaving Calendar View")
+        guard let previosulyOpenDreamID = dreamRecordingViewModel.previouslyOpenedDreamId else {
+     
+            return
+        }
+        
+        let dream = dreamRecordingViewModel.dream(by:previosulyOpenDreamID)
+        dream.toggleIsOpen()
+
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) { [weak self] in
+            guard let self = self else {return}
+            
+            self.dreamRecordingView.collectionView.performBatchUpdates({
+                self.dreamRecordingView.collectionView.reloadItems(at: [IndexPath(row: previosulyOpenDreamID, section: 0)])
+            }, completion: nil)
+        }
+        dreamRecordingViewModel.previouslyOpenedDreamId = nil
+        
+        
+        
+        
+        
     }
 
     
@@ -44,12 +75,12 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
     
     init(){
         self.dreamRecordingViewModel = DreamRecordingViewModel(controllerManagedByDataSource: .CalendarViewController,curentlySelectedDate: current_date)
-        self.dreamRecordingView = DreamRecordsView(frame: .zero)
-        calendarView = CalendarView()
+        dreamRecordingView           = DreamRecordsView(frame: .zero)
+        calendarView                 = CalendarView()
      
         
         super.init(nibName: nil, bundle: nil)
-        dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(dreamRecordingView: self.dreamRecordingView,dreamRecordingViewModel: self.dreamRecordingViewModel, controller: self)
+        dreamRecordingDataSourceManager = DreamRecordingViewDataSourceManager(dreamRecordingView: dreamRecordingView,dreamRecordingViewModel: dreamRecordingViewModel, controller: self)
     }
     
     required init?(coder: NSCoder) {
@@ -58,12 +89,12 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        dreamRecordingView.collectionView.delegate = dreamRecordingDataSourceManager
+        dreamRecordingView.collectionView.dataSource = dreamRecordingDataSourceManager
         setupUI()
         setupConstraints()
         setupCalendarSelection()
-            //navigationController?.setToolbarHidden(true, animated: false)
         navigationItem.leftBarButtonItem = createLeftOptionsBarButtonItem()
-        //navigationItem.rightBarButtonItem = createRightOptionsBarButtonItem()
 
 
     }
@@ -72,10 +103,8 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
     private func setupUI(){
         view.backgroundColor = .systemBackground
         navigationController?.navigationItem.largeTitleDisplayMode = .never
-        //title = "Calendar"
    
-        dreamRecordingView.collectionView.delegate = dreamRecordingDataSourceManager
-        dreamRecordingView.collectionView.dataSource = dreamRecordingDataSourceManager
+     
 
         view.addSubview(calendarView)
         view.addSubview(dreamRecordingView)
@@ -142,6 +171,7 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
             // Haptic feedback
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
             impactFeedback.impactOccurred()
+            dreamRecordingViewModel.previouslyOpenedDreamId = nil
             
         }catch let err as NSError{
             
@@ -152,6 +182,7 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
             self.present(alert, animated: true)
             
         }
+        
         
     }
 
@@ -183,18 +214,9 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
             return UIBarButtonItem(customView: button)
         
 
-//
-        //return UIBarButtonItem(title: "Dream Calendar", style: .done, target: self, action: #selector(toggleCalendar))
-       // let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .semibold)
-      //  return UIBarButtonItem(title: "Dream Calendar", image: UIImage(systemName: "chevron.down", withConfiguration: config), target: self, action: #selector(toggleCalendar))
 
     }
-//    func createRightOptionsBarButtonItem() -> UIBarButtonItem {
-//       // return UIBarButtonItem(title: "Add", image: UIImage(systemName: "plus"), target: self, action: #selector(addDream))
-//
-//
-//        //return UIBarButtonItem(title: "Dream Calendar", style: .done, target: self, action: #selector(toggleCalendar))
-//    }
+
     
     
     @objc private func toggleCalendar() {

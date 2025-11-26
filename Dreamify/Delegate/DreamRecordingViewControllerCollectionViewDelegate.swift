@@ -34,8 +34,8 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 
             }
             
-            let section = dreamRecordingViewModel.dreamsCount
-            if(controllerManagedByAudioPlayer == .DreamViewController && self.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfSections && vc.isViewLoaded){
+            let section = vc.dreamRecordingViewModel.dreamsCount
+            if(controllerManagedByAudioPlayer == .DreamViewController && self.dreamRecordingViewModel.dreamsCount != vc.dreamRecordingView.collectionView.numberOfItems(inSection: 0) && vc.isViewLoaded){
                 DispatchQueue.main.async{ [weak self] in
                     guard let self = self else{ return }
                     vc.dreamRecordingView.collectionView.insertItems(at: [IndexPath(row: section-1, section: 0)])
@@ -103,11 +103,12 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 guard let self = self else { return }
                 
                 let dream = self.dreamRecordingViewModel.dream(by: indexPath.row)
+                
                 let filename = dream.url
                 do {
                     print("item to be deleted at indexpath: \(indexPath)")
-                    try deleteSection(indexPath: indexPath)
-                        //collectionView.deleteItems(at: [indexPath])
+                    try deleteDream(indexPath: indexPath)
+                    self.dreamRecordingViewModel.previouslyOpenedDreamId = nil
                     
                 } catch {
                     print("Error deleting file '\(filename)': \(error.localizedDescription)")
@@ -116,6 +117,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 
                 
             }
+            
             deleteAction.image = UIImage(systemName: "trash")
             return [deleteAction]
             
@@ -133,7 +135,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
     }
     
     
-    func deleteSection(indexPath:IndexPath) throws ->Void{
+    func deleteDream(indexPath:IndexPath) throws ->Void{
         do{
             let dream = dreamRecordingViewModel.dream(by:indexPath.row)
             let filename = dream.url
@@ -142,32 +144,34 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
 
             if fileExists{
                 switch controller {
-                    case is DreamRecordingsViewController:
+                case is DreamRecordingsViewController:
                     try deleteSectionFromCollectionViewDelegateInCalendarViewController?.deleteRecording(id:dream.id)
-                    //try deleteSectionFromCollectionViewInMainViewControllerDelegate?.deleteRecording(id:dream.id)
-                        break
-                        
-                    case is CalendarViewController:
+                    break
+                    
+                case is CalendarViewController:
                     try deleteSectionFromCollectionViewInDreamViewControllerDelegate?.deleteRecording(id:dream.id)
-                   // try deleteSectionFromCollectionViewInMainViewControllerDelegate?.deleteRecording(id:dream.id)
-                        break
-                        
-                    default:
-                        // TODO: add an actual error
-                        print("an unexpected error occured")
-                        break
-
+                    break
+                    
+                default:
+                    // TODO: add an actual error
+                    print("an unexpected error occured")
+                    break
+                    
                 }
-                try FileManager.default.removeItem(atPath: url.path)
+                //1.)remove from array
                 try dreamRecordingViewModel.removeDreamFromArray(id: dream.id)
+                //2.) remove from core data
                 try dreamRecordingViewModel.deleteDreamById(id: dream.id)
+                //3.)remove from file system
+                try FileManager.default.removeItem(atPath: url.path)
                 
                 DispatchQueue.main.async{ [weak self ] in
                     guard let self = self else {return}
+                    //4.) remove from collection view
                     self.dreamRecordingsView.collectionView.deleteItems(at:    [indexPath])
                 }
-
             }
+
             
         }catch{
             print("Error deleting file: \(error.localizedDescription)")
@@ -175,6 +179,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
         }
 
     }
+
     
 
     
@@ -190,7 +195,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
         
         
                     }
-                    guard let  currPlayingCell = self.dreamRecordingsView.collectionView.cellForItem(at: IndexPath(row: 0, section: curr_index) ) as? DreamRecordingViewCell else{
+                    guard let  currPlayingCell = self.dreamRecordingsView.collectionView.cellForItem(at: IndexPath(row: curr_index, section: 0) ) as? DreamRecordingViewCell else{
                         throw NSError(domain: "AudioStoppingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Play Pause Controller is accessing a variable that doesnt exist in the collection"])
         
         
@@ -200,6 +205,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
         
         
                 }catch let err as NSError{
+                    
                     let alert = UIAlertController(title: "An Unexpected Error Occured",
                                                   message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
                                                   preferredStyle: .alert)
@@ -224,3 +230,15 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
 
 
 
+extension DreamRecordingViewDataSourceManager {
+    var dreamRecordingsView: DreamRecordsView {
+        switch controller {
+        case let vc as DreamRecordingsViewController:
+            return vc.dreamRecordingView
+        case let vc as CalendarViewController:
+            return vc.dreamRecordingView
+        default:
+            fatalError("Unsupported controller type")
+        }
+    }
+}

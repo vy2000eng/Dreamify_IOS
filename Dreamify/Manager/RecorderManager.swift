@@ -12,9 +12,6 @@ import UIKit
 enum State  {
     case stopped
     case recording
-    
-    
-    
 }
 
 public class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {

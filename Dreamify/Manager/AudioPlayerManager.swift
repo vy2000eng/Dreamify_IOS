@@ -73,12 +73,7 @@ extension AudioPlayerManager:AVAudioPlayerDelegate{
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         print("audio finished")
         
-//        if let viewController = viewController as? DreamRecordingsViewController {
-//            //let dreamVC = viewController as! DreamRecordingsViewController
-//            
-//        }
-        //dreamVC.collectionView.reloadData()
-        
+
         
         
         do{
@@ -92,8 +87,7 @@ extension AudioPlayerManager:AVAudioPlayerDelegate{
             }
             
             if let dreamVC = viewController as? DreamRecordingsViewController {
-                //let dreamVC = viewController as! DreamRecordingsViewController
-                guard let  currPlayingCell = dreamVC.dreamRecordingView.collectionView.cellForItem(at: IndexPath(row: 0, section: curr_index) ) as? DreamRecordingViewCell else{
+                guard let  currPlayingCell = dreamVC.dreamRecordingView.collectionView.cellForItem(at: IndexPath(row: curr_index, section:0) ) as? DreamRecordingViewCell else{
                     throw NSError(domain: "AudioStoppingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Play Pause Controller is accessing a variable that doesnt exist in the collection"])
                     
                     
@@ -103,8 +97,7 @@ extension AudioPlayerManager:AVAudioPlayerDelegate{
                 
             }
             if let calendarViewController = viewController as? CalendarViewController {
-                //let dreamVC = viewController as! DreamRecordingsViewController
-                guard let  currPlayingCell = calendarViewController.dreamRecordingView.collectionView.cellForItem(at: IndexPath(row: 0, section: curr_index) ) as? DreamRecordingViewCell else{
+                guard let  currPlayingCell = calendarViewController.dreamRecordingView.collectionView.cellForItem(at: IndexPath(row: curr_index, section:0) ) as? DreamRecordingViewCell else{
                     throw NSError(domain: "AudioStoppingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Play Pause Controller is accessing a variable that doesnt exist in the collection"])
                     
                     

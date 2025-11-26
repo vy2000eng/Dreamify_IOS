@@ -37,18 +37,7 @@ class DreamRecordsView:UIView{
             section.interGroupSpacing = 16 // More generous spacing
             section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0)
             
-            // Header
-//            let headerSize = NSCollectionLayoutSize(
-//                widthDimension: .fractionalWidth(1.0),
-//                heightDimension: .estimated(60)
-//            )
-//            let header = NSCollectionLayoutBoundarySupplementaryItem(
-//                layoutSize: headerSize,
-//                elementKind: UICollectionView.elementKindSectionHeader,
-//                alignment: .top
-//            )
-//            header.pinToVisibleBounds = false // Less aggressive pinning
-//            section.boundarySupplementaryItems = [header]
+
             
             return section
         }
@@ -57,7 +46,6 @@ class DreamRecordsView:UIView{
         collectionView.backgroundColor = .systemBackground
         collectionView.contentInsetAdjustmentBehavior = .automatic
         collectionView.register(DreamRecordingViewCell.self, forCellWithReuseIdentifier: "dreamCell")
-        //collectionView.register(DreamRecordingHeaderViewCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "headerCell")
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.showsVerticalScrollIndicator = false // Cleaner look
         

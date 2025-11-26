@@ -14,19 +14,41 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     let taskId = "dreamify.refreshAuthToken.backgroundTask"
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {        
         
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskId, using: nil){ task in
             guard let newTask = task as? BGAppRefreshTask  else {return}
             self.handleTask(task: newTask)
             
         }
-//        let count = UserDefaults.standard.integer(forKey: "task_run_count")
-//        print("task ran \(count) times!")
+
         
          schedule()
+        
+//        do {
+//            let calendar = Calendar.current
+//            let today = Date()
+//            
+//            let dreamText = "I was soaring above crystal blue waters, feeling completely free and weightless."
+//            
+//            for i in 0..<100 {
+//                // Distribute dreams across 7 days (0-6 days ago)
+//                let daysAgo = i % 7
+//                
+//                if let dreamDate = calendar.date(byAdding: .day, value: -daysAgo, to: today) {
+//                    try CoreDataManager.shared.addDreamTestDream(
+//                        title: "Dream \(i + 1)",
+//                        url: "https://www.youtube.com/watch?v=example\(i + 1)",
+//                        transribedText: dreamText,
+//                        date: dreamDate
+//                    )
+//                }
+//            }
+//            
+//        } catch let err {
+//            print("Error adding dreams: \(err.localizedDescription)")
+//        }
+
         
         
         

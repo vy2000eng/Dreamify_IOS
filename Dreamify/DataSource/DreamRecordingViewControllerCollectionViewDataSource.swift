@@ -7,31 +7,71 @@
 
 import UIKit
 class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
+
+    
+//    func updateTitleAndDescriptionInCollection(controllerMangedByDataSource :ControllerManagedByAudioPlayerClass) throws {
+//        
+//        switch(controllerMangedByDataSource){
+//        case .CalendarViewController:
+//            guard let  cvc = self.controller as? CalendarViewController else{
+//                throw NSError(domain: "CalendarViewController Casting Exception", code: 1, userInfo: [NSLocalizedDescriptionKey: "could not cast controller to DreamViewContoller"])
+//                
+//            }
+//           // do{
+//            DispatchQueue.main.async{ [weak self] in
+//                guard let self = self else{ return }
+//                cvc.dreamRecordingView.collectionView.reloadData()//.insertItems(at: [IndexPath(row: section-1, section: 0)])
+//            }
+//            
+//            break
+//        case .DreamViewController:
+//            guard let  dvc = self.controller as? DreamRecordingsViewController else{
+//                throw NSError(domain: "DreamViewController Casting Exception", code: 1, userInfo: [NSLocalizedDescriptionKey: "could not cast controller to DreamViewContoller"])
+//                
+//            }
+//
+//            DispatchQueue.main.async{ [weak self] in
+//                guard let self = self else{ return }
+//                dvc.dreamRecordingView.collectionView.reloadData()//.insertItems(at: [IndexPath(row: section-1, section: 0)])
+//            }
+//            break
+//        }
+//        
+//
+//            
+//        //}
+//  
+//            
+//
+//    }
+
     var dreamRecordingViewModel:DreamRecordingViewModel
-    var dreamRecordingsView:DreamRecordsView
+    //var dreamRecordingsView:DreamRecordsView
     var controller:UIViewController
     var audioPlayerManager: AudioPlayerManager
     var controllerManagedByAudioPlayer:ControllerManagedByAudioPlayerClass
    
     weak var retrieveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
     weak var deleteSectionFromCollectionViewDelegateInCalendarViewController:DeleteSectionFromCollectionView?
-    weak var deleteSectionFromCollectionViewInMainViewControllerDelegate:DeleteSectionFromCollectionView?
     weak var deleteSectionFromCollectionViewInDreamViewControllerDelegate:DeleteSectionFromCollectionView?
+    weak var updateDreamTitleAndTranscriptionDelegate:UpdateDreamTitleAndTranscription?
     
     init(dreamRecordingView:DreamRecordsView, dreamRecordingViewModel:DreamRecordingViewModel,controller:UIViewController) {
         self.controller = controller
         
-        self.dreamRecordingsView = dreamRecordingView
+        //self.dreamRecordingsView = dreamRecordingView
         self.dreamRecordingViewModel = dreamRecordingViewModel
         // Cleaner type checking
         switch controller {
         case is DreamRecordingsViewController:
             self.controller =  self.controller as! DreamRecordingsViewController
             controllerManagedByAudioPlayer = .DreamViewController
+            break
         case is CalendarViewController:
             self.controller =  self.controller as! CalendarViewController
 
             controllerManagedByAudioPlayer = .CalendarViewController
+            break
         default:
             fatalError("Unsupported controller type")
             
@@ -52,12 +92,28 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     }
     
     func dreamCell(indexPath:IndexPath) -> UICollectionViewCell{
+        print("index path at which the cell is being returned is: [\(indexPath.row),\(indexPath.section)]")
         guard let cell = dreamRecordingsView.collectionView.dequeueReusableCell(withReuseIdentifier: "dreamCell", for: indexPath) as? DreamRecordingViewCell
+        
         else{
             fatalError("Unable to dequeue TopicViewCell. This is a developer error.")
         }
         let dream = dreamRecordingViewModel.dream(by: indexPath.row)
         cell.configure(with: dream)
+
+        
+        // Create separate gesture recognizers
+        let headerLongPress = UILongPressGestureRecognizer(target: self, action: #selector(handleTitleLongPress))
+        let mainLongPress = UILongPressGestureRecognizer(target: self, action: #selector(handleTitleLongPress))
+
+        // Set tags
+        cell.headerView.tag = indexPath.row
+        cell.mainContentView.tag = indexPath.row
+
+        // Add gesture recognizers to their respective views
+        cell.headerView.addGestureRecognizer(headerLongPress)
+        cell.mainContentView.addGestureRecognizer(mainLongPress)
+        
         cell.playPauseButton.tag    = indexPath.row
         cell.playPauseButton.addTarget(self, action: #selector(handlePlayPause( _:)) , for: .touchUpInside)
         
@@ -86,6 +142,7 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         return cell
     }
 
+
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
@@ -97,73 +154,50 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         print("tapped item at \(indexPath.row)")
-        let dream = dreamRecordingViewModel.dream(by: indexPath.row)
-        dream.toggleIsOpen()
-//        if let cell = collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell {
-//            cell.configure(with: dream)
-//        }
         
-       // collectionView.reconfigureItems(at: [indexPath])
+        let dream = dreamRecordingViewModel.dream(by: indexPath.row)
+        let previouslyOpenedId = dreamRecordingViewModel.previouslyOpenedDreamId
+        
+        // Case 1: Tapping the already open dream (toggle close)
+        if previouslyOpenedId == indexPath.row {
+            dream.toggleIsOpen()
+            dreamRecordingViewModel.previouslyOpenedDreamId = nil
+            
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+                collectionView.performBatchUpdates({
+                    collectionView.reloadItems(at: [indexPath])
+                }, completion: nil)
+            }
+            return
+        }
+        
+        // Case 2: Opening a new dream
+        var indexPathsToReload: [IndexPath] = [indexPath]
+        
+        // Close previously opened dream if exists
+        if let previousId = previouslyOpenedId {
+            let previousDream = dreamRecordingViewModel.dream(by: previousId)
+            previousDream.toggleIsOpen()
+            indexPathsToReload.append(IndexPath(row: previousId, section: 0))
+        }
+        
+        // Open the selected dream
+        dream.toggleIsOpen()
+        dreamRecordingViewModel.previouslyOpenedDreamId = indexPath.row
+        
+        // Animate the changes
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
             collectionView.performBatchUpdates({
-                //collectionView.reconfigureItems(at: [indexPath])
-                collectionView.reloadItems(at: [indexPath])
+                collectionView.reloadItems(at: indexPathsToReload)
             }, completion: nil)
         }
-
-        
-        
-//        collectionView.performBatchUpdates({
-//              collectionView.reloadItems(at: [indexPath])
-//          }, completion: nil)
-//        guard let cell = dreamRecordingsView.collectionView.dequeueReusableCell(withReuseIdentifier: "dreamCell", for: indexPath) as? DreamRecordingViewCell
-//        else{
-//            fatalError("Unable to dequeue TopicViewCell. This is a developer error.")
-//        }
-       // cell.configure(with: dream)
-        
-        //return dreamCell(indexPath: indexPath)
-
-        
-
-        
-        
-        
-
-        
-        
     }
     
-//    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-//        
-//        print("view called")
-//        print("index path: \( indexPath.section)")
-//        print("dream \(dreamRecordingViewModel.dream(by: indexPath.section).title)")
-//        
-//        let cell = collectionView.dequeueReusableSupplementaryView(ofKind:     kind, withReuseIdentifier: "headerCell", for: indexPath) as! DreamRecordingHeaderViewCell
-//        cell.configureDreamRecordingViewHeader(viewmodel: dreamRecordingViewModel, row: indexPath.section)
-//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture(gesture:)))
-//        cell.headerView.isUserInteractionEnabled = true
-//        cell.headerView.addGestureRecognizer(tapGesture)
-//        cell.headerView.tag = indexPath.section
-//        return cell
-//        
-//    }
-    
-//    func numberOfSections(in collectionView: UICollectionView) -> Int {
-//        print("number of sections \(dreamRecordingViewModel.dreamsCount)")
-//        return dreamRecordingViewModel.dreamsCount
-//        
-//    }
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return dreamRecordingViewModel.dreamsCount
         
-        
-//        let dream = dreamRecordingViewModel.dream(by: section)
-//        if(dream.retrieveIsOpen()){
-//            return 1
-//        }
-//        return 0;
+
         
     }
     
@@ -173,7 +207,67 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
 
 extension DreamRecordingViewDataSourceManager{
     @objc
+    private func handleTitleLongPress(_ gesture:UILongPressGestureRecognizer) {
+        if gesture.state == .began {
+            print("long press tapped")
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+            
+            // Access the tag from the gesture's view
+            let index = gesture.view?.tag ?? 0
+            
+            let indexPath = IndexPath(row: index, section: 0)
+            let dream = dreamRecordingViewModel.dream(by: indexPath.row)
+            let vc = EditDreamViewController(dream: dream)
+           // vc.updateDreamTitleAndTranscriptipnViewFromDelegate = self
+            let navController = UINavigationController(rootViewController: vc)
+            self.controller.present(navController, animated: true)
+
+            vc.onSaveButtomTapped = {[weak self] in
+                guard let self = self else{return}
+                
+                
+                if(controllerManagedByAudioPlayer == .DreamViewController){
+                    guard let controllerToUpdateCollectionInsideOf = controller as? DreamRecordingsViewController else{
+                        throw NSError(domain: "Could not cast controller to DreamRecordingsViewController", code: 0, userInfo: nil)
+                    }
+                    controllerToUpdateCollectionInsideOf.dreamRecordingView.collectionView.reloadItems(at: [indexPath])
+                    try updateDreamTitleAndTranscriptionDelegate?.updateTitleAndDescriptionInCollection()
+                    
+                    
+                    
+                    print("Edit occured in DreamViewController")
+                }
+                
+                if(controllerManagedByAudioPlayer == .CalendarViewController){
+                    guard let controllerToUpdateCollectionInsideOf = controller as? CalendarViewController else{
+                        throw NSError(domain: "Could not cast controller to CalendarViewController", code: 0, userInfo: nil)
+                    }
+                    controllerToUpdateCollectionInsideOf.dreamRecordingView.collectionView.reloadItems(at: [indexPath])
+                    
+                    try updateDreamTitleAndTranscriptionDelegate?.updateTitleAndDescriptionInCollection()
+
+                    print("Edit occured in CalendaarViewController")
+
+                }
+                
+            
+                
+            
+            }
+            
+            
+
+
+        }
+
+    }
+    
+    
+    
+    @objc
     func handlePlayPause(_ sender:UIButton)  throws -> Void{
+        
         
         
         
@@ -196,11 +290,11 @@ extension DreamRecordingViewDataSourceManager{
         }
         
         let config    = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
-        let dream     = dreamRecordingViewModel.dream(by: indexPath.section)
+        let dream     = dreamRecordingViewModel.dream(by: indexPath.row)
         
         
         // if it is the same index, so pausing the current recording
-        if(dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying == indexPath.section){
+        if(dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying == indexPath.row){
             curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
             //stopAudio()
             do{
@@ -233,7 +327,7 @@ extension DreamRecordingViewDataSourceManager{
                     
                     
                     curr_cell.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
-                    dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.section,isPlaying: true)
+                    dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.row,isPlaying: true)
                     let url = dream.url//URL(string: dream.url)
                     try     self.audioPlayerManager.playAudio(fileName: url)
                     
@@ -286,7 +380,7 @@ extension DreamRecordingViewDataSourceManager{
                 return
             }
             
-            guard let prev_cell = dreamRecordingsView.collectionView.cellForItem(at: IndexPath(row: 0, section: currentPlayingIndex) ) as? DreamRecordingViewCell else{
+            guard let prev_cell = dreamRecordingsView.collectionView.cellForItem(at: IndexPath(row: currentPlayingIndex, section: 0) ) as? DreamRecordingViewCell else{
                 let alert = UIAlertController(title: "An Unexpected Error Occured",
                                               message: "Cannot Stop Playing the previous Recording",//"You tapped the start recording button, but the action failed",
                                               preferredStyle: .alert)
@@ -297,6 +391,7 @@ extension DreamRecordingViewDataSourceManager{
             }
             
             prev_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+            
             do{
                 try self.audioPlayerManager.stopAudio()
 
@@ -316,7 +411,7 @@ extension DreamRecordingViewDataSourceManager{
             
             
             curr_cell.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
-            dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.section,isPlaying: true)
+            dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.row,isPlaying: true)
             let url = dream.url
             
             do{
@@ -365,7 +460,6 @@ extension DreamRecordingViewDataSourceManager{
             let dream = dreamRecordingViewModel.dream(by: id)
             
             dream.toggleIsOpen()
-            //speechTranscriberManager.transcribeAudio(url: <#T##URL#>)
 
          
             
@@ -383,7 +477,7 @@ extension DreamRecordingViewDataSourceManager{
     func analyzeDream(_ sender:UIButton) {
         print("analyzze tapped")
         let indexPath = IndexPath (row: sender.tag, section: 0)
-        let dream    = dreamRecordingViewModel.dream(by: indexPath.section)
+        let dream    = dreamRecordingViewModel.dream(by: indexPath.row)
         
         let loading = LoadingOverlayView(
                title: "Analyzing dream...",

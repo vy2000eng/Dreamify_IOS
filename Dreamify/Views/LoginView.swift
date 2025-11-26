@@ -7,14 +7,21 @@
 import Foundation
 import UIKit
 
-class LoginView:UIView, UITextFieldDelegate{
+class LoginView: UIView, UITextFieldDelegate {
     
+    // MARK: - Properties
+    var isSignUpMode = false {
+        didSet {
+            updateUIForMode()
+        }
+    }
     
     // MARK: - UI Elements
     private let scrollView = UIScrollView()
     private let contentView = UIView()
+    private var signinSignUpConstraints: [NSLayoutConstraint] = []
     
-     let titleLabel: UILabel = {
+    let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Welcome Back"
         label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
@@ -23,7 +30,7 @@ class LoginView:UIView, UITextFieldDelegate{
         return label
     }()
     
-     let subtitleLabel: UILabel = {
+    let subtitleLabel: UILabel = {
         let label = UILabel()
         label.text = "Sign in to your account"
         label.font = UIFont.systemFont(ofSize: 16, weight: .regular)
@@ -32,7 +39,43 @@ class LoginView:UIView, UITextFieldDelegate{
         return label
     }()
     
-     let emailTextField: UITextField = {
+//    let fNameTextField: UITextField = {
+//        let textField = UITextField()
+//        textField.placeholder = "First Name"
+//        textField.borderStyle = .none
+//        textField.backgroundColor = UIColor.systemGray6
+//        textField.layer.cornerRadius = 12
+//        textField.font = UIFont.systemFont(ofSize: 16)
+//        textField.autocapitalizationType = .words
+//        textField.autocorrectionType = .no
+//        
+//        // Add padding
+//        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
+//        textField.leftView = paddingView
+//        textField.leftViewMode = .always
+//        
+//        return textField
+//    }()
+//    
+//    let LNameTextField: UITextField = {
+//        let textField = UITextField()
+//        textField.placeholder = "Last Name"
+//        textField.borderStyle = .none
+//        textField.backgroundColor = UIColor.systemGray6
+//        textField.layer.cornerRadius = 12
+//        textField.font = UIFont.systemFont(ofSize: 16)
+//        textField.autocapitalizationType = .words
+//        textField.autocorrectionType = .no
+//        
+//        // Add padding
+//        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
+//        textField.leftView = paddingView
+//        textField.leftViewMode = .always
+//        
+//        return textField
+//    }()
+    
+    let emailTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Email or Username"
         textField.borderStyle = .none
@@ -51,7 +94,7 @@ class LoginView:UIView, UITextFieldDelegate{
         return textField
     }()
     
-     let passwordTextField: UITextField = {
+    let passwordTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Password"
         textField.borderStyle = .none
@@ -70,7 +113,7 @@ class LoginView:UIView, UITextFieldDelegate{
         return textField
     }()
     
-     let showPasswordButton: UIButton = {
+    let showPasswordButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "eye"), for: .normal)
         button.setImage(UIImage(systemName: "eye.slash"), for: .selected)
@@ -119,8 +162,6 @@ class LoginView:UIView, UITextFieldDelegate{
         return indicator
     }()
     
-
-    
     // MARK: - Setup Methods
     func setupUI() {
         backgroundColor = .systemBackground
@@ -131,6 +172,8 @@ class LoginView:UIView, UITextFieldDelegate{
         
         contentView.addSubview(titleLabel)
         contentView.addSubview(subtitleLabel)
+//        contentView.addSubview(fNameTextField)
+//        contentView.addSubview(LNameTextField)
         contentView.addSubview(emailTextField)
         contentView.addSubview(passwordTextField)
         contentView.addSubview(showPasswordButton)
@@ -150,9 +193,12 @@ class LoginView:UIView, UITextFieldDelegate{
          signUpButton, activityIndicator].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
+        
+        // Initially hide name fields
+   
     }
     
-     func setupConstraints() {
+    func setupConstraints() {
         NSLayoutConstraint.activate([
             // Scroll View
             scrollView.topAnchor.constraint(equalTo: topAnchor),
@@ -177,17 +223,17 @@ class LoginView:UIView, UITextFieldDelegate{
             subtitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
             subtitleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
             
-            // Email Text Field
-            emailTextField.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 40),
-            emailTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
-            emailTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
-            emailTextField.heightAnchor.constraint(equalToConstant: 50),
-            
-            // Password Text Field
-            passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
-            passwordTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
-            passwordTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
-            passwordTextField.heightAnchor.constraint(equalToConstant: 50),
+//            // First Name Text Field
+//            fNameTextField.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 40),
+//            fNameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
+//            fNameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
+//            fNameTextField.heightAnchor.constraint(equalToConstant: 50),
+//            
+//            // Last Name Text Field
+//            LNameTextField.topAnchor.constraint(equalTo: fNameTextField.bottomAnchor, constant: 16),
+//            LNameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
+//            LNameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
+//            LNameTextField.heightAnchor.constraint(equalToConstant: 50),
             
             // Show Password Button
             showPasswordButton.centerYAnchor.constraint(equalTo: passwordTextField.centerYAnchor),
@@ -219,8 +265,76 @@ class LoginView:UIView, UITextFieldDelegate{
             signUpButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
             signUpButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32)
         ])
+        
+        setupDynamicConstraints()
     }
+    
+    private func setupDynamicConstraints() {
+        // Remove old constraints
+        NSLayoutConstraint.deactivate(signinSignUpConstraints)
+        signinSignUpConstraints.removeAll()
+        
+        if isSignUpMode {
+            // Sign Up Mode - Email below Last Name
+            signinSignUpConstraints = [
+                emailTextField.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 40),
+                emailTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
+                emailTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
+                emailTextField.heightAnchor.constraint(equalToConstant: 50),
+                
+                passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
+                passwordTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
+                passwordTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
+                passwordTextField.heightAnchor.constraint(equalToConstant: 50)
+            ]
+        } else {
+            // Sign In Mode - Email below Subtitle
+            signinSignUpConstraints = [
+                emailTextField.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 40),
+                emailTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
+                emailTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
+                emailTextField.heightAnchor.constraint(equalToConstant: 50),
+                
+                passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
+                passwordTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
+                passwordTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
+                passwordTextField.heightAnchor.constraint(equalToConstant: 50)
+            ]
+        }
+        
+        NSLayoutConstraint.activate(signinSignUpConstraints)
+    }
+    
+    private func updateUIForMode() {
+        UIView.animate(withDuration: 0.3) {
+            if self.isSignUpMode {
+                // Switch to Sign Up mode
+                self.titleLabel.text = "Create Account"
+                self.subtitleLabel.text = "Sign up to get started"
+                self.emailTextField.placeholder = "Email"
+                self.loginButton.setTitle("Sign Up", for: .normal)
+                self.signUpButton.setTitle("Already have an account? Sign In", for: .normal)
+             
+                self.forgotPasswordButton.isHidden = true
+            } else {
+                // Switch to Sign In mode
+                self.titleLabel.text = "Welcome Back"
+                self.subtitleLabel.text = "Sign in to your account"
+                self.emailTextField.placeholder = "Email or Username"
+                self.loginButton.setTitle("Sign In", for: .normal)
+                self.signUpButton.setTitle("Don't have an account? Sign Up", for: .normal)
 
+                self.forgotPasswordButton.isHidden = false
+                
+                // Clear name fields when switching to sign in
+
+            }
+            
+            self.setupDynamicConstraints()
+            self.layoutIfNeeded()
+        }
+    }
+    
     func setupKeyboardObservers() {
         NotificationCenter.default.addObserver(
             self,
@@ -240,10 +354,10 @@ class LoginView:UIView, UITextFieldDelegate{
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         addGestureRecognizer(tapGesture)
     }
+    
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-
     
     @objc private func dismissKeyboard() {
         endEditing(true)
@@ -261,5 +375,4 @@ class LoginView:UIView, UITextFieldDelegate{
         scrollView.contentInset.bottom = 0
         scrollView.verticalScrollIndicatorInsets.bottom = 0
     }
-    
 }

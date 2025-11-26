@@ -10,13 +10,13 @@ import SwipeCellKit
 class DreamRecordingViewCell: SwipeCollectionViewCell {
     
     //section cell elements
-    lazy var mainSectionTitle: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 18, weight: .semibold)
-        label.textColor = .label
-        return label
-    }()
+//    lazy var mainSectionTitle: UILabel = {
+//        let label = UILabel()
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        label.font = .systemFont(ofSize: 18, weight: .semibold)
+//        label.textColor = .label
+//        return label
+//    }()
 
     lazy var mainCreatedOnLabel: UILabel = {
         let label = UILabel()
@@ -92,13 +92,13 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         return view
     }()
     
-    lazy var sectionTitle: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 18, weight: .semibold)
-        label.textColor = .label
-        return label
-    }()
+//    lazy var sectionTitle: UILabel = {
+//        let label = UILabel()
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        label.font = .systemFont(ofSize: 18, weight: .semibold)
+//        label.textColor = .label
+//        return label
+//    }()
     
     lazy var createdOnLabel: UILabel = {
         let label = UILabel()
@@ -108,10 +108,30 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         return label
     }()
     
+    lazy var sectionTitle: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 18, weight: .semibold)
+        label.textColor = .label
+        label.isUserInteractionEnabled = true // Enable interaction
+        return label
+    }()
+    
+    lazy var mainSectionTitle: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 18, weight: .semibold)
+        label.textColor = .label
+        label.isUserInteractionEnabled = true // Enable interaction
+        return label
+    }()
+    
     private var scrollViewHeightConstraint: NSLayoutConstraint!
     private var sectionCellConstraints: [NSLayoutConstraint] = []
     private var headerCellConstraints: [NSLayoutConstraint] = []
     private var isHeaderSetup = false
+    var onTitleLongPress: ((Int) -> Void)?
+    private var cellIndex: Int = 0
 
 
 
@@ -121,12 +141,30 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        //setupHeaderCell()
         setupViews ()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupGestures() {
+        // Add long press gesture to both title labels
+        let headerLongPress = UILongPressGestureRecognizer(target: self, action: #selector(handleTitleLongPress))
+        sectionTitle.addGestureRecognizer(headerLongPress)
+        
+        let mainLongPress = UILongPressGestureRecognizer(target: self, action: #selector(handleTitleLongPress))
+        mainSectionTitle.addGestureRecognizer(mainLongPress)
+    }
+    
+    @objc private func handleTitleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        if gesture.state == .began {
+            // Add haptic feedback
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+            
+            onTitleLongPress?(cellIndex)
+        }
     }
 
 
@@ -145,9 +183,7 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
             headerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-           // headerView.heightAnchor.constraint(equalToConstant: 50),
 
-            ///headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
             // Section title
             sectionTitle.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
@@ -241,49 +277,6 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         // Re-setup header
         setupHeaderCell()
     }
-//    func configure(with dream: DreamViewModel) {
-//       // setupHeaderCell()
-//        let sectionTitleText = dream.title
-//        let createdDate = dream.createdDate
-//        let dateFormatter = DateFormatter()
-//        dateFormatter.dateStyle = .short
-//        dateFormatter.timeStyle = .short
-//        let formattedCreatedDate = dateFormatter.string(from: createdDate)
-//        
-//        sectionTitle.text = sectionTitleText
-//        createdOnLabel.text = formattedCreatedDate
-//
-//        
-//        
-//        if(dream.retrieveIsOpen()){
-//            if sectionCellConstraints.isEmpty {
-//                setupSectionCell()
-//            }
-//        
-//                
-//                if(dream.retrieveIsShowingTextTranscriptionOrAnalysis()){
-//                    transcriptionAnalysisButton.setTitle("Analysis", for: .normal)
-//                    transcriptionAnalysisButton.backgroundColor = .systemOrange
-//                    
-//                }else{
-//                    transcriptionAnalysisButton.setTitle("Transcription", for: .normal)
-//                    transcriptionAnalysisButton.backgroundColor = .systemCyan
-//                    
-//                }
-//                
-//                textView.attributedText = .create(
-//                    string: dream.retrieveIsShowingTextTranscriptionOrAnalysis() ? dream.analyzedText:dream.transcribedText,
-//                    font: .systemFont(ofSize: 16, weight: .regular),
-//                    color: .label
-//                )
-//        }else{
-//            
-//            
-//            if !sectionCellConstraints.isEmpty {
-//                  resetToHeaderCell()
-//              }
-//        }
-//    }
     func configure(with dream: DreamViewModel) {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .short
@@ -409,223 +402,9 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         
         // Activate all constraints
         NSLayoutConstraint.activate(headerCellConstraints)
-        //NSLayoutConstraint.activate(sectionCellConstraints)
         
         // Start with header visible, section hidden
         mainContentView.isHidden = true
         headerView.isHidden = false
     }
-    
-    
-    
-    
-    
-    
 }
-    
-//    private func setupSectionCell(){
-//        NSLayoutConstraint.deactivate(headerCellConstraints)
-//        headerCellConstraints.removeAll()
-//        contentView.addSubview(mainContentView)
-//        mainContentView.addSubview(textView)
-//        mainContentView.addSubview(playPauseButton)
-//        mainContentView.addSubview(analyzeButton)
-//        mainContentView.addSubview(transcriptionAnalysisButton)
-//        
-//        headerCellConstraints = [
-//            // Header view
-////            headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-////            headerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-////            headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-////            headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-//           // headerView.heightAnchor.constraint(equalToConstant: 50),
-//
-//            ///headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-//            mainContentView.topAnchor.constraint(equalTo: contentView.topAnchor),
-//            mainContentView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-//            mainContentView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-//            mainContentView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-//            
-//            
-//            
-//            
-//            
-//            // Section title
-//            sectionTitle.topAnchor.constraint(equalTo: mainContentView.topAnchor, constant: 8),
-//            sectionTitle.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 16),
-//            sectionTitle.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -16),
-//            
-//            // Created date
-//            createdOnLabel.topAnchor.constraint(equalTo: sectionTitle.bottomAnchor, constant: 4),
-//            createdOnLabel.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 16),
-//            createdOnLabel.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -16),
-//            
-//            
-//            analyzeButton.topAnchor.constraint(equalTo: createdOnLabel.bottomAnchor, constant: 12),
-//           analyzeButton.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -12),
-//           analyzeButton.widthAnchor.constraint(equalToConstant: 70),
-//           analyzeButton.heightAnchor.constraint(equalToConstant: 24),
-//            //section
-//
-//            transcriptionAnalysisButton.topAnchor.constraint(equalTo: createdOnLabel.topAnchor, constant: 12),
-//            transcriptionAnalysisButton.leadingAnchor.constraint(equalTo: createdOnLabel.leadingAnchor, constant: 12),
-//            transcriptionAnalysisButton.widthAnchor.constraint(equalToConstant: 70),
-//            transcriptionAnalysisButton.heightAnchor.constraint(equalToConstant: 24),
-//
-//
-//
-//            // Text view
-//            textView.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 16),
-//            textView.topAnchor.constraint(equalTo: analyzeButton.bottomAnchor, constant: 8),
-//            textView.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -16),
-//           // textView.bottomAnchor.constraint(equalTo: playPauseButton.topAnchor, constant: -16),
-//
-//            // Play button - centered at bottom
-//            playPauseButton.topAnchor.constraint(equalTo: textView.bottomAnchor, constant: 40),
-//            playPauseButton.centerXAnchor.constraint(equalTo: mainContentView.centerXAnchor,constant: 10),
-//            playPauseButton.bottomAnchor.constraint(equalTo: mainContentView.bottomAnchor, constant: -16),
-//            playPauseButton.widthAnchor.constraint(equalToConstant: 40),
-//            playPauseButton.heightAnchor.constraint(equalToConstant: 40)
-//            
-//            //createdOnLabel.bottomAnchor.constraint(equalTo: mainContentView.bottomAnchor, constant: -8)
-//        ]
-//        NSLayoutConstraint.activate(headerCellConstraints)
-//    }
-    
-    
-
-
-
-
-//    private func setupSectionCell() {
-//        NSLayoutConstraint.deactivate(headerCellConstraints)
-//       // headerCellConstraints.removeAll(keepingCapacity: true)
-//       // headerCellConstraints[3].isActive = false
-//
-////        if let lastConstraint = headerCellConstraints.last {
-////            lastConstraint.isActive = false
-////            headerCellConstraints.removeLast()
-////        }
-////
-//        //NSLayoutConstraint.deactivate(headerCellConstraints)
-//        //removeHeaderCell()
-//
-////        contentView.addSubview(headerView)
-////        headerView.addSubview(sectionTitle)
-////        headerView.addSubview(createdOnLabel)
-//
-//        contentView.addSubview(mainContentView)
-//        mainContentView.addSubview(textView)
-//        mainContentView.addSubview(playPauseButton)
-//        mainContentView.addSubview(analyzeButton)
-//        mainContentView.addSubview(transcriptionAnalysisButton)
-//      //  scrollViewHeightConstraint = mainContentView.heightAnchor.constraint(equalToConstant: 350)
-//
-//
-//
-//        headerCellConstraints = [
-//
-////            headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-////            headerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-////            headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-////            headerView.heightAnchor.constraint(equalToConstant: 60),
-////
-////            //headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-////
-////            // Section title
-////            sectionTitle.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
-////            sectionTitle.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-////            sectionTitle.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-////
-////            // Created date
-////            createdOnLabel.topAnchor.constraint(equalTo: sectionTitle.bottomAnchor, constant: 4),
-////            createdOnLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-////            createdOnLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-////            createdOnLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -8),
-//
-//
-//
-//            // Main content view with padding
-//            headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-//            headerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-//            headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-//            headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-//            headerView.heightAnchor.constraint(equalToConstant: 50),
-//
-//            ///headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-//
-//            // Section title
-//            sectionTitle.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
-//            sectionTitle.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            sectionTitle.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-//
-//            // Created date
-//            createdOnLabel.topAnchor.constraint(equalTo: sectionTitle.bottomAnchor, constant: 4),
-//            createdOnLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            createdOnLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-//            createdOnLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -8),
-//
-//
-//
-//
-//            mainContentView.topAnchor.constraint(equalTo: headerView.bottomAnchor , constant: 20),
-//            mainContentView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-//            mainContentView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-//            mainContentView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
-//        //    scrollViewHeightConstraint,
-//
-//        // Analyze button - top right corner
-//           analyzeButton.topAnchor.constraint(equalTo: mainContentView.topAnchor, constant: 12),
-//           analyzeButton.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -12),
-//           analyzeButton.widthAnchor.constraint(equalToConstant: 70),
-//           analyzeButton.heightAnchor.constraint(equalToConstant: 24),
-//
-//            transcriptionAnalysisButton.topAnchor.constraint(equalTo: mainContentView.topAnchor, constant: 12),
-//            transcriptionAnalysisButton.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 12),
-//            transcriptionAnalysisButton.widthAnchor.constraint(equalToConstant: 70),
-//            transcriptionAnalysisButton.heightAnchor.constraint(equalToConstant: 24),
-//
-//
-//
-//            // Text view
-//            textView.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 16),
-//            textView.topAnchor.constraint(equalTo: analyzeButton.bottomAnchor, constant: 8),
-//            textView.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -16),
-//           // textView.bottomAnchor.constraint(equalTo: playPauseButton.topAnchor, constant: -16),
-//
-//            // Play button - centered at bottom
-//            playPauseButton.topAnchor.constraint(equalTo: textView.bottomAnchor, constant: 40),
-//            playPauseButton.centerXAnchor.constraint(equalTo: mainContentView.centerXAnchor,constant: 10),
-//            playPauseButton.bottomAnchor.constraint(equalTo: mainContentView.bottomAnchor, constant: -16),
-//            playPauseButton.widthAnchor.constraint(equalToConstant: 40),
-//            playPauseButton.heightAnchor.constraint(equalToConstant: 40)
-//        ]
-//        //headerCellConstraints.append(contentsOf: sectionCellConstraints)//.append(sectionCellConstraints)
-//        NSLayoutConstraint.activate(headerCellConstraints)
-//
-//
-//
-//
-//    }
-//    private func removeSectionCell() {
-//       // sectionCellConstraints.remove(at: headerCellConstraints.count - 20)
-//        sectionCellConstraints.removeAll()
-//        mainContentView.removeFromSuperview()
-//        textView.removeFromSuperview()
-//        analyzeButton.removeFromSuperview()
-//        transcriptionAnalysisButton.removeFromSuperview()
-//        NSLayoutConstraint.deactivate(headerCellConstraints)
-//
-//
-//
-////        contentView.addSubview(mainContentView)
-////        mainContentView.addSubview(textView)
-////        mainContentView.addSubview(playPauseButton)
-////        mainContentView.addSubview(analyzeButton)
-////        mainContentView.addSubview(transcriptionAnalysisButton)
-//
-//
-//
-//
-//    }
-    

@@ -1,10 +1,9 @@
-//
+
 //  File.swift
 //  Dreamify
 //
 //  Created by Vladyslav Yatsuta on 6/22/25.
 //
-
 
 import UIKit
 
@@ -31,15 +30,39 @@ class MainContentView: UIView {
         return button
     }()
     
-    // Choose one of these visual effects:
-
     let audioVisualizerView: AudioVisualizerView = {
         let view = AudioVisualizerView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.alpha = 0
         return view
     }()
-
+    
+    private let transcriptionContainerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemGray6
+        view.layer.cornerRadius = 16
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.alpha = 0
+        return view
+    }()
+    
+    private let transcriptionLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        label.textColor = .label
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.text = "Listening..."
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let scrollView: UIScrollView = {
+        let scroll = UIScrollView()
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.showsVerticalScrollIndicator = false
+        return scroll
+    }()
     
     private var isRecording = false
     
@@ -55,41 +78,64 @@ class MainContentView: UIView {
     func setupUI() {
         backgroundColor = .systemBackground
         
+        addSubview(transcriptionContainerView)
+        transcriptionContainerView.addSubview(scrollView)
+        scrollView.addSubview(transcriptionLabel)
         addSubview(actionButton)
-         addSubview(audioVisualizerView)
+        addSubview(audioVisualizerView)
         
         NSLayoutConstraint.activate([
+            // Transcription container
+            transcriptionContainerView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 20),
+            transcriptionContainerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+            transcriptionContainerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            transcriptionContainerView.heightAnchor.constraint(equalToConstant: 200),
+            
+            // ScrollView
+            scrollView.topAnchor.constraint(equalTo: transcriptionContainerView.topAnchor, constant: 16),
+            scrollView.leadingAnchor.constraint(equalTo: transcriptionContainerView.leadingAnchor, constant: 16),
+            scrollView.trailingAnchor.constraint(equalTo: transcriptionContainerView.trailingAnchor, constant: -16),
+            scrollView.bottomAnchor.constraint(equalTo: transcriptionContainerView.bottomAnchor, constant: -16),
+            
+            // Transcription label
+            transcriptionLabel.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            transcriptionLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            transcriptionLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            transcriptionLabel.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            transcriptionLabel.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            
+            // Action button
             actionButton.centerXAnchor.constraint(equalTo: safeAreaLayoutGuide.centerXAnchor),
             actionButton.centerYAnchor.constraint(equalTo: safeAreaLayoutGuide.centerYAnchor),
             actionButton.widthAnchor.constraint(equalToConstant: 100),
             actionButton.heightAnchor.constraint(equalToConstant: 100),
             
-
+            // Audio visualizer
             audioVisualizerView.centerXAnchor.constraint(equalTo: centerXAnchor),
             audioVisualizerView.topAnchor.constraint(equalTo: actionButton.bottomAnchor, constant: 80),
             audioVisualizerView.widthAnchor.constraint(equalToConstant: 300),
             audioVisualizerView.heightAnchor.constraint(equalToConstant: 60),
-
         ])
         
-     
-        sendSubviewToBack(audioVisualizerView)    }
+        sendSubviewToBack(audioVisualizerView)
+    }
     
     // MARK: - Recording State Methods
     func startRecording() {
         isRecording = true
+        transcriptionLabel.text = "Listening..."
         
         UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.8) {
             self.actionButton.backgroundColor = UIColor.systemGray2
             self.actionButton.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
             self.audioVisualizerView.alpha = 1
+            self.transcriptionContainerView.alpha = 1
         }
         
         // Change icon to stop
         let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
         actionButton.setImage(UIImage(systemName: "stop.fill", withConfiguration: config), for: .normal)
         
-        //pulseView.startAnimating()
         audioVisualizerView.startAnimating()
     }
     
@@ -100,14 +146,25 @@ class MainContentView: UIView {
             self.actionButton.backgroundColor = UIColor.systemRed
             self.actionButton.transform = CGAffineTransform.identity
             self.audioVisualizerView.alpha = 0
+            self.transcriptionContainerView.alpha = 0
         }
         
         // Change icon back to mic
         let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .medium)
         actionButton.setImage(UIImage(systemName: "mic.fill", withConfiguration: config), for: .normal)
         
-        //pulseView.stopAnimating()
         audioVisualizerView.stopAnimating()
+    }
+    
+    // MARK: - Transcription Update
+    func updateTranscription(text: String) {
+        transcriptionLabel.text = text.isEmpty ? "Listening..." : text
+        
+        // Auto-scroll to bottom
+        DispatchQueue.main.async {
+            let bottomOffset = CGPoint(x: 0, y: max(0, self.scrollView.contentSize.height - self.scrollView.bounds.height))
+            self.scrollView.setContentOffset(bottomOffset, animated: true)
+        }
     }
 }
 

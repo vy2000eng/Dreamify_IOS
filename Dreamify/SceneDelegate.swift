@@ -19,7 +19,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         //guard let _ = (scene as? UIWindowScene) else { return }
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
-        if UserSettings.shared.userLoginState{
+        if TokenManager.shared.getAccessToken() != nil && TokenManager.shared.getRefreshToken() != nil{
+           // var userEntityViewModel = USer
             
             window?.rootViewController = UINavigationController(rootViewController: TabsViewController())
 

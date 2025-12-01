@@ -72,7 +72,7 @@ class UserInfoViewController: UIViewController {
                     print(response)
                     
                     //UserSettings.shared.setUserDetails(userDetails: response)
-                   // self.userInfoView.configure(with: response)
+                    //self.userInfoView.configure(with: response)
                     
                 case .failure(let error):
                     print("Request failed: \(error)")

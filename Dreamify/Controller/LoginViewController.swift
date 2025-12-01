@@ -11,16 +11,28 @@ import KeychainAccess
 class LoginViewController:UIViewController{
     
     var loginView : LoginView;
-    let alert :UIAlertController;
+    //var alert :UIAlertController;
+    var userEntityViewModel:UserEntityViewModel?
     weak var userIsLoggedInChangeAccountMAnagementOptionsDelegate:UserIsLoggedInChangeAccountMAnagementOptions?
     
-    init(){
-        
+    init() {
         loginView = LoginView(frame: .zero)
-        alert = UIAlertController(title: "", message: "", preferredStyle: .alert)
+        //self.userEntityViewModel = nil // Initialize as nil
+       // alert = UIAlertController()
         
         super.init(nibName: nil, bundle: nil)
         
+        do {
+            self.userEntityViewModel = try UserEntityViewModel(email: nil)
+            
+        } catch let err as NSError {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                let alert = UIAlertController(title: "Initialization Error", message: err.localizedDescription, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+            }
+        }
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -127,18 +139,34 @@ extension LoginViewController{
                 DispatchQueue.main.async{
                     switch result {
                     case .success(let response):
-                 
-                        TokenManager.shared.saveAccessToken(response.accessToken)
-                        TokenManager.shared.saveRefreshToken(response.refreshToken)
+         
                         UserSettings.shared.setLoginState(true)
-                        
-                        
-                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                             let window = windowScene.windows.first {
-                              let mainViewController = TabsViewController()
-                              window.rootViewController = UINavigationController(rootViewController: mainViewController)
-                              window.makeKeyAndVisible()
+                        do{
+                            let user = try  self.userEntityViewModel?.getUserByEmail(email: email!)
+                            
+                           TokenManager.shared.saveAccessToken(response.accessToken)
+                           TokenManager.shared.saveRefreshToken(response.refreshToken)
+                            TokenManager.shared.saveUserEmail(email: user!.userEmail)
+                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                 let window = windowScene.windows.first {
+                                  let mainViewController = TabsViewController()
+                                  window.rootViewController = UINavigationController(rootViewController: mainViewController)
+                                  window.makeKeyAndVisible()
+                            }
+                            
+                            
+                        }catch let err as NSError{
+                            let alert = UIAlertController(title: "Error", message: err.localizedDescription, preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+
+                            self.present(alert, animated: true)
+                            
+                            print("\(err.localizedDescription)")
+                            
                         }
+                        
+                        
+                 
                         
                         self.setLoadingState(false)
                         print("Success: \(response.accessToken)")
@@ -146,10 +174,11 @@ extension LoginViewController{
                         //TODO: add an actual error lol
                         print("Error: \(error)")
                         self.setLoadingState(false)
-                        
-                        self.createAlert(title: "login Error", msg: error.localizedDescription)
-                        self.present(self.alert,animated: true)
-                        
+                
+                            let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                            self.present(alert,animated: true)
+
                         
                     }
                     
@@ -171,28 +200,43 @@ extension LoginViewController{
                 DispatchQueue.main.async{
                     switch result {
                     case .success(let response):
-                 
-                        TokenManager.shared.saveAccessToken(response.accessToken)
-                        TokenManager.shared.saveRefreshToken(response.refreshToken)
-                        UserSettings.shared.setLoginState(true)
-                        //navigationController?.
-                        
-                        
-                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                             let window = windowScene.windows.first {
-                              let mainViewController = TabsViewController()
-                              window.rootViewController = UINavigationController(rootViewController: mainViewController)
-                              window.makeKeyAndVisible()
+                        do {
+                            let user  = try self.userEntityViewModel?.addUser(email: email!)
+                     
+                            TokenManager.shared.saveAccessToken(response.accessToken)
+                            TokenManager.shared.saveRefreshToken(response.refreshToken)
+                            TokenManager.shared.saveUserEmail(email: user!.userEmail)
+
+                            UserSettings.shared.setLoginState(true)
+                            //navigationController?.
+                            
+                            
+                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                 let window = windowScene.windows.first {
+                                  let mainViewController = TabsViewController()
+                                  window.rootViewController = UINavigationController(rootViewController: mainViewController)
+                                  window.makeKeyAndVisible()
+                            }
+                            
+                            self.setLoadingState(false)
+                            print("Success: \(response.accessToken)")
+                            
+                        }catch let error as NSError{
+                            let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                            self.present(alert,animated: true)
+                            
                         }
-                        
-                        self.setLoadingState(false)
-                        print("Success: \(response.accessToken)")
+                   
                     case .failure(let error):
                         //TODO: add an actual error lol
                         print("Error: \(error)")
                         self.setLoadingState(false)
-                        self.createAlert(title: "registration Error", msg: error.localizedDescription)
-                        self.present(self.alert,animated: true)
+                        let alert = UIAlertController(title: "Registration Error", message: error.localizedDescription, preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                        self.present(alert,animated: true)
+                        //self.createAlert(title: "registration Error", msg: error.localizedDescription)
+                       // self.present(UIAlertController(title: "Registration Error", message: error.localizedDescription, preferredStyle: .alert),animated: true)
                      
                         //alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                         //self.present(alert, animated: true)
@@ -210,17 +254,17 @@ extension LoginViewController{
 }
 // MARK: utililty functions
 extension LoginViewController{
-    private func createAlert(title:String, msg:String){
-        alert.title = title
-        alert.message = msg
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        
-        
-        
-//        let alert = UIAlertController(title: title,
-//                                      message: msg,
-//                                      preferredStyle: .alert)
-    }
+//    private func createAlert(title:String, msg:String){
+//        alert.title = title
+//        alert.message = msg
+//        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+//        
+//        
+//        
+////        let alert = UIAlertController(title: title,
+////                                      message: msg,
+////                                      preferredStyle: .alert)
+//    }
     
     
     

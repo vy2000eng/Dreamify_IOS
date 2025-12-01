@@ -20,7 +20,7 @@ class TabsViewController:UITabBarController{
     var mainViewController           : MainViewController
     var dreamRecordingViewController : DreamRecordingsViewController
     var calendarViewController       : CalendarViewController
-    var accountManagerViewController       : AccountManagerViewController
+    var accountManagerViewController : AccountManagerViewController
     
     init() {
         self.accountManagerViewController                                      = AccountManagerViewController ()

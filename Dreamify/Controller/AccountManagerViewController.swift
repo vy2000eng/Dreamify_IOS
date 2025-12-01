@@ -34,24 +34,30 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
             guard let self = self else {return}
             print("Tapped: \(itemTitle)")
             if(itemTitle == "Log Out"){
-                TokenManager.shared.clearTokens()
-                accountManagerView.changeAccountSection()
-
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                    let window = windowScene.windows.first {
+                    let mainViewController = LoginViewController()
+                    TokenManager.shared.clearTokens()
+                    accountManagerView.changeAccountSection()
+                    TokenManager.shared.clearTokens()
+                    let loginViewController = LoginViewController()
+                    loginViewController.userIsLoggedInChangeAccountMAnagementOptionsDelegate = self
+                    window.rootViewController = UINavigationController(rootViewController: mainViewController)
+                    window.makeKeyAndVisible()
+                }
                 return
             }
             if(itemTitle == "Create An Account"){
-                var loginViewController = LoginViewController()
+                let loginViewController = LoginViewController()
                 loginViewController.userIsLoggedInChangeAccountMAnagementOptionsDelegate = self
                 self.navigationController?.pushViewController(loginViewController, animated: true)
                 return
             }
         
             
-            if(itemTitle == "Log Out"){
-                TokenManager.shared.clearTokens()
-            }
+       
             if(itemTitle == "Manage Account"){
-                var userInfo = UserInfoViewController()
+                let userInfo = UserInfoViewController()
                 
                 
                 
@@ -65,13 +71,13 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
             
             
             if(itemTitle == "Privacy Policy"){
-                var privacyPolicyViewController = PrivacyPolicyTermsOfServiceController(privacyPolicyTermsOfService: 0)
+                let privacyPolicyViewController = PrivacyPolicyTermsOfServiceController(privacyPolicyTermsOfService: 0)
                 
                 self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
                 return
             }
             if(itemTitle == "Terms of Service"){
-                var privacyPolicyViewController = PrivacyPolicyTermsOfServiceController(privacyPolicyTermsOfService: 1)
+                let privacyPolicyViewController = PrivacyPolicyTermsOfServiceController(privacyPolicyTermsOfService: 1)
                 
                 self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
                 return

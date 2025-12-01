@@ -51,6 +51,7 @@ class CoreDataManager{
     // these error are propogated through the scope of the calling method and as such are handled there too
     func getAllDreams() throws -> [Dream] {
         let fetchRequest:NSFetchRequest<Dream> = Dream.fetchRequest()
+        
         do {
             let dreams = try context.fetch(fetchRequest)
             return dreams
@@ -61,6 +62,24 @@ class CoreDataManager{
             throw err
         }
     }
+    
+    func getAllDreamsForUser(userId:UUID) throws -> [Dream] {
+        let fetchRequest:NSFetchRequest<Dream> = Dream.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "userRelationShip.id == %@", userId.uuidString)
+
+        
+        do {
+            let dreams = try context.fetch(fetchRequest)
+            return dreams
+            
+        }catch let err as NSError{
+            print("Error retrieving dreams from function call getAllDreams() \(err), \(err.userInfo)")
+
+            throw err
+        }
+    }
+    
+    
     func getAllDreamsCreatedByDate() throws -> [Dream] {
         
         let fetchRequest:NSFetchRequest<Dream> = Dream.fetchRequest()
@@ -79,21 +98,46 @@ class CoreDataManager{
     
     
     func addDream(title:String, url:String, transribedText:String?) throws{
-        let newDream          = Dream(context: context)
-        newDream.title        = title
-        newDream.url          = url
-        newDream.id           = UUID()
-        newDream.created_date = Date()
-        newDream.transcribedText = transribedText
+        // get user email from token manager
+        guard let userEmail = TokenManager.shared.getUserEmail() else {
+            throw NSError(domain: "User Retrieval Error", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not retrieve user from internal storage"])
+        }
+        //create fetch request for user
+        let fetchRequest:NSFetchRequest<UserEntity> = UserEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "userEmail == %@", userEmail as CVarArg)
+        
         do{
+            // create new dream
+            let newDream          = Dream(context: context)
+            newDream.title        = title
+            newDream.url          = url
+            newDream.id           = UUID()
+            newDream.created_date = Date()
+            newDream.transcribedText = transribedText
+            //retrieve user
+            guard let user  = try context.fetch(fetchRequest).first else{
+                throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not found"])
+            }
+            //construct relationships
+            user.addToDreamRelationShip(newDream)
+            newDream.userRelationShip = user
+            //save to db
             try context.save()
+
+
+            
+        
         }catch let err as NSError{
-            print("Error saving a dream from funciton call addDream(title:String, url:String) \(err), \(err.userInfo)")
             throw err
+            
         }
     }
     
     func addDreamTestDream(title:String, url:String, transribedText:String?, date:Date) throws{
+        
+        
+        
+        
         let newDream          = Dream(context: context)
         newDream.title        = title
         newDream.url          = url
@@ -216,7 +260,60 @@ class CoreDataManager{
 
         
     }
+    // user Entity
+    func getUserByEmail(email:String) throws -> UserEntityModel{
+        let fetchRequest:NSFetchRequest<UserEntity> = UserEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "userEmail == %@", email as CVarArg)
 
+        do{
+            //try CoreDataManager.shared.getUSerByEmail(email: email)
+            guard let user  = try context.fetch(fetchRequest).first else{
+                throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not found"])
+                
+
+                
+            }
+            
+            return UserEntityModel(userEntity: user)
+            
+        }catch let err as NSError{
+            throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unable to retrieve user from internal database"])
+
+            
+        }
+        
+        
+        
+    }
+    
+    
+    func addUser(email: String) throws -> UserEntityModel {
+        let fetchRequest: NSFetchRequest<UserEntity> = UserEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "userEmail == %@", email)
+        
+        // Check if user with this email already exists
+        let existingUsers = try context.fetch(fetchRequest)
+        
+        if let existingUser = existingUsers.first {
+            // User already exists, return it
+            return UserEntityModel(userEntity: existingUser)
+        } else {
+            // User doesn't exist, create new one
+            let user = UserEntity(context: context)
+            user.id = UUID()
+            user.userEmail = email
+            
+            do {
+                try context.save()
+                return UserEntityModel(userEntity: user)
+            } catch let err as NSError {
+                print("Error saving user: \(err), \(err.userInfo)")
+                throw err
+            }
+        }
+    }
+
+    
     
     
 }

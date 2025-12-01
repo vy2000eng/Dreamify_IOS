@@ -28,7 +28,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 
             }
             do{
-                vc.dreamRecordingViewModel.dreams = try vc.dreamRecordingViewModel.getAllDreams()
+                vc.dreamRecordingViewModel.dreams = try vc.dreamRecordingViewModel.getAllDreamsForUser()
             }catch {
                 print("An err occured in datasource manager")
                 
@@ -51,7 +51,7 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                 
             }
             do{
-                vc.dreamRecordingViewModel.dreams = try vc.dreamRecordingViewModel.getAllDreams()
+                vc.dreamRecordingViewModel.dreams = try vc.dreamRecordingViewModel.getAllDreamsForUser()
             }catch {
                 print("An err occured in datasource manager")
             }

@@ -25,12 +25,22 @@ class TokenManager {
         keychain["access_token"] = token
     }
     
+    func saveUserEmail(email: String){
+        keychain["user_email"] = email
+    }
+    
+    func getUserEmail() -> String?{
+        return keychain["user_email"]
+        
+    }
+    
     func getAccessToken() -> String? {
         return keychain["access_token"]
     }
     func clearTokens() -> Void{
         keychain["refresh_token"] = nil
         keychain["access_token"] = nil
+        keychain["user_email"] = nil
     }
     
     

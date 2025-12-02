@@ -286,6 +286,47 @@ class CoreDataManager{
         
     }
     
+    func deleteAllDataForUser(email:String) throws -> Void {
+        do{
+            
+            
+
+            // get user
+            guard let userEmail = TokenManager.shared.getUserEmail() else {
+                throw NSError(domain: "User Retrieval Error", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not retrieve user from internal storage"])
+            }
+            // generate request for fetching user
+            let userFetchRequest:NSFetchRequest<UserEntity> = UserEntity.fetchRequest()
+            userFetchRequest.predicate = NSPredicate(format: "userEmail == %@", userEmail as CVarArg)
+            
+            //retrieve user for whom to delete all internal data
+            guard let user  = try context.fetch(userFetchRequest).first else{
+                throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not found"])
+            }
+            
+            //retrieve all dreams
+            let fetchRequest:NSFetchRequest<Dream> = Dream.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "userRelationShip.id == %@", user.id.uuidString as CVarArg)
+            var dreams = try context.fetch(fetchRequest)
+            //delete every dream
+            for dream in dreams{
+                // delete the url path
+                let url = getDocumentsDirectory().appendingPathComponent(dream.url!)
+                try FileManager.default.removeItem(atPath: url.path)
+                // delete the dream metadata
+                context.delete(dream)
+            }
+            //delete the subsequent user associated with the dream
+            context.delete(user)
+            try context.save()
+            
+        }catch let err as NSError{
+            throw NSError(domain:err.domain, code: err.code, userInfo: [NSLocalizedDescriptionKey:err.localizedDescription])
+
+        }
+        
+    }
+    
     
     func addUser(email: String) throws -> UserEntityModel {
         let fetchRequest: NSFetchRequest<UserEntity> = UserEntity.fetchRequest()

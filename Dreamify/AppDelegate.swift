@@ -14,8 +14,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     let taskId = "dreamify.refreshAuthToken.backgroundTask"
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {        
-        
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskId, using: nil){ task in
             guard let newTask = task as? BGAppRefreshTask  else {return}
             self.handleTask(task: newTask)
@@ -23,7 +22,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         
-         schedule()
+        schedule()
+        
+        APIClientManager.shared.refreshToken{ refreshResult in
+            switch refreshResult{
+                case .success(let response):
+                
+                    print("token refresh was executed successfully")
+                    TokenManager.shared.saveAccessToken(response.accessToken)
+                    TokenManager.shared.saveRefreshToken(response.refreshToken)
+                
+                case .failure(let err):
+                    print("Token refresh failed: \(err)")
+                    TokenManager.shared.clearTokens()
+                    UserSettings.shared.setLoginState(false)
+                    self.navigateToLogin()
+            }
+            
+        }
         
 
         
@@ -36,6 +52,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Schedule when app goes to background
            schedule()
+        
+        
+        APIClientManager.shared.refreshToken{ refreshResult in
+            switch refreshResult{
+                
+            case .success(let response):
+                print("token refresh was executed successfully")
+                TokenManager.shared.saveAccessToken(response.accessToken)
+                TokenManager.shared.saveRefreshToken(response.refreshToken)
+                
+                //self.schedule()
+                
+                //task.setTaskCompleted(success: true)
+
+           
+                
+            case .failure(let err):
+                print("Token refresh failed: \(err)")
+                TokenManager.shared.clearTokens()
+                UserSettings.shared.setLoginState(false)
+                self.navigateToLogin()
+               // task.setTaskCompleted(success: false)
+            }
+            
+        }
     }
     
     func applicationWillEnterForeground(_ application: UIApplication) {
@@ -49,7 +90,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Also check when app becomes active
         checkIfLoginNeeded()
     }
-
+    
     
 
 
@@ -170,7 +211,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
     internal func checkIfLoginNeeded() {
-        if !UserSettings.shared.userLoginState {
+        if TokenManager.shared.getAccessToken() == nil && TokenManager.shared.getRefreshToken() == nil {
             DispatchQueue.main.async {
                 self.navigateToLogin()
             }

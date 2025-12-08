@@ -19,7 +19,7 @@ class LoginViewController:UIViewController{
     init() {
         loginView = LoginView(frame: .zero)
         //self.userEntityViewModel = nil // Initialize as nil
-       // alert = UIAlertController()
+        // alert = UIAlertController()
         
         super.init(nibName: nil, bundle: nil)
         
@@ -43,18 +43,18 @@ class LoginViewController:UIViewController{
     override func viewDidLoad() {
         setupUI()
         super.viewDidLoad()
-
- 
+        
+        
     }
     func setupUI(){
         loginView.setupUI()
         loginView.setupConstraints()
         setupActions()
-       // loginView.setupKeyboardObservers()
+        // loginView.setupKeyboardObservers()
         view.addSubview(loginView)
         loginView.translatesAutoresizingMaskIntoConstraints = false
-
-
+        
+        
         
         
         NSLayoutConstraint.activate([
@@ -65,7 +65,7 @@ class LoginViewController:UIViewController{
             
             
         ])
-
+        
         
     }
     
@@ -90,31 +90,38 @@ class LoginViewController:UIViewController{
                 case . success(let response):
                     UserSettings.shared.setLoginState(true)
                     do{
-                        let user = try  self.userEntityViewModel?.getUserByEmail(email: email!)
                         
-                       TokenManager.shared.saveAccessToken(response.accessToken)
-                       TokenManager.shared.saveRefreshToken(response.refreshToken)
-                        TokenManager.shared.saveUserEmail(email: user!.userEmail)
-                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                             let window = windowScene.windows.first {
-                              let mainViewController = TabsViewController()
-                              window.rootViewController = UINavigationController(rootViewController: mainViewController)
-                              window.makeKeyAndVisible()
+                        guard let userEmail = email else{
+                            throw NSError(domain: "LoginViewController", code: 1001, userInfo: [NSLocalizedDescriptionKey : "Email is missing"])
                         }
                         
+                        
+                        if let foundUser = try self.userEntityViewModel?.getUserByEmail(email: email!) {
+                            let user = foundUser
+                        } else {
+                            let user = try self.userEntityViewModel?.addUser(email: userEmail)
+                        }
+                        
+                        
+                        TokenManager.shared.saveAccessToken(response.accessToken)
+                        TokenManager.shared.saveRefreshToken(response.refreshToken)
+                        TokenManager.shared.saveUserEmail(email: userEmail)
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let window = windowScene.windows.first {
+                            let mainViewController = TabsViewController()
+                            window.rootViewController = UINavigationController(rootViewController: mainViewController)
+                            window.makeKeyAndVisible()
+                        }
                         
                     }catch let err as NSError{
                         let alert = UIAlertController(title: "Error", message: err.localizedDescription, preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-
+                        
                         self.present(alert, animated: true)
                         
                         print("\(err.localizedDescription)")
                         
                     }
-                    
-                    
-             
                     
                     self.setLoadingState(false)
                     print("Success: \(response.accessToken)")
@@ -124,65 +131,13 @@ class LoginViewController:UIViewController{
                     let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                     self.present(alert,animated: true)
-                    
-                    
-                    
-                    
-                    
                 }
                 
             }
-  
-            
-                
-                
-                
-                
-                
-                
-            }
-            
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         }
-        // Make API call to your .NET backend
-        // POST /auth/google or whatever your endpoint is
-        // Body: { "idToken": googleIdToken, "email": email, "name": name }
         
-        // Your backend should:
-        // 1. Verify the Google ID token
-        // 2. Create/find user in your DB
-        // 3. Generate YOUR auth + refresh tokens
-        // 4. Return them
-        
-//        APIClientManager.shared.googleSignIn(idToken: googleIdToken) { result in
-//            switch result {
-//            case .success(let response):
-//                // Save YOUR backend's tokens
-//                TokenManager.shared.saveAccessToken(response.accessToken)
-//                TokenManager.shared.saveRefreshToken(response.refreshToken)
-//                UserSettings.shared.setLoginState(true)
-//                
-//                // Navigate to main app
-//                DispatchQueue.main.async {
-//                    // Navigate to TabsViewController or wherever
-//                }
-//                
-//            case .failure(let error):
-//                print("Backend auth failed: \(error)")
-//            }
-//        }
     }
+}
     
     
     

@@ -331,8 +331,18 @@ class CoreDataManager{
             //delete every dream
             for dream in dreams{
                 // delete the url path
-                let url = getDocumentsDirectory().appendingPathComponent(dream.url!)
-                try FileManager.default.removeItem(atPath: url.path)
+                guard let dreamUrl = dream.url else{
+                    throw NSError(domain:"Dream Url Error", code: 1, userInfo: [NSLocalizedDescriptionKey:"Unable to retrieve dream path to delete file"])
+                }
+                let url = getDocumentsDirectory().appendingPathComponent(dreamUrl)
+                if FileManager.default.fileExists(atPath: url.path) {
+                    try FileManager.default.removeItem(at: url) // Use 'at:' not 'atPath:'
+                    print("Deleted file: \(url.lastPathComponent)")
+                } else {
+                    print("File doesn't exist: \(url.path)")
+                }
+                //try FileManager.default.
+               // try FileManager.default.removeItem(atPath: url.path)
                 // delete the dream metadata
                 context.delete(dream)
             }

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import GoogleSignIn
 
 
 class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccountMAnagementOptions {
@@ -44,6 +45,7 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
                     accountManagerView.changeAccountSection()
                     let loginViewController = LoginViewController()
                     loginViewController.userIsLoggedInChangeAccountMAnagementOptionsDelegate = self
+                    GIDSignIn.sharedInstance.signOut()
                     window.rootViewController = UINavigationController(rootViewController: mainViewController)
                     window.makeKeyAndVisible()
                 }
@@ -60,12 +62,6 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
        
             if(itemTitle == "Manage Account"){
                 let userInfo = UserInfoViewController()
-                
-                
-                
-                
-               // userInfo.retrieveUserInfo()
-                //loginViewController.userIsLoggedInChangeAccountMAnagementOptionsDelegate = self
                 self.navigationController?.pushViewController(userInfo, animated: true)
                 return
                 
@@ -107,6 +103,12 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
                                         
                                         do{
                                             try self.accountManagerViewModel.deleteAllData()
+                                            GIDSignIn.sharedInstance.disconnect { error in
+                                                guard error == nil else { return }
+                                            }
+                                  
+                                            self.navigateToLoginView()
+
                                         }catch let error as NSError{
                                             self.showErrorAlert(message: "Failed to delete local data: \(error.localizedDescription)")
                                         }
@@ -118,7 +120,7 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
                                 
                         
                             })
-                            self.navigateToLoginView()
+                             //self.navigateToLoginView()
 
                             
                         })

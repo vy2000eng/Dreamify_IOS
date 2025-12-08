@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import KeychainAccess
+import GoogleSignIn
 class LoginViewController:UIViewController{
     
     var loginView : LoginView;
@@ -49,7 +50,7 @@ class LoginViewController:UIViewController{
         loginView.setupUI()
         loginView.setupConstraints()
         setupActions()
-        loginView.setupKeyboardObservers()
+       // loginView.setupKeyboardObservers()
         view.addSubview(loginView)
         loginView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -74,19 +75,169 @@ class LoginViewController:UIViewController{
         loginView.loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         loginView.forgotPasswordButton.addTarget(self, action: #selector(forgotPasswordTapped), for: .touchUpInside)
         loginView.signUpButton.addTarget(self, action: #selector(signUpButtonTapped), for: .touchUpInside)
+        loginView.googleSignInButton.addTarget(self, action: #selector(btnGoogleSingInDidTap), for: .touchUpInside)
         
         // Add text field delegates
         loginView.emailTextField.delegate = self
         loginView.passwordTextField.delegate = self
     }
     
+    func authenticateWithBackend(googleIdToken: String, email: String?, name: String?) {
+        APIClientManager.shared.request(endpoint: "/account/SignInWithGoogle",method: "POST",body: ["IdToken":googleIdToken],type: LoginResponse.self){ [weak self ] result in
+            guard let self = self else{return}
+            DispatchQueue.main.async{
+                switch result{
+                case . success(let response):
+                    UserSettings.shared.setLoginState(true)
+                    do{
+                        let user = try  self.userEntityViewModel?.getUserByEmail(email: email!)
+                        
+                       TokenManager.shared.saveAccessToken(response.accessToken)
+                       TokenManager.shared.saveRefreshToken(response.refreshToken)
+                        TokenManager.shared.saveUserEmail(email: user!.userEmail)
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                             let window = windowScene.windows.first {
+                              let mainViewController = TabsViewController()
+                              window.rootViewController = UINavigationController(rootViewController: mainViewController)
+                              window.makeKeyAndVisible()
+                        }
+                        
+                        
+                    }catch let err as NSError{
+                        let alert = UIAlertController(title: "Error", message: err.localizedDescription, preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+
+                        self.present(alert, animated: true)
+                        
+                        print("\(err.localizedDescription)")
+                        
+                    }
+                    
+                    
+             
+                    
+                    self.setLoadingState(false)
+                    print("Success: \(response.accessToken)")
+                    
+                    
+                case.failure(let error):
+                    let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                    self.present(alert,animated: true)
+                    
+                    
+                    
+                    
+                    
+                }
+                
+            }
+  
+            
+                
+                
+                
+                
+                
+                
+            }
+            
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        }
+        // Make API call to your .NET backend
+        // POST /auth/google or whatever your endpoint is
+        // Body: { "idToken": googleIdToken, "email": email, "name": name }
+        
+        // Your backend should:
+        // 1. Verify the Google ID token
+        // 2. Create/find user in your DB
+        // 3. Generate YOUR auth + refresh tokens
+        // 4. Return them
+        
+//        APIClientManager.shared.googleSignIn(idToken: googleIdToken) { result in
+//            switch result {
+//            case .success(let response):
+//                // Save YOUR backend's tokens
+//                TokenManager.shared.saveAccessToken(response.accessToken)
+//                TokenManager.shared.saveRefreshToken(response.refreshToken)
+//                UserSettings.shared.setLoginState(true)
+//                
+//                // Navigate to main app
+//                DispatchQueue.main.async {
+//                    // Navigate to TabsViewController or wherever
+//                }
+//                
+//            case .failure(let error):
+//                print("Backend auth failed: \(error)")
+//            }
+//        }
+    }
+    
     
     
 
-}
+
 
 // - MARK: actions
 extension LoginViewController{
+    @objc
+    func btnGoogleSingInDidTap(_ sender: Any) {
+        print("View controller: \(self)")
+        print("Is view controller in window hierarchy: \(self.view.window != nil)")
+       // print("Client ID configured: \(GIDSignIn.sharedInstance.configuration?.clientID ?? "NO CLIENT ID")")
+//        guard let clientID = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String else {
+//            print("ERROR: No client ID found")
+//            return
+//        }
+//        
+//        let config = GIDConfiguration(clientID: clientID)
+//        
+//        GIDSignIn.sharedInstance.configuration = config
+        
+        print("Starting sign in...")
+        
+        GIDSignIn.sharedInstance.signIn(
+            withPresenting: self,
+            hint: nil,
+            additionalScopes: []
+        ) { signInResult, error in
+            
+            guard error == nil else {
+                print("Sign in error: \(error!)")
+                return
+            }
+            guard let signInResult = signInResult else { return }
+            
+            // Get the ID token to send to your backend
+            guard let idToken = signInResult.user.idToken?.tokenString else {
+                print("No ID token")
+                return
+            }
+            
+            // Get user info
+            let email = signInResult.user.profile?.email
+            let name = signInResult.user.profile?.name
+            
+            print("Google ID Token: \(idToken)")
+            print("Email: \(email ?? "none")")
+            print("Name: \(name ?? "none")")
+            
+            // Send to your .NET backend
+            self.authenticateWithBackend(googleIdToken: idToken, email: email, name: name)
+
+        }
+    }
     
     @objc  func togglePasswordVisibility() {
         loginView.passwordTextField.isSecureTextEntry.toggle()
@@ -139,6 +290,7 @@ extension LoginViewController{
                 DispatchQueue.main.async{
                     switch result {
                     case .success(let response):
+                        
          
                         UserSettings.shared.setLoginState(true)
                         do{

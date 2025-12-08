@@ -89,10 +89,12 @@ class EditDreamViewController:UIViewController {
              return
          }
          
+         let  tag = editDreamView.tagButton.currentTitle!//titleLabel!.text
+         
          let newDescription = editDreamView.descriptionTextView.text ?? ""
          
-         editDreamRecordingViewModel.updateDream(dreamTitle: newTitle, dreamTranscription:  newDescription)
-         
+         editDreamRecordingViewModel.updateDream(dreamTitle: newTitle, dreamTranscription:  newDescription, tag: tag)
+         //dream
          do{
              try onSaveButtomTapped?()
              

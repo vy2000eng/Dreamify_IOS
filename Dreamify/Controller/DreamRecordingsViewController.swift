@@ -14,6 +14,7 @@ import AVFAudio
 class DreamRecordingsViewController:UIViewController, DeleteSectionFromCollectionView, UpdateDreamTitleAndTranscription{
     func updateTitleAndDescriptionInCollection() throws {
         print("update delegate called in dream recordingViewController")
+        dreamRecordingViewModel.dreams = try dreamRecordingViewModel.getAllDreamsForUser()
         dreamRecordingView.collectionView.reloadData()
     }
 

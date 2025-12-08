@@ -114,6 +114,7 @@ class CoreDataManager{
             newDream.id           = UUID()
             newDream.created_date = Date()
             newDream.transcribedText = transribedText
+            newDream.tag = nil
             //retrieve user
             guard let user  = try context.fetch(fetchRequest).first else{
                 throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not found"])
@@ -136,7 +137,12 @@ class CoreDataManager{
     func addDreamTestDream(title:String, url:String, transribedText:String?, date:Date) throws{
         
         
-        
+        guard let userEmail = TokenManager.shared.getUserEmail() else {
+            throw NSError(domain: "User Retrieval Error", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not retrieve user from internal storage"])
+        }
+        //create fetch request for user
+        let fetchRequest:NSFetchRequest<UserEntity> = UserEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "userEmail == %@", userEmail as CVarArg)
         
         let newDream          = Dream(context: context)
         newDream.title        = title
@@ -144,6 +150,16 @@ class CoreDataManager{
         newDream.id           = UUID()
         newDream.created_date = date
         newDream.transcribedText = transribedText
+        newDream.tag = nil
+
+        
+        guard let user  = try context.fetch(fetchRequest).first else{
+            throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not found"])
+        }
+        //construct relationships
+        user.addToDreamRelationShip(newDream)
+        newDream.userRelationShip = user
+        
         do{
             try context.save()
         }catch let err as NSError{
@@ -164,9 +180,9 @@ class CoreDataManager{
         }
     }
     //TODO: this function should throw, all of these funcitons should throw
-    func updateDream(dreamId: UUID, dreamTitle: String? = nil, dreamTranscription: String? = nil) {
+    func updateDream(dreamId: UUID, dreamTitle: String? = nil, dreamTranscription: String? = nil, tag:String? = nil) {
         // Check if at least one parameter is provided
-        guard dreamTitle != nil || dreamTranscription != nil else {
+        guard dreamTitle != nil || dreamTranscription != nil || tag != nil else {
             print("No updates provided - both dreamTitle and dreamTranscription are nil")
             return
         }
@@ -188,6 +204,10 @@ class CoreDataManager{
             // Update transcription if provided
             if let newTranscription = dreamTranscription {
                 dream.transcribedText = newTranscription // or whatever your property name is
+            }
+            
+            if let newTag = tag{
+                dream.tag = newTag
             }
             
             try context.save()

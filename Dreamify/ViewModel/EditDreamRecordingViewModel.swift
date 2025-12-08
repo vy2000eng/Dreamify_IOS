@@ -14,13 +14,8 @@ public class EditDreamRecordingViewModel{
         
     }
     //TODO: all instances which are accesing core data should throw
-    func updateDream(dreamTitle: String? = nil, dreamTranscription: String? = nil){
-        CoreDataManager.shared.updateDream(dreamId: self.dream.id,dreamTitle: dreamTitle, dreamTranscription: dreamTranscription )
+    func updateDream(dreamTitle: String? = nil, dreamTranscription: String? = nil, tag : String? = nil){
+        CoreDataManager.shared.updateDream(dreamId: self.dream.id,dreamTitle: dreamTitle, dreamTranscription: dreamTranscription, tag: tag )
     }
-    
-    
-    
-    
-    
     
 }

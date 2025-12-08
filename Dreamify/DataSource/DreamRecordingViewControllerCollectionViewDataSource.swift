@@ -231,8 +231,14 @@ extension DreamRecordingViewDataSourceManager{
                     guard let controllerToUpdateCollectionInsideOf = controller as? DreamRecordingsViewController else{
                         throw NSError(domain: "Could not cast controller to DreamRecordingsViewController", code: 0, userInfo: nil)
                     }
+                    //MARK: this should be in try catch
+                    dreamRecordingViewModel.dreams = try dreamRecordingViewModel.getAllDreamsForUser()
                     controllerToUpdateCollectionInsideOf.dreamRecordingView.collectionView.reloadItems(at: [indexPath])
                     try updateDreamTitleAndTranscriptionDelegate?.updateTitleAndDescriptionInCollection()
+                    DispatchQueue.main.async {
+                        controllerToUpdateCollectionInsideOf.dreamRecordingView.collectionView.reloadItems(at: [indexPath])
+                    }
+                    
                     
                     
                     
@@ -243,9 +249,16 @@ extension DreamRecordingViewDataSourceManager{
                     guard let controllerToUpdateCollectionInsideOf = controller as? CalendarViewController else{
                         throw NSError(domain: "Could not cast controller to CalendarViewController", code: 0, userInfo: nil)
                     }
+                    guard let  currently_selected_date = retrieveCurrentlySelectedDateDelegate?.retrieveCurrentlySelectedDate() else{
+                        return
+                    }
+                    dreamRecordingViewModel.dreams = try dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: currently_selected_date)
                     controllerToUpdateCollectionInsideOf.dreamRecordingView.collectionView.reloadItems(at: [indexPath])
                     
                     try updateDreamTitleAndTranscriptionDelegate?.updateTitleAndDescriptionInCollection()
+                    DispatchQueue.main.async {
+                        controllerToUpdateCollectionInsideOf.dreamRecordingView.collectionView.reloadItems(at: [indexPath])
+                    }
 
                     print("Edit occured in CalendaarViewController")
 

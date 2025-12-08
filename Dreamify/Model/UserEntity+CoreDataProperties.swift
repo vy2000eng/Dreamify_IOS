@@ -2,7 +2,7 @@
 //  UserEntity+CoreDataProperties.swift
 //  Dreamify
 //
-//  Created by Vladyslav Yatsuta on 12/3/25.
+//  Created by Vladyslav Yatsuta on 11/25/25.
 //
 //
 
@@ -16,9 +16,9 @@ extension UserEntity {
         return NSFetchRequest<UserEntity>(entityName: "UserEntity")
     }
 
-    @NSManaged public var id: UUID?
-    @NSManaged public var userEmail: String?
-    @NSManaged public var dreamRelationShip: NSSet?
+    @NSManaged public var id: UUID
+    @NSManaged public var userEmail: String
+    @NSManaged public var dreamRelationShip: Set<Dream>?
 
 }
 
@@ -42,3 +42,4 @@ extension UserEntity {
 extension UserEntity : Identifiable {
 
 }
+

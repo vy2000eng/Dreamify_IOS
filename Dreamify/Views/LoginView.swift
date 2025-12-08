@@ -38,6 +38,23 @@ class LoginView: UIView, UITextFieldDelegate {
         label.textColor = .secondaryLabel
         return label
     }()
+    let googleSignInButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("  Continue with Google", for: .normal)
+        button.setTitleColor(.label, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        button.backgroundColor = .systemBackground
+        button.layer.cornerRadius = 12
+        button.layer.borderWidth = 1
+        button.layer.borderColor = UIColor.systemGray4.cgColor
+        
+        // Add Google "G" logo using SF Symbol
+        button.setImage(UIImage(systemName: "g.circle.fill"), for: .normal)
+        button.tintColor = .systemBlue
+        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 0)
+        
+        return button
+    }()
     
 //    let fNameTextField: UITextField = {
 //        let textField = UITextField()
@@ -182,11 +199,13 @@ class LoginView: UIView, UITextFieldDelegate {
         contentView.addSubview(orLabel)
         contentView.addSubview(signUpButton)
         contentView.addSubview(activityIndicator)
+        contentView.addSubview(googleSignInButton)
+        
         
         // Configure scroll view
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         contentView.translatesAutoresizingMaskIntoConstraints = false
-        
+        googleSignInButton.translatesAutoresizingMaskIntoConstraints = false
         // Configure all views for Auto Layout
         [titleLabel, subtitleLabel, emailTextField, passwordTextField,
          showPasswordButton, forgotPasswordButton, loginButton, orLabel,
@@ -260,10 +279,17 @@ class LoginView: UIView, UITextFieldDelegate {
             orLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             
             // Sign Up Button
-            signUpButton.topAnchor.constraint(equalTo: orLabel.bottomAnchor, constant: 16),
+            //signUpButton.topAnchor.constraint(equalTo: orLabel.bottomAnchor, constant: 16),
+            signUpButton.topAnchor.constraint(equalTo: googleSignInButton.bottomAnchor, constant: 16),
             signUpButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
             signUpButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
-            signUpButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32)
+            signUpButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32),
+            
+            
+            googleSignInButton.topAnchor.constraint(equalTo: orLabel.bottomAnchor, constant: 16),
+            googleSignInButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
+            googleSignInButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
+            googleSignInButton.heightAnchor.constraint(equalToConstant: 50),
         ])
         
         setupDynamicConstraints()
@@ -334,30 +360,30 @@ class LoginView: UIView, UITextFieldDelegate {
             self.layoutIfNeeded()
         }
     }
+//    
+//    func setupKeyboardObservers() {
+//        NotificationCenter.default.addObserver(
+//            self,
+//            selector: #selector(keyboardWillShow),
+//            name: UIResponder.keyboardWillShowNotification,
+//            object: nil
+//        )
+//        
+//        NotificationCenter.default.addObserver(
+//            self,
+//            selector: #selector(keyboardWillHide),
+//            name: UIResponder.keyboardWillHideNotification,
+//            object: nil
+//        )
+//        
+//        // Add tap gesture to dismiss keyboard
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+//        addGestureRecognizer(tapGesture)
+//    }
     
-    func setupKeyboardObservers() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillShow),
-            name: UIResponder.keyboardWillShowNotification,
-            object: nil
-        )
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillHide),
-            name: UIResponder.keyboardWillHideNotification,
-            object: nil
-        )
-        
-        // Add tap gesture to dismiss keyboard
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        addGestureRecognizer(tapGesture)
-    }
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
+//    deinit {
+//        NotificationCenter.default.removeObserver(self)
+//    }
     
     @objc private func dismissKeyboard() {
         endEditing(true)

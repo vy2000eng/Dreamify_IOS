@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		C00B12462E2416DD00B4704D /* SwipeCellKit in Frameworks */ = {isa = PBXBuildFile; productRef = C00B12452E2416DD00B4704D /* SwipeCellKit */; };
 		C00B12B72E67F7FF00B4704D /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = C00B12B62E67F7FF00B4704D /* KeychainAccess */; };
+		C00F226B2EE290C1002F7751 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C00F226A2EE290C1002F7751 /* GoogleSignIn */; };
+		C00F226D2EE290C1002F7751 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C00F226C2EE290C1002F7751 /* GoogleSignInSwift */; };
 		C0A8865F2E95DF8E007163EC /* CalendarKit in Frameworks */ = {isa = PBXBuildFile; productRef = C0A8865E2E95DF8E007163EC /* CalendarKit */; };
 /* End PBXBuildFile section */
 
@@ -71,7 +73,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C00F226D2EE290C1002F7751 /* GoogleSignInSwift in Frameworks */,
 				C00B12B72E67F7FF00B4704D /* KeychainAccess in Frameworks */,
+				C00F226B2EE290C1002F7751 /* GoogleSignIn in Frameworks */,
 				C0A8865F2E95DF8E007163EC /* CalendarKit in Frameworks */,
 				C00B12462E2416DD00B4704D /* SwipeCellKit in Frameworks */,
 			);
@@ -137,6 +141,8 @@
 				C00B12452E2416DD00B4704D /* SwipeCellKit */,
 				C00B12B62E67F7FF00B4704D /* KeychainAccess */,
 				C0A8865E2E95DF8E007163EC /* CalendarKit */,
+				C00F226A2EE290C1002F7751 /* GoogleSignIn */,
+				C00F226C2EE290C1002F7751 /* GoogleSignInSwift */,
 			);
 			productName = Dreamify;
 			productReference = C0A893602E087364008B1730 /* Dreamify.app */;
@@ -224,6 +230,7 @@
 				C00B12192E22EF8400B4704D /* XCRemoteSwiftPackageReference "swipecellkit" */,
 				C00B12B52E67F7FF00B4704D /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				C0A8865D2E95DC3D007163EC /* XCRemoteSwiftPackageReference "CalendarKit" */,
+				C00F21DD2EE24FA8002F7751 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C0A893612E087364008B1730 /* Products */;
@@ -312,6 +319,7 @@
 				INFOPLIST_FILE = Dreamify/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Dreamify;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs access to the microphone to record audio for video capture.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -346,6 +354,7 @@
 				INFOPLIST_FILE = Dreamify/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Dreamify;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs access to the microphone to record audio for video capture.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -612,6 +621,14 @@
 				kind = branch;
 			};
 		};
+		C00F21DD2EE24FA8002F7751 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
 		C0A8865D2E95DC3D007163EC /* XCRemoteSwiftPackageReference "CalendarKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/richardtop/CalendarKit.git";
@@ -632,6 +649,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C00B12B52E67F7FF00B4704D /* XCRemoteSwiftPackageReference "KeychainAccess" */;
 			productName = KeychainAccess;
+		};
+		C00F226A2EE290C1002F7751 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C00F21DD2EE24FA8002F7751 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		C00F226C2EE290C1002F7751 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C00F21DD2EE24FA8002F7751 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
 		};
 		C0A8865E2E95DF8E007163EC /* CalendarKit */ = {
 			isa = XCSwiftPackageProductDependency;

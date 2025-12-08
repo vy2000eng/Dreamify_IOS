@@ -5,16 +5,39 @@
 //  Created by Vladyslav Yatsuta on 6/22/25.
 //
 
+import GoogleSignIn
 import UIKit
 import CoreData
 import BackgroundTasks
-
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     let taskId = "dreamify.refreshAuthToken.backgroundTask"
+    
+    func application(_ app: UIApplication, open url: URL,
+              options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        print("=== APP DELEGATE URL RECEIVED ===")
+        print("URL: \(url)")
+        var handled: Bool
+        handled = GIDSignIn.sharedInstance.handle(url)
+        print("Google handled: \(handled)")
+        if handled {
+            return true
+        }
+        return false
+    }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+       
+        if let clientID = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String {
+            let config = GIDConfiguration(clientID: clientID)
+            GIDSignIn.sharedInstance.configuration = config
+            print("Google Sign In configured with client ID: \(clientID)")
+        } else {
+            print("ERROR: GIDClientID not found in Info.plist")
+        }
+        
+        
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskId, using: nil){ task in
             guard let newTask = task as? BGAppRefreshTask  else {return}
             self.handleTask(task: newTask)
@@ -23,6 +46,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         
         schedule()
+        
+        
+//        
+//                do {
+//                    print("ADDING DREAMSSSSSSSSSSSSSSS")
+//                    let calendar = Calendar.current
+//                    let today = Date()
+//        
+//                    let dreamText = "I was soaring above crystal blue waters, feeling completely free and weightless."
+//        
+//                    for i in 0..<100 {
+//                        // Distribute dreams across 7 days (0-6 days ago)
+//                        let daysAgo = i % 7
+//        
+//                        if let dreamDate = calendar.date(byAdding: .day, value: -daysAgo, to: today) {
+//                            try CoreDataManager.shared.addDreamTestDream(
+//                                title: "Dream \(i + 1)",
+//                                url: "https://www.youtube.com/watch?v=example\(i + 1)",
+//                                transribedText: dreamText,
+//                                date: dreamDate
+//                            )
+//                        }
+//                    }
+//        
+//                } catch let err {
+//                    print("Error adding dreams: \(err.localizedDescription)")
+//                }
+        
         
         APIClientManager.shared.refreshToken{ refreshResult in
             switch refreshResult{
@@ -41,12 +92,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
         }
         
+        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
+          if error != nil || user == nil {
+            // Show the app's signed-out state.
+          } else {
+            // Show the app's signed-in state.
+          }
+        }
+        return true
+        
 
         
         
         
         
-        return true
+        //return true
     }
     
     func applicationDidEnterBackground(_ application: UIApplication) {

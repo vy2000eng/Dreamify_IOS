@@ -221,7 +221,6 @@ class UserInfoView: UIView {
         containerStackView.addArrangedSubview(resetPasswordButton)
         
         // Add text field delegates and actions
-        //emailTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         usernameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         
         // Add button actions

@@ -29,11 +29,7 @@ class EditDreamView: UIView {
         label.backgroundColor = UIColor.systemGreen
         label.tintColor = .white
         label.layer.cornerRadius = 12
-            //label.text =  "+ Add Tag"
-        //label.clipsToBounds = true
         label.setTitle("Add tag", for: .normal)
-
-
         label.titleLabel?.font = .systemFont(ofSize: 10, weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -125,21 +121,15 @@ class EditDreamView: UIView {
     init(frame: CGRect, dream: DreamViewModel) {
         self.dream = dream
         self.dataSource = [
-            ("Nightmare", UIColor.systemRed),
-            ("Lucid", UIColor.systemPurple),
-            ("Recurring", UIColor.systemOrange),
-            ("Pleasant", UIColor.systemGreen),
-            ("Adventure", UIColor.systemBlue),
-            ("Anxiety", UIColor.systemYellow)
+            ("No Tag", UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)), // Medium gray
+            ("Nightmare", UIColor(red: 0.8, green: 0.1, blue: 0.2, alpha: 1.0)), // Deep crimson
+            ("Lucid", UIColor(red: 0.5, green: 0.0, blue: 0.8, alpha: 1.0)), // Electric purple
+            ("Recurring", UIColor(red: 1.0, green: 0.4, blue: 0.0, alpha: 1.0)), // Bright orange
+            ("Pleasant", UIColor(red: 0.2, green: 0.8, blue: 0.5, alpha: 1.0)), // Mint green
+            ("Adventure", UIColor(red: 0.0, green: 0.6, blue: 1.0, alpha: 1.0)), // Sky blue
+            ("Anxiety", UIColor(red: 0.7, green: 0.5, blue: 0.2, alpha: 1.0)) // Dark mustard
         ]
-//        self.dataSource = [
-//            "Nightmare": .systemRed,      // Red for scary/bad
-//            "Lucid": .systemPurple,        // Purple for mystical/awareness
-//            "Recurring": .systemOrange,    // Orange for repetition/warning
-//            "Pleasant": .systemGreen,      // Green for positive/good
-//            "Adventure": .systemBlue,      // Blue for exploration/excitement
-//            "Anxiety": .systemYellow       // Yellow for caution/stress
-//        ]
+
         super.init(frame: frame)
         setupView()
         configureView()
@@ -222,78 +212,52 @@ class EditDreamView: UIView {
             
         ])
     }
-//    let dataSource: [String: UIColor] = [
-//        "Nightmare": .systemRed,      // Red for scary/bad
-//        "Lucid": .systemPurple,        // Purple for mystical/awareness
-//        "Recurring": .systemOrange,    // Orange for repetition/warning
-//        "Pleasant": .systemGreen,      // Green for positive/good
-//        "Adventure": .systemBlue,      // Blue for exploration/excitement
-//        "Anxiety": .systemYellow       // Yellow for caution/stress
-//    ]
-//    let actionClosure = { [weak self] (action: UIAction) in
-//        guard let self  = self else{return}
-//        let color = self.dataSource[action.title]
-////        {
-////            tagButton?.backgroundColor = color
-////        }
-//    }
+
     
     private func configureView() {
-//        dreamTitleTextView.text = dream.title
-//        descriptionTextView.text = dream.transcribedText ?? "No description available"
-//        
-//        let dateFormatter = DateFormatter()
-//        dateFormatter.dateStyle = .medium
-//        dateFormatter.timeStyle = .short
-//        dateValueLabel.text = dateFormatter.string(from: dream.createdDate)
-//        
-//        var menuChildren: [UIMenuElement] = []
-//        for (tag, color) in dataSource {
-//            let action = UIAction(title: tag) { [weak self] action in
-//                guard let self = self else { return }
-//                if let color = self.dataSource[action.title] {
-//                    self.tagButton.backgroundColor = color
-//                }
-//            }
-//            let config = UIImage.SymbolConfiguration(pointSize: 12)
-//            action.image = UIImage(systemName: "circle.fill", withConfiguration: config)?
-//                .withTintColor(color, renderingMode: .alwaysOriginal)
-//            menuChildren.append(action)
-//        }
-//        tagButton.menu = UIMenu(options: .displayInline, children: menuChildren)
-//        tagButton.showsMenuAsPrimaryAction = true
-//        tagButton.changesSelectionAsPrimaryAction = true
+        
         dreamTitleTextView.text = dream.title
         descriptionTextView.text = dream.transcribedText ?? "No description available"
-        
+
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
         dateFormatter.timeStyle = .short
         dateValueLabel.text = dateFormatter.string(from: dream.createdDate)
         
+        
         var menuChildren: [UIMenuElement] = []
         for (tag, color) in dataSource {
-            let action = UIAction(title: tag, state: tag == dream.dreamTag ? .on : .off) { [weak self] action in
+            let action = UIAction(title: tag) { [weak self] action in
                 guard let self = self else { return }
                 self.tagButton.backgroundColor = color
-                self.tagButton.setTitle(action.title, for: .normal)
+                self.tagButton.setTitle(tag, for: .normal)
+                
+   
             }
+            
             let config = UIImage.SymbolConfiguration(pointSize: 12)
             action.image = UIImage(systemName: "circle.fill", withConfiguration: config)?
                 .withTintColor(color, renderingMode: .alwaysOriginal)
+            
             menuChildren.append(action)
         }
+
         tagButton.menu = UIMenu(options: .displayInline, children: menuChildren)
         tagButton.showsMenuAsPrimaryAction = true
-        tagButton.changesSelectionAsPrimaryAction = true
-        
+        // Remove this line: tagButton.changesSelectionAsPrimaryAction = true
+
         // Set initial button appearance if tag exists
         if let existingTag = dream.dreamTag {
             if let match = dataSource.first(where: { $0.0 == existingTag }) {
                 tagButton.backgroundColor = match.1
                 tagButton.setTitle(existingTag, for: .normal)
             }
+        } else {
+            // Set default "No Tag" appearance
+            tagButton.backgroundColor = dataSource[0].1
+            tagButton.setTitle("No Tag", for: .normal)
         }
+
 
     }
     

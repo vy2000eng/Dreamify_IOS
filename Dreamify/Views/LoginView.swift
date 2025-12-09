@@ -55,42 +55,7 @@ class LoginView: UIView, UITextFieldDelegate {
         
         return button
     }()
-    
-//    let fNameTextField: UITextField = {
-//        let textField = UITextField()
-//        textField.placeholder = "First Name"
-//        textField.borderStyle = .none
-//        textField.backgroundColor = UIColor.systemGray6
-//        textField.layer.cornerRadius = 12
-//        textField.font = UIFont.systemFont(ofSize: 16)
-//        textField.autocapitalizationType = .words
-//        textField.autocorrectionType = .no
-//        
-//        // Add padding
-//        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
-//        textField.leftView = paddingView
-//        textField.leftViewMode = .always
-//        
-//        return textField
-//    }()
-//    
-//    let LNameTextField: UITextField = {
-//        let textField = UITextField()
-//        textField.placeholder = "Last Name"
-//        textField.borderStyle = .none
-//        textField.backgroundColor = UIColor.systemGray6
-//        textField.layer.cornerRadius = 12
-//        textField.font = UIFont.systemFont(ofSize: 16)
-//        textField.autocapitalizationType = .words
-//        textField.autocorrectionType = .no
-//        
-//        // Add padding
-//        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
-//        textField.leftView = paddingView
-//        textField.leftViewMode = .always
-//        
-//        return textField
-//    }()
+
     
     let emailTextField: UITextField = {
         let textField = UITextField()
@@ -242,17 +207,6 @@ class LoginView: UIView, UITextFieldDelegate {
             subtitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
             subtitleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
             
-//            // First Name Text Field
-//            fNameTextField.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 40),
-//            fNameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
-//            fNameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
-//            fNameTextField.heightAnchor.constraint(equalToConstant: 50),
-//            
-//            // Last Name Text Field
-//            LNameTextField.topAnchor.constraint(equalTo: fNameTextField.bottomAnchor, constant: 16),
-//            LNameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
-//            LNameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
-//            LNameTextField.heightAnchor.constraint(equalToConstant: 50),
             
             // Show Password Button
             showPasswordButton.centerYAnchor.constraint(equalTo: passwordTextField.centerYAnchor),

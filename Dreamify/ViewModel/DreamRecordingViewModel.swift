@@ -27,7 +27,7 @@ public class DreamRecordingViewModel{
         do{
             switch(self.controllerManagedByDataSource){
             case .DreamViewController:
-                try dreams = getAllDreamsForUser()//getAllDreams()
+                try dreams = getAllDreamsForUser()
                 break
             case .CalendarViewController:
                 try dreams = getAllDreamsCreatedByDate(seleectedDate: Date.now)
@@ -75,34 +75,6 @@ public class DreamRecordingViewModel{
         return dreams[index]
     }
     
-//    func getAllDreams()throws -> [DreamViewModel]{
-//        var previousOpenStates       :[String:Bool] = [:]
-//        var previousTranscribedStates:[String:Bool] = [:]
-//        
-//        for (_, dream) in dreams.enumerated(){
-//            
-//            previousOpenStates[dream.id.uuidString] = dream.retrieveIsOpen()
-//            previousTranscribedStates[dream.id.uuidString] = dream.retrieveIsShowingTextTranscriptionOrAnalysis()
-//        }
-//        
-//        do{
-//            let alldreams = try CoreDataManager.shared.getAllDreams().map(DreamViewModel.init )
-//            
-//            for dream in alldreams{
-//                if previousOpenStates[dream.id.uuidString] == true{
-//                    dream.toggleIsOpen()
-//                }
-//                if previousTranscribedStates[dream.id.uuidString] == true{
-//                    dream.toggleIsShowingTextTransctiptionOrAnalysis()
-//                }
-//            }
-//            return alldreams
-//            
-//        }catch let err as NSError{
-//            print("Error initializing dreams in getAllDreams() \(err), \(err.userInfo)")
-//            throw err
-//        }
-//    }
     
     func getAllDreamsForUser()throws -> [DreamViewModel]{
         var previousOpenStates       :[String:Bool] = [:]
@@ -125,7 +97,7 @@ public class DreamRecordingViewModel{
             for dream in alldreams{
                 if previousOpenStates[dream.id.uuidString] == true{
                     //dream
-                    //dream.toggleIsOpen()
+                    dream.toggleIsOpen()
                 }
                 if previousTranscribedStates[dream.id.uuidString] == true{
                     dream.toggleIsShowingTextTransctiptionOrAnalysis()

@@ -10,7 +10,6 @@ class EditDreamViewController:UIViewController {
     var editDreamView:EditDreamView
     var dream:DreamViewModel
     var editDreamRecordingViewModel: EditDreamRecordingViewModel
-    //weak var updateDreamTitleAndTranscriptipnViewFromDelegate:updateDreamTitleAndTranscription?
     
     
     
@@ -92,9 +91,15 @@ class EditDreamViewController:UIViewController {
          let  tag = editDreamView.tagButton.currentTitle!//titleLabel!.text
          
          let newDescription = editDreamView.descriptionTextView.text ?? ""
-         
-         editDreamRecordingViewModel.updateDream(dreamTitle: newTitle, dreamTranscription:  newDescription, tag: tag)
-         //dream
+         if tag == "No Tag"{
+             editDreamRecordingViewModel.updateDream(dreamTitle: newTitle, dreamTranscription:  newDescription, tag: nil)
+
+             
+         }else{
+             editDreamRecordingViewModel.updateDream(dreamTitle: newTitle, dreamTranscription:  newDescription, tag: tag)
+
+             
+         }
          do{
              try onSaveButtomTapped?()
              

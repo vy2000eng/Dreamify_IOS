@@ -23,9 +23,9 @@ class DreamRecordingsViewController:UIViewController, DeleteSectionFromCollectio
     func deleteRecording(id:UUID) {
         print("dream vc delegate called")
         do{
-            try self.dreamRecordingViewModel.removeDreamFromArray(id: id)//removeDreamByIDFromArray(id:id)//removeDreamFromArray(id: dream.id)
+            try self.dreamRecordingViewModel.removeDreamFromArray(id: id)
 
-                self.dreamRecordingView.collectionView.reloadData()//deleteSections(IndexSet(integer: indexPath.section))
+                self.dreamRecordingView.collectionView.reloadData()
             
         }catch let err{
             print("an error occured whilst removing dream from collection view in dreamRecordingViewController: \(err)")

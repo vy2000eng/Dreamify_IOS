@@ -75,30 +75,7 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-//    lazy var tagLabel: UIButton = {
-//        let label = UIButton()
-//        label.backgroundColor = UIColor.systemGreen
-//        label.tintColor = .white
-//        label.layer.cornerRadius = 12
-//       // label.text =  "+ Add Tag"
-//        //label.clipsToBounds = true
-//
-//        label.titleLabel?.font = .systemFont(ofSize: 10, weight: .medium)
-//        label.translatesAutoresizingMaskIntoConstraints = false
-//        return label
-//    }()
-    
-//    lazy var headerTagLabel: UIButton = {
-//        let label = UIButton()
-//        label.backgroundColor = UIColor.systemGreen
-//        label.tintColor = .white
-//        label.layer.cornerRadius = 12
-//        label.titleLabel?.font = .systemFont(ofSize: 10, weight: .medium)
-//        label.translatesAutoresizingMaskIntoConstraints = false
-//        label.isUserInteractionEnabled = false // Make it non-interactive in header
-//        return label
-//    }()
-//
+
     lazy var headerTagLabel: UIButton = {
         let label = UIButton()
         label.backgroundColor = UIColor.systemGreen
@@ -166,12 +143,14 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
     var onTitleLongPress: ((Int) -> Void)?
     private var cellIndex: Int = 0
     private var dataSource = [
-        ("Nightmare", UIColor.systemRed.withAlphaComponent(0.7)),
-        ("Lucid", UIColor.systemPurple.withAlphaComponent(0.7)),
-        ("Recurring", UIColor.systemOrange.withAlphaComponent(0.7)),
-        ("Pleasant", UIColor.systemGreen.withAlphaComponent(0.7)),
-        ("Adventure", UIColor.systemBlue.withAlphaComponent(0.7)),
-        ("Anxiety", UIColor.systemYellow.withAlphaComponent(0.7))
+        ("Nightmare", UIColor(red: 0.8, green: 0.1, blue: 0.2, alpha: 1.0)), // Deep crimson
+        ("Lucid", UIColor(red: 0.5, green: 0.0, blue: 0.8, alpha: 1.0)), // Electric purple
+        ("Recurring", UIColor(red: 1.0, green: 0.4, blue: 0.0, alpha: 1.0)), // Bright orange
+        ("Pleasant", UIColor(red: 0.2, green: 0.8, blue: 0.5, alpha: 1.0)), // Mint green
+        ("Adventure", UIColor(red: 0.0, green: 0.6, blue: 1.0, alpha: 1.0)), // Sky blue
+        ("Anxiety", UIColor(red: 0.7, green: 0.5, blue: 0.2, alpha: 1.0)), // Dark mustard
+
+
     ]
 
 
@@ -221,59 +200,6 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
 
         
         headerCellConstraints = [
-            
-            
-//            headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 2),
-//            headerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 2),
-//            headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: 2),
-//            headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 2),
-//            
-//            headerTagLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            headerTagLabel.bottomAnchor.constraint(equalTo: sectionTitle.topAnchor, constant:   5),
-//            headerTagLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 70),
-//
-//            
-//
-//            sectionTitle.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
-//            sectionTitle.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            sectionTitle.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-//            
-//            createdOnLabel.topAnchor.constraint(equalTo: sectionTitle.bottomAnchor, constant: 4),
-//            createdOnLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-            
-            // Tag label on the same line as date, aligned to the right
-//            headerTagLabel.centerYAnchor.constraint(equalTo: sectionTitle.centerYAnchor),
-//            headerTagLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-//            headerTagLabel.heightAnchor.constraint(equalToConstant: 24),
-//            
-//            createdOnLabel.trailingAnchor.constraint(lessThanOrEqualTo: headerTagLabel.leadingAnchor, constant: -8),
-//            createdOnLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -8)
-//            headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 2),
-//            headerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 2),
-//            headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: 2),
-//            headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 2),
-//            
-//            sectionTitle.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
-//            sectionTitle.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            sectionTitle.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-//            
-//            createdOnLabel.topAnchor.constraint(equalTo: sectionTitle.bottomAnchor, constant: 4),
-//            createdOnLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            createdOnLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-//            
-//            // Add header tag label
-//            headerTagLabel.topAnchor.constraint(equalTo: createdOnLabel.bottomAnchor, constant: 8),
-//            headerTagLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            headerTagLabel.widthAnchor.constraint(equalToConstant: 90),
-//            headerTagLabel.heightAnchor.constraint(equalToConstant: 24),
-//            headerTagLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -8)
-            
-            
-            
-            
-            
-            
-            
             // Header view
             headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             headerView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -431,7 +357,6 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
             )
             if let dreamTag = dream.dreamTag {
                 tagLabel.setTitle(dreamTag, for: .normal)
-                tagLabel.setTitle(dreamTag, for: .normal)
                 
                 // Find and set color
                 for (tag, color) in dataSource {
@@ -485,22 +410,7 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         
         // Setup header constraints
         headerCellConstraints = [
-//            headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-//            headerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-//            headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-//            headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-//
-//            
-//            // Section title
-//            sectionTitle.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
-//            sectionTitle.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            sectionTitle.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-//            
-//            // Created date
-//            createdOnLabel.topAnchor.constraint(equalTo: sectionTitle.bottomAnchor, constant: 4),
-//            createdOnLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            createdOnLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-//            createdOnLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -8)
+
             
             headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 2),
             headerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 2),
@@ -523,49 +433,6 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
             headerTagLabel.heightAnchor.constraint(equalToConstant: 24),
 
             createdOnLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -8)
-            
-            
-            
-            
-//            headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor,constant: 2),
-//            headerView.topAnchor.constraint(equalTo: contentView.topAnchor,constant: 2),
-//            headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor,constant: 2),
-//            headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor,constant: 2),
-//            
-//            sectionTitle.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
-//            sectionTitle.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            sectionTitle.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-//            
-//            createdOnLabel.topAnchor.constraint(equalTo: sectionTitle.bottomAnchor, constant: 4),
-//            createdOnLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            createdOnLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-//            createdOnLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -8)
-            
-            
-            
-            
-            
-//            headerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 2),
-//            headerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 2),
-//            headerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: 2),
-//            headerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 2),
-//            
-//            sectionTitle.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
-//            sectionTitle.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            sectionTitle.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-//            
-//            createdOnLabel.topAnchor.constraint(equalTo: sectionTitle.bottomAnchor, constant: 4),
-//            createdOnLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-//            
-//            // Tag label on the same line as date, aligned to the right
-//            headerTagLabel.centerYAnchor.constraint(equalTo: createdOnLabel.centerYAnchor),
-//            headerTagLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-//            headerTagLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 70),
-//            headerTagLabel.heightAnchor.constraint(equalToConstant: 24),
-//            
-//            createdOnLabel.trailingAnchor.constraint(lessThanOrEqualTo: headerTagLabel.leadingAnchor, constant: -8),
-//            createdOnLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -8)
-
 
         ]
         
@@ -617,48 +484,7 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
             playPauseButton.widthAnchor.constraint(equalToConstant: 40),
             playPauseButton.heightAnchor.constraint(equalToConstant: 40)
         ]
-//        sectionCellConstraints = [
-//           // Main content view
-//            mainContentView.topAnchor.constraint(equalTo: contentView.topAnchor,constant: 2),
-//            mainContentView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor,constant: 2),
-//            mainContentView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor,constant: 2),
-//            mainContentView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor,constant: 2),
-//            
-//            // Section title (in mainContentView)
-//            mainSectionTitle.topAnchor.constraint(equalTo: mainContentView.topAnchor, constant: 8),
-//            mainSectionTitle.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 16),
-//            mainSectionTitle.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -16),
-//            
-//            // Created date (in mainContentView)
-//            mainCreatedOnLabel.topAnchor.constraint(equalTo: mainSectionTitle.bottomAnchor, constant: 4),
-//            mainCreatedOnLabel.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 16),
-//            mainCreatedOnLabel.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -16),
-//            
-//            // Transcription button
-//            transcriptionAnalysisButton.topAnchor.constraint(equalTo: mainCreatedOnLabel.bottomAnchor, constant: 12),
-//            transcriptionAnalysisButton.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 16),
-//            transcriptionAnalysisButton.widthAnchor.constraint(equalToConstant: 100),
-//            transcriptionAnalysisButton.heightAnchor.constraint(equalToConstant: 24),
-//            
-//            // Analyze button
-//            analyzeButton.topAnchor.constraint(equalTo: mainCreatedOnLabel.bottomAnchor, constant: 12),
-//            analyzeButton.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -16),
-//            analyzeButton.widthAnchor.constraint(equalToConstant: 70),
-//            analyzeButton.heightAnchor.constraint(equalToConstant: 24),
-//            
-//            // Text view
-//            textView.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 16),
-//            textView.topAnchor.constraint(equalTo: analyzeButton.bottomAnchor, constant: 12),
-//            textView.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -16),
-//            
-//            // Play button
-//            playPauseButton.topAnchor.constraint(equalTo: textView.bottomAnchor, constant: 16),
-//            playPauseButton.centerXAnchor.constraint(equalTo: mainContentView.centerXAnchor),
-//            playPauseButton.bottomAnchor.constraint(equalTo: mainContentView.bottomAnchor, constant: -16),
-//            playPauseButton.widthAnchor.constraint(equalToConstant: 40),
-//            playPauseButton.heightAnchor.constraint(equalToConstant: 40)
-//
-//        ]
+
         
         // Activate all constraints
         NSLayoutConstraint.activate(headerCellConstraints)

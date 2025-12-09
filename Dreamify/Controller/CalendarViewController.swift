@@ -17,7 +17,6 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
         var dreams =  try dreamRecordingViewModel.getAllDreamsForUser()
         dreamRecordingViewModel.dreams = dreams
         filterDreamsForDate(current_date)
-        //dreamRecordingViewModel.dreams = try dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: current_date)// try dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: current_date)
         
         dreamRecordingView.collectionView.reloadInputViews()
 

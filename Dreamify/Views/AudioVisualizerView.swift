@@ -31,7 +31,7 @@ class AudioVisualizerView: UIView {
         
         for i in 0..<numberOfBars {
             let barView = UIView()
-            barView.backgroundColor = UIColor.white.withAlphaComponent(0.8)
+            barView.backgroundColor = UIColor.label.withAlphaComponent(0.8)
             barView.layer.cornerRadius = 3
             
             let x = startX + CGFloat(i) * (barWidth + spacing)

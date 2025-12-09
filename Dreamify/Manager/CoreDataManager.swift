@@ -150,7 +150,7 @@ class CoreDataManager{
         newDream.id           = UUID()
         newDream.created_date = date
         newDream.transcribedText = transribedText
-        newDream.tag = nil
+        newDream.tag = "No Tag"
 
         
         guard let user  = try context.fetch(fetchRequest).first else{
@@ -206,9 +206,7 @@ class CoreDataManager{
                 dream.transcribedText = newTranscription // or whatever your property name is
             }
             
-            if let newTag = tag{
-                dream.tag = newTag
-            }
+                dream.tag = tag
             
             try context.save()
             print("Dream updated successfully")
@@ -225,7 +223,6 @@ class CoreDataManager{
         newDream.url          = url
         newDream.id           = UUID()
         newDream.created_date = Date()
-        //newDream.transcribedText = transribedText
         do{
             try context.save()
         }catch let err as NSError{
@@ -309,8 +306,6 @@ class CoreDataManager{
     func deleteAllDataForUser(email:String) throws -> Void {
         do{
             
-            
-
             // get user
             guard let userEmail = TokenManager.shared.getUserEmail() else {
                 throw NSError(domain: "User Retrieval Error", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not retrieve user from internal storage"])
@@ -341,9 +336,7 @@ class CoreDataManager{
                 } else {
                     print("File doesn't exist: \(url.path)")
                 }
-                //try FileManager.default.
-               // try FileManager.default.removeItem(atPath: url.path)
-                // delete the dream metadata
+          
                 context.delete(dream)
             }
             //delete the subsequent user associated with the dream

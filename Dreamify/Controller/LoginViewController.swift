@@ -18,8 +18,7 @@ class LoginViewController:UIViewController{
     
     init() {
         loginView = LoginView(frame: .zero)
-        //self.userEntityViewModel = nil // Initialize as nil
-        // alert = UIAlertController()
+
         
         super.init(nibName: nil, bundle: nil)
         
@@ -50,6 +49,7 @@ class LoginViewController:UIViewController{
         loginView.setupUI()
         loginView.setupConstraints()
         setupActions()
+        //TODO: need to add this back WARNING inteferes with Google Auth Screen
         // loginView.setupKeyboardObservers()
         view.addSubview(loginView)
         loginView.translatesAutoresizingMaskIntoConstraints = false
@@ -147,18 +147,9 @@ class LoginViewController:UIViewController{
 // - MARK: actions
 extension LoginViewController{
     @objc
-    func btnGoogleSingInDidTap(_ sender: Any) {
-        print("View controller: \(self)")
-        print("Is view controller in window hierarchy: \(self.view.window != nil)")
-       // print("Client ID configured: \(GIDSignIn.sharedInstance.configuration?.clientID ?? "NO CLIENT ID")")
-//        guard let clientID = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String else {
-//            print("ERROR: No client ID found")
-//            return
-//        }
-//        
-//        let config = GIDConfiguration(clientID: clientID)
-//        
-//        GIDSignIn.sharedInstance.configuration = config
+    func btnGoogleSingInDidTap(_ sender: Any) throws -> Void {
+
+
         
         print("Starting sign in...")
         
@@ -169,26 +160,21 @@ extension LoginViewController{
         ) { signInResult, error in
             
             guard error == nil else {
-                print("Sign in error: \(error!)")
+                //TODO: add error in here later
                 return
             }
             guard let signInResult = signInResult else { return }
             
             // Get the ID token to send to your backend
             guard let idToken = signInResult.user.idToken?.tokenString else {
-                print("No ID token")
+                //TODO: add an actual error here
                 return
             }
             
             // Get user info
             let email = signInResult.user.profile?.email
             let name = signInResult.user.profile?.name
-            
-            print("Google ID Token: \(idToken)")
-            print("Email: \(email ?? "none")")
-            print("Name: \(name ?? "none")")
-            
-            // Send to your .NET backend
+
             self.authenticateWithBackend(googleIdToken: idToken, email: email, name: name)
 
         }
@@ -214,8 +200,7 @@ extension LoginViewController{
             // Handle password reset
             print("Password reset requested")
         }
-       // present(resetAction, animated: true)
-        //
+
     }
     @objc private func signUpButtonTapped() {
         // Navigate to sign up screen
@@ -265,15 +250,10 @@ extension LoginViewController{
                         }catch let err as NSError{
                             let alert = UIAlertController(title: "Error", message: err.localizedDescription, preferredStyle: .alert)
                             alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-
                             self.present(alert, animated: true)
-                            
                             print("\(err.localizedDescription)")
                             
                         }
-                        
-                        
-                 
                         
                         self.setLoadingState(false)
                         print("Success: \(response.accessToken)")
@@ -282,9 +262,9 @@ extension LoginViewController{
                         print("Error: \(error)")
                         self.setLoadingState(false)
                 
-                            let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-                            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                            self.present(alert,animated: true)
+                        let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                        self.present(alert,animated: true)
 
                         
                     }
@@ -294,10 +274,6 @@ extension LoginViewController{
             }
             
         }else{
-//            let fname = loginView.fNameTextField.text;
-//            let lname = loginView.LNameTextField.text;
-        
-            
             APIClientManager.shared.request(
                 endpoint: "/account/register",
                 method: "POST",
@@ -315,7 +291,6 @@ extension LoginViewController{
                             TokenManager.shared.saveUserEmail(email: user!.userEmail)
 
                             UserSettings.shared.setLoginState(true)
-                            //navigationController?.
                             
                             
                             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -342,11 +317,7 @@ extension LoginViewController{
                         let alert = UIAlertController(title: "Registration Error", message: error.localizedDescription, preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                         self.present(alert,animated: true)
-                        //self.createAlert(title: "registration Error", msg: error.localizedDescription)
-                       // self.present(UIAlertController(title: "Registration Error", message: error.localizedDescription, preferredStyle: .alert),animated: true)
-                     
-                        //alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                        //self.present(alert, animated: true)
+
                         
                     }
                     
@@ -361,18 +332,6 @@ extension LoginViewController{
 }
 // MARK: utililty functions
 extension LoginViewController{
-//    private func createAlert(title:String, msg:String){
-//        alert.title = title
-//        alert.message = msg
-//        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-//        
-//        
-//        
-////        let alert = UIAlertController(title: title,
-////                                      message: msg,
-////                                      preferredStyle: .alert)
-//    }
-    
     
     
     private func handleLoginSuccess() {

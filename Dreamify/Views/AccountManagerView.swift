@@ -56,7 +56,7 @@ class AccountManagerView: UIView {
     
     // MARK: - Callbacks
     
-    var onItemTapped: ((String) -> Void)?
+    var onItemTapped: ((String) async throws -> Void)?
     
     // MARK: - Initialization
     
@@ -258,7 +258,7 @@ class AccountManagerView: UIView {
         }
     }
     
-    @objc private func itemTapped(_ sender: UITapGestureRecognizer) {
+    @objc private func itemTapped(_ sender: UITapGestureRecognizer)    {
         guard let title = sender.view?.accessibilityIdentifier else { return }
         // Add visual feedback
         UIView.animate(withDuration: 0.1, animations: {
@@ -268,7 +268,12 @@ class AccountManagerView: UIView {
                 sender.view?.alpha = 1.0
             }
         }
-        onItemTapped?(title)
+        //await onItemTapped?(title)
+        Task{
+            try? await onItemTapped?(title)
+
+            
+        }
     }
 }
 

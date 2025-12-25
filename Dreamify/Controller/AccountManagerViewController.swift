@@ -19,7 +19,7 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
     private var loadingOverlay: LoadingOverlayView?
 
     
-    override func viewDidLoad() {
+    override func viewDidLoad()  {
         super.viewDidLoad()
         
         
@@ -34,7 +34,7 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
         ])
         
         // Handle item taps
-        accountManagerView.onItemTapped = { [weak self] itemTitle in
+         accountManagerView.onItemTapped = { [weak self] itemTitle in
             guard let self = self else {return}
             print("Tapped: \(itemTitle)")
             if(itemTitle == "Log Out"){
@@ -54,7 +54,7 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
             if(itemTitle == "Create An Account"){
                 let loginViewController = LoginViewController()
                 loginViewController.userIsLoggedInChangeAccountMAnagementOptionsDelegate = self
-                self.navigationController?.pushViewController(loginViewController, animated: true)
+                await self.navigationController?.pushViewController(loginViewController, animated: true)
                 return
             }
         
@@ -62,7 +62,7 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
        
             if(itemTitle == "Manage Account"){
                 let userInfo = UserInfoViewController()
-                self.navigationController?.pushViewController(userInfo, animated: true)
+                await self.navigationController?.pushViewController(userInfo, animated: true)
                 return
                 
             }
@@ -71,13 +71,13 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
             if(itemTitle == "Privacy Policy"){
                 let privacyPolicyViewController = PrivacyPolicyTermsOfServiceController(privacyPolicyTermsOfService: 0)
                 
-                self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
+                await self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
                 return
             }
             if(itemTitle == "Terms of Service"){
                 let privacyPolicyViewController = PrivacyPolicyTermsOfServiceController(privacyPolicyTermsOfService: 1)
                 
-                self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
+               await  self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
                 return
             }
             
@@ -127,19 +127,25 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
                     )
                 
                 alert.addAction(UIAlertAction( title: "Cancel", style: .cancel))
-                present(alert, animated: true)
-                
-                
-                
-                
-                
+                await present(alert, animated: true)
+            }
+            if(itemTitle == "Manage Subscription"){
+                do{
+                     try await  purchase(ProductID: "monthly_subscription.dreamify")
 
-                
-                
-                
-                
-                
-                
+                    
+                }catch{
+                    let alert = UIAlertController(title: "The Subscription purchase failed", message: error.localizedDescription, preferredStyle: .alert)
+
+                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+
+                    
+                    //alert.addAction(UIAlertAction( title: "Cancel", style: .cancel))
+                    self.present(alert, animated: true)
+
+                    //present(alert, animated: true)
+                    
+                }
             }
         }
         
@@ -166,10 +172,10 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
            loadingOverlay = loading
        }
        
-       private func hideLoading() {
-           loadingOverlay?.hide()
-           loadingOverlay = nil
-       }
+    private func hideLoading() {
+       loadingOverlay?.hide()
+       loadingOverlay = nil
+    }
     
     
     func navigateToLoginView(){

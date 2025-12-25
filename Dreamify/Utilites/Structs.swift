@@ -19,6 +19,17 @@ enum ControllerManagedByAudioPlayerClass:Int{
 }
 
 
+struct ResetPasswordDetailsStruct{
+    var email:String
+    var code:String
+    var password:String
+    var confirmPassword:String
+    
+}
+
+
+
+
 
 struct PrivacyPolicyTermsOfServiceStruct {
     

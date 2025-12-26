@@ -2,7 +2,7 @@
 //  UserEntity+CoreDataClass.swift
 //  Dreamify
 //
-//  Created by Vladyslav Yatsuta on 11/25/25.
+//  Created by Vladyslav Yatsuta on 12/3/25.
 //
 //
 

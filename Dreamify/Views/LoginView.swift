@@ -38,42 +38,24 @@ class LoginView: UIView, UITextFieldDelegate {
         label.textColor = .secondaryLabel
         return label
     }()
-    
-//    let fNameTextField: UITextField = {
-//        let textField = UITextField()
-//        textField.placeholder = "First Name"
-//        textField.borderStyle = .none
-//        textField.backgroundColor = UIColor.systemGray6
-//        textField.layer.cornerRadius = 12
-//        textField.font = UIFont.systemFont(ofSize: 16)
-//        textField.autocapitalizationType = .words
-//        textField.autocorrectionType = .no
-//        
-//        // Add padding
-//        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
-//        textField.leftView = paddingView
-//        textField.leftViewMode = .always
-//        
-//        return textField
-//    }()
-//    
-//    let LNameTextField: UITextField = {
-//        let textField = UITextField()
-//        textField.placeholder = "Last Name"
-//        textField.borderStyle = .none
-//        textField.backgroundColor = UIColor.systemGray6
-//        textField.layer.cornerRadius = 12
-//        textField.font = UIFont.systemFont(ofSize: 16)
-//        textField.autocapitalizationType = .words
-//        textField.autocorrectionType = .no
-//        
-//        // Add padding
-//        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
-//        textField.leftView = paddingView
-//        textField.leftViewMode = .always
-//        
-//        return textField
-//    }()
+    let googleSignInButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("  Continue with Google", for: .normal)
+        button.setTitleColor(.label, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        button.backgroundColor = .systemBackground
+        button.layer.cornerRadius = 12
+        button.layer.borderWidth = 1
+        button.layer.borderColor = UIColor.systemGray4.cgColor
+        
+        // Add Google "G" logo using SF Symbol
+        button.setImage(UIImage(systemName: "g.circle.fill"), for: .normal)
+        button.tintColor = .systemBlue
+        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 0)
+        
+        return button
+    }()
+
     
     let emailTextField: UITextField = {
         let textField = UITextField()
@@ -182,11 +164,13 @@ class LoginView: UIView, UITextFieldDelegate {
         contentView.addSubview(orLabel)
         contentView.addSubview(signUpButton)
         contentView.addSubview(activityIndicator)
+        contentView.addSubview(googleSignInButton)
+        
         
         // Configure scroll view
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         contentView.translatesAutoresizingMaskIntoConstraints = false
-        
+        googleSignInButton.translatesAutoresizingMaskIntoConstraints = false
         // Configure all views for Auto Layout
         [titleLabel, subtitleLabel, emailTextField, passwordTextField,
          showPasswordButton, forgotPasswordButton, loginButton, orLabel,
@@ -223,17 +207,6 @@ class LoginView: UIView, UITextFieldDelegate {
             subtitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
             subtitleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
             
-//            // First Name Text Field
-//            fNameTextField.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 40),
-//            fNameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
-//            fNameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
-//            fNameTextField.heightAnchor.constraint(equalToConstant: 50),
-//            
-//            // Last Name Text Field
-//            LNameTextField.topAnchor.constraint(equalTo: fNameTextField.bottomAnchor, constant: 16),
-//            LNameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
-//            LNameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
-//            LNameTextField.heightAnchor.constraint(equalToConstant: 50),
             
             // Show Password Button
             showPasswordButton.centerYAnchor.constraint(equalTo: passwordTextField.centerYAnchor),
@@ -260,10 +233,17 @@ class LoginView: UIView, UITextFieldDelegate {
             orLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             
             // Sign Up Button
-            signUpButton.topAnchor.constraint(equalTo: orLabel.bottomAnchor, constant: 16),
+            //signUpButton.topAnchor.constraint(equalTo: orLabel.bottomAnchor, constant: 16),
+            signUpButton.topAnchor.constraint(equalTo: googleSignInButton.bottomAnchor, constant: 16),
             signUpButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
             signUpButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
-            signUpButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32)
+            signUpButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32),
+            
+            
+            googleSignInButton.topAnchor.constraint(equalTo: orLabel.bottomAnchor, constant: 16),
+            googleSignInButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
+            googleSignInButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32),
+            googleSignInButton.heightAnchor.constraint(equalToConstant: 50),
         ])
         
         setupDynamicConstraints()
@@ -334,30 +314,30 @@ class LoginView: UIView, UITextFieldDelegate {
             self.layoutIfNeeded()
         }
     }
+//    
+//    func setupKeyboardObservers() {
+//        NotificationCenter.default.addObserver(
+//            self,
+//            selector: #selector(keyboardWillShow),
+//            name: UIResponder.keyboardWillShowNotification,
+//            object: nil
+//        )
+//        
+//        NotificationCenter.default.addObserver(
+//            self,
+//            selector: #selector(keyboardWillHide),
+//            name: UIResponder.keyboardWillHideNotification,
+//            object: nil
+//        )
+//        
+//        // Add tap gesture to dismiss keyboard
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+//        addGestureRecognizer(tapGesture)
+//    }
     
-    func setupKeyboardObservers() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillShow),
-            name: UIResponder.keyboardWillShowNotification,
-            object: nil
-        )
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillHide),
-            name: UIResponder.keyboardWillHideNotification,
-            object: nil
-        )
-        
-        // Add tap gesture to dismiss keyboard
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        addGestureRecognizer(tapGesture)
-    }
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
+//    deinit {
+//        NotificationCenter.default.removeObserver(self)
+//    }
     
     @objc private func dismissKeyboard() {
         endEditing(true)

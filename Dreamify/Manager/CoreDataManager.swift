@@ -114,6 +114,7 @@ class CoreDataManager{
             newDream.id           = UUID()
             newDream.created_date = Date()
             newDream.transcribedText = transribedText
+            newDream.tag = nil
             //retrieve user
             guard let user  = try context.fetch(fetchRequest).first else{
                 throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not found"])
@@ -136,7 +137,12 @@ class CoreDataManager{
     func addDreamTestDream(title:String, url:String, transribedText:String?, date:Date) throws{
         
         
-        
+        guard let userEmail = TokenManager.shared.getUserEmail() else {
+            throw NSError(domain: "User Retrieval Error", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not retrieve user from internal storage"])
+        }
+        //create fetch request for user
+        let fetchRequest:NSFetchRequest<UserEntity> = UserEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "userEmail == %@", userEmail as CVarArg)
         
         let newDream          = Dream(context: context)
         newDream.title        = title
@@ -144,6 +150,16 @@ class CoreDataManager{
         newDream.id           = UUID()
         newDream.created_date = date
         newDream.transcribedText = transribedText
+        newDream.tag = "No Tag"
+
+        
+        guard let user  = try context.fetch(fetchRequest).first else{
+            throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not found"])
+        }
+        //construct relationships
+        user.addToDreamRelationShip(newDream)
+        newDream.userRelationShip = user
+        
         do{
             try context.save()
         }catch let err as NSError{
@@ -164,9 +180,9 @@ class CoreDataManager{
         }
     }
     //TODO: this function should throw, all of these funcitons should throw
-    func updateDream(dreamId: UUID, dreamTitle: String? = nil, dreamTranscription: String? = nil) {
+    func updateDream(dreamId: UUID, dreamTitle: String? = nil, dreamTranscription: String? = nil, tag:String? = nil) {
         // Check if at least one parameter is provided
-        guard dreamTitle != nil || dreamTranscription != nil else {
+        guard dreamTitle != nil || dreamTranscription != nil || tag != nil else {
             print("No updates provided - both dreamTitle and dreamTranscription are nil")
             return
         }
@@ -190,6 +206,8 @@ class CoreDataManager{
                 dream.transcribedText = newTranscription // or whatever your property name is
             }
             
+                dream.tag = tag
+            
             try context.save()
             print("Dream updated successfully")
             
@@ -205,7 +223,6 @@ class CoreDataManager{
         newDream.url          = url
         newDream.id           = UUID()
         newDream.created_date = Date()
-        //newDream.transcribedText = transribedText
         do{
             try context.save()
         }catch let err as NSError{
@@ -283,6 +300,53 @@ class CoreDataManager{
         }
         
         
+        
+    }
+    
+    func deleteAllDataForUser(email:String) throws -> Void {
+        do{
+            
+            // get user
+            guard let userEmail = TokenManager.shared.getUserEmail() else {
+                throw NSError(domain: "User Retrieval Error", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not retrieve user from internal storage"])
+            }
+            // generate request for fetching user
+            let userFetchRequest:NSFetchRequest<UserEntity> = UserEntity.fetchRequest()
+            userFetchRequest.predicate = NSPredicate(format: "userEmail == %@", userEmail as CVarArg)
+            
+            //retrieve user for whom to delete all internal data
+            guard let user  = try context.fetch(userFetchRequest).first else{
+                throw NSError(domain: "CoreDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not found"])
+            }
+            
+            //retrieve all dreams
+            let fetchRequest:NSFetchRequest<Dream> = Dream.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "userRelationShip.id == %@", user.id.uuidString as CVarArg)
+            var dreams = try context.fetch(fetchRequest)
+            //delete every dream
+            for dream in dreams{
+                // delete the url path
+                guard let dreamUrl = dream.url else{
+                    throw NSError(domain:"Dream Url Error", code: 1, userInfo: [NSLocalizedDescriptionKey:"Unable to retrieve dream path to delete file"])
+                }
+                let url = getDocumentsDirectory().appendingPathComponent(dreamUrl)
+                if FileManager.default.fileExists(atPath: url.path) {
+                    try FileManager.default.removeItem(at: url) // Use 'at:' not 'atPath:'
+                    print("Deleted file: \(url.lastPathComponent)")
+                } else {
+                    print("File doesn't exist: \(url.path)")
+                }
+          
+                context.delete(dream)
+            }
+            //delete the subsequent user associated with the dream
+            context.delete(user)
+            try context.save()
+            
+        }catch let err as NSError{
+            throw NSError(domain:err.domain, code: err.code, userInfo: [NSLocalizedDescriptionKey:err.localizedDescription])
+
+        }
         
     }
     

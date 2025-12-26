@@ -15,7 +15,8 @@ import Foundation
 class APIClientManager {
     
     static let shared = APIClientManager()
-   private let baseURL = "https://api.dream-if-y.us/api"
+    private let baseURL = "https://api.dream-if-y.us/api"
+  //  private let baseURL = "http://localhost:5064/api"
 
     private var authToken: String?
     
@@ -154,7 +155,7 @@ class APIClientManager {
         APIClientManager.shared.request(
             endpoint: "/account/refresh",
             method: "POST",
-            body: ["refreshToken": refreshToken],
+            body: ["RefreshToken": refreshToken],
             type: LoginResponse.self
         ) { [weak self] result in
             guard let self = self else { return }

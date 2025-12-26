@@ -8,17 +8,18 @@
 import Foundation
 import UIKit
 import KeychainAccess
+import GoogleSignIn
 class LoginViewController:UIViewController{
     
     var loginView : LoginView;
     //var alert :UIAlertController;
     var userEntityViewModel:UserEntityViewModel?
     weak var userIsLoggedInChangeAccountMAnagementOptionsDelegate:UserIsLoggedInChangeAccountMAnagementOptions?
-    
+    private var loadingOverlay: LoadingOverlayView?
+
     init() {
         loginView = LoginView(frame: .zero)
-        //self.userEntityViewModel = nil // Initialize as nil
-       // alert = UIAlertController()
+
         
         super.init(nibName: nil, bundle: nil)
         
@@ -42,18 +43,19 @@ class LoginViewController:UIViewController{
     override func viewDidLoad() {
         setupUI()
         super.viewDidLoad()
-
- 
+        
+        
     }
     func setupUI(){
         loginView.setupUI()
         loginView.setupConstraints()
         setupActions()
-        loginView.setupKeyboardObservers()
+        //TODO: need to add this back WARNING inteferes with Google Auth Screen
+        // loginView.setupKeyboardObservers()
         view.addSubview(loginView)
         loginView.translatesAutoresizingMaskIntoConstraints = false
-
-
+        
+        
         
         
         NSLayoutConstraint.activate([
@@ -64,7 +66,7 @@ class LoginViewController:UIViewController{
             
             
         ])
-
+        
         
     }
     
@@ -74,42 +76,178 @@ class LoginViewController:UIViewController{
         loginView.loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         loginView.forgotPasswordButton.addTarget(self, action: #selector(forgotPasswordTapped), for: .touchUpInside)
         loginView.signUpButton.addTarget(self, action: #selector(signUpButtonTapped), for: .touchUpInside)
+        loginView.googleSignInButton.addTarget(self, action: #selector(btnGoogleSingInDidTap), for: .touchUpInside)
         
         // Add text field delegates
         loginView.emailTextField.delegate = self
         loginView.passwordTextField.delegate = self
     }
     
+    func authenticateWithBackend(googleIdToken: String, email: String?, name: String?) {
+        APIClientManager.shared.request(endpoint: "/account/SignInWithGoogle",method: "POST",body: ["IdToken":googleIdToken],type: LoginResponse.self){ [weak self ] result in
+            guard let self = self else{return}
+            DispatchQueue.main.async{
+                switch result{
+                case . success(let response):
+                    UserSettings.shared.setLoginState(true)
+                    do{
+                        print("THIS INDICATED IF FIRST LOGIN OR NOT: \(response.isFirstLogin)")
+                        guard let userEmail = email else{
+                            throw NSError(domain: "LoginViewController", code: 1001, userInfo: [NSLocalizedDescriptionKey : "Email is missing"])
+                        }
+                        
+                        
+                        if let foundUser = try self.userEntityViewModel?.getUserByEmail(email: email!) {
+                            let user = foundUser
+                        } else {
+                             try self.userEntityViewModel?.addUser(email: userEmail)
+                        }
+                        
+                        
+                        TokenManager.shared.saveAccessToken(response.accessToken)
+                        TokenManager.shared.saveRefreshToken(response.refreshToken)
+                        TokenManager.shared.saveUserEmail(email: userEmail)
+                        if(response.isFirstLogin){
+                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                               let window = windowScene.windows.first {
+                                let mainViewController = EmailVerififcationController()
+                                window.rootViewController = UINavigationController(rootViewController: mainViewController)
+                                window.makeKeyAndVisible()
+                            }
+                            
+                        }else{
+                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                               let window = windowScene.windows.first {
+                                let mainViewController = TabsViewController()
+                                window.rootViewController = UINavigationController(rootViewController: mainViewController)
+                                window.makeKeyAndVisible()
+                            }
+                            
+                        }
+                       
+                        
+                    }catch let err as NSError{
+                        let alert = UIAlertController(title: "Error", message: err.localizedDescription, preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                        
+                        self.present(alert, animated: true)
+                        
+                        print("\(err.localizedDescription)")
+                        
+                    }
+                    
+                   // self.setLoadingState(false)
+                    print("Success: \(response.accessToken)")
+                    
+                    
+                case.failure(let error):
+                    let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                    self.present(alert,animated: true)
+                }
+                
+            }
+        }
+        
+    }
+}
+    
     
     
 
-}
+
 
 // - MARK: actions
 extension LoginViewController{
+    @objc
+    func btnGoogleSingInDidTap(_ sender: Any) throws -> Void {
+
+
+        
+        print("Starting sign in...")
+        
+        GIDSignIn.sharedInstance.signIn(
+            withPresenting: self,
+            hint: nil,
+            additionalScopes: []
+        ) { signInResult, error in
+            do{
+                self.showLoading()
+                
+                guard error == nil else {
+                    //TODO: add error in here later
+                    throw NSError(domain: "LoginViewController", code: 1, userInfo: [NSLocalizedDescriptionKey : "An Unexpected Error Occured While Trying to Log in With Google"])
+
+                    //return
+                }
+                guard let signInResult = signInResult else {
+                    throw NSError(domain: "LoginViewController", code: 1, userInfo: [NSLocalizedDescriptionKey : "An Unexpected Error Occured While Signing in With Google"])
+
+                }
+                
+                // Get the ID token to send to your backend
+                guard let idToken = signInResult.user.idToken?.tokenString else {
+                    //TODO: add an actual error here
+                 
+                    throw NSError(domain: "LoginViewController", code: 1, userInfo: [NSLocalizedDescriptionKey : "An Unexpected Error Occured While Signing in With Google"])
+
+                }
+                
+                // Get user info
+                let email = signInResult.user.profile?.email
+                let name = signInResult.user.profile?.name
+                self.hideLoading()
+
+                self.authenticateWithBackend(googleIdToken: idToken, email: email, name: name)
+                
+                
+//                let vc = EmailVerififcationController()
+//                
+//                self.navigationController?.pushViewController(vc, animated: true)
+                
+            }catch let err as NSError{
+                self.hideLoading()
+                let alert = UIAlertController(title: "Error", message: err.localizedDescription, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                
+                self.present(alert, animated: true)
+                
+                
+            }
+    
+
+        }
+    }
     
     @objc  func togglePasswordVisibility() {
         loginView.passwordTextField.isSecureTextEntry.toggle()
         loginView.showPasswordButton.isSelected = !loginView.passwordTextField.isSecureTextEntry
     }
     @objc private func forgotPasswordTapped() {
-        let alert = UIAlertController(
-            title: "Forgot Password",
-            message: "Please enter your email address to reset your password",
-            preferredStyle: .alert
-        )
-        
-        alert.addTextField { textField in
-            textField.placeholder = "Email"
-            textField.keyboardType = .emailAddress
+        print("forgot password button tapped")
+        DispatchQueue.main.async{[weak self] in
+            guard let self = self else{return}
+            let vc = SendPasswordResetEmailViewController()
+
+            navigationController?.pushViewController(vc, animated: true)
+            
         }
-        
-        let resetAction = UIAlertAction(title: "Reset", style: .default) { _ in
-            // Handle password reset
-            print("Password reset requested")
-        }
-       // present(resetAction, animated: true)
-        //
+//        let alert = UIAlertController(
+//            title: "Forgot Password",
+//            message: "Please enter your email address to reset your password",
+//            preferredStyle: .alert
+//        )
+//        
+//        alert.addTextField { textField in
+//            textField.placeholder = "Email"
+//            textField.keyboardType = .emailAddress
+//        }
+//        
+//        let resetAction = UIAlertAction(title: "Reset", style: .default) { _ in
+//            // Handle password reset
+//            print("Password reset requested")
+//        }
+
     }
     @objc private func signUpButtonTapped() {
         // Navigate to sign up screen
@@ -123,7 +261,8 @@ extension LoginViewController{
         guard validateInput() else { return }
         
         // Show loading state
-        setLoadingState(true)
+        //setLoadingState(true)
+        showLoading()
         let email = loginView.emailTextField.text
         let password = loginView.passwordTextField.text
         
@@ -139,6 +278,7 @@ extension LoginViewController{
                 DispatchQueue.main.async{
                     switch result {
                     case .success(let response):
+                        
          
                         UserSettings.shared.setLoginState(true)
                         do{
@@ -158,26 +298,24 @@ extension LoginViewController{
                         }catch let err as NSError{
                             let alert = UIAlertController(title: "Error", message: err.localizedDescription, preferredStyle: .alert)
                             alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-
                             self.present(alert, animated: true)
-                            
                             print("\(err.localizedDescription)")
                             
                         }
                         
+                        //self.setLoadingState(false)
+                        self.hideLoading()
                         
-                 
-                        
-                        self.setLoadingState(false)
                         print("Success: \(response.accessToken)")
                     case .failure(let error):
                         //TODO: add an actual error lol
                         print("Error: \(error)")
-                        self.setLoadingState(false)
+                       // self.setLoadingState(false)
+                        self.hideLoading()
                 
-                            let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-                            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                            self.present(alert,animated: true)
+                        let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                        self.present(alert,animated: true)
 
                         
                     }
@@ -187,10 +325,6 @@ extension LoginViewController{
             }
             
         }else{
-//            let fname = loginView.fNameTextField.text;
-//            let lname = loginView.LNameTextField.text;
-        
-            
             APIClientManager.shared.request(
                 endpoint: "/account/register",
                 method: "POST",
@@ -207,18 +341,18 @@ extension LoginViewController{
                             TokenManager.shared.saveRefreshToken(response.refreshToken)
                             TokenManager.shared.saveUserEmail(email: user!.userEmail)
 
-                            UserSettings.shared.setLoginState(true)
-                            //navigationController?.
+                            //UserSettings.shared.setLoginState(true)
                             
                             
                             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                                  let window = windowScene.windows.first {
-                                  let mainViewController = TabsViewController()
+                                  let mainViewController = EmailVerififcationController()
                                   window.rootViewController = UINavigationController(rootViewController: mainViewController)
                                   window.makeKeyAndVisible()
                             }
                             
-                            self.setLoadingState(false)
+                            //self.setLoadingState(false)
+                            self.hideLoading()
                             print("Success: \(response.accessToken)")
                             
                         }catch let error as NSError{
@@ -231,15 +365,12 @@ extension LoginViewController{
                     case .failure(let error):
                         //TODO: add an actual error lol
                         print("Error: \(error)")
-                        self.setLoadingState(false)
+                        //self.setLoadingState(false)
+                        self.hideLoading()
                         let alert = UIAlertController(title: "Registration Error", message: error.localizedDescription, preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                         self.present(alert,animated: true)
-                        //self.createAlert(title: "registration Error", msg: error.localizedDescription)
-                       // self.present(UIAlertController(title: "Registration Error", message: error.localizedDescription, preferredStyle: .alert),animated: true)
-                     
-                        //alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                        //self.present(alert, animated: true)
+
                         
                     }
                     
@@ -254,18 +385,6 @@ extension LoginViewController{
 }
 // MARK: utililty functions
 extension LoginViewController{
-//    private func createAlert(title:String, msg:String){
-//        alert.title = title
-//        alert.message = msg
-//        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-//        
-//        
-//        
-////        let alert = UIAlertController(title: title,
-////                                      message: msg,
-////                                      preferredStyle: .alert)
-//    }
-    
     
     
     private func handleLoginSuccess() {
@@ -316,18 +435,33 @@ extension LoginViewController{
         
         return true
     }
-    
-    func setLoadingState(_ isLoading: Bool) {
-        loginView.loginButton.isEnabled = !isLoading
-        
-        if isLoading {
-            loginView.loginButton.setTitle("", for: .normal)
-            loginView.activityIndicator.startAnimating()
-        } else {
-            loginView.loginButton.setTitle("Sign In", for: .normal)
-            loginView.activityIndicator.stopAnimating()
-        }
+    private func showLoading() {
+           hideLoading() // Remove any existing overlay
+           
+           let loading = LoadingOverlayView(
+               title: "Logging You In...",
+               subtitle: "Please wait while we analyze your dream"
+           )
+           loading.show(in: view)
+           loadingOverlay = loading
+       }
+       
+    private func hideLoading() {
+       loadingOverlay?.hide()
+       loadingOverlay = nil
     }
+    
+//    func setLoadingState(_ isLoading: Bool) {
+//        loginView.loginButton.isEnabled = !isLoading
+//        
+//        if isLoading {
+//            loginView.loginButton.setTitle("", for: .normal)
+//            loginView.activityIndicator.startAnimating()
+//        } else {
+//            loginView.loginButton.setTitle("Sign In", for: .normal)
+//            loginView.activityIndicator.stopAnimating()
+//        }
+//    }
     
     
     

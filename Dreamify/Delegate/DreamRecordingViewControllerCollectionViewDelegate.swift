@@ -65,6 +65,13 @@ extension DreamRecordingViewDataSourceManager:UICollectionViewDelegate, SwipeCol
                     DispatchQueue.main.async{ [weak self] in
                         guard let self = self else{ return }
                         vc.filterDreamsForDate( currently_selected_date)
+                        let date = DateComponents(
+                            calendar: Calendar(identifier: .gregorian),
+                            year: Calendar.current.component(.year, from: Date.now),
+                            month: Calendar.current.component(.month, from: Date.now),
+                            day: Calendar.current.component(.day, from: Date.now)
+                        )
+                        vc.calendarView.calendar.reloadDecorations(forDateComponents: [date], animated: false)//.reloadInputViews()//reloadDecorations(forDateComponents: Calendar.current.dateComponents([.year,.month,.day], from: currently_selected_date), animated: true)
                     }
                 }
             }catch let err as NSError{

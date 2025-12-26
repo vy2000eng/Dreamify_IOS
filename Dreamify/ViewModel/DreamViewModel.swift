@@ -13,17 +13,23 @@ class DreamViewModel{
     private var isPlaying:Bool
     private var isOpen:Bool
     private var isShowingTranscriptionOrAnalysis:Bool
-    
+    private var tag:String?
     
     init(dream: Dream) {
         self.dream = dream
         self.isOpen = false
         self.isPlaying = false
         self.isShowingTranscriptionOrAnalysis = false
+        self.tag = dream.tag ?? nil
     }
     var id:UUID{
         return self.dream.id
     }
+    
+    var dreamTag:String?{
+        return self.tag
+    }
+    
     func setIsPlaying(isPlaying: Bool){
         self.isPlaying = isPlaying
     }

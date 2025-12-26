@@ -39,7 +39,7 @@ class MainContentView: UIView {
     
     private let transcriptionContainerView: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemGray6
+        view.backgroundColor = .systemBackground
         view.layer.cornerRadius = 16
         view.translatesAutoresizingMaskIntoConstraints = false
         view.alpha = 0

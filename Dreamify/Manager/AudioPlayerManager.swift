@@ -40,7 +40,7 @@ class AudioPlayerManager: NSObject{
         
         do{
                 
-                audioPlayer = try  AVAudioPlayer(contentsOf: url) //AVAudioPlayer(contentsOf: url!)
+                audioPlayer = try  AVAudioPlayer(contentsOf: url)
          
             
                 audioPlayer?.delegate = self
@@ -114,7 +114,7 @@ extension AudioPlayerManager:AVAudioPlayerDelegate{
             
             if let dreamVC = viewController as? DreamRecordingsViewController {
                 let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                              message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                              message: err.localizedDescription,
                                               preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                 dreamVC.present(alert, animated: true)
@@ -123,7 +123,7 @@ extension AudioPlayerManager:AVAudioPlayerDelegate{
             }
             if let calendarVC = viewController as? CalendarViewController {
                 let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                              message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
+                                              message: err.localizedDescription,
                                               preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                 calendarVC.present(alert, animated: true)

@@ -5,51 +5,189 @@
 //  Created by Vladyslav Yatsuta on 6/22/25.
 //
 
+import GoogleSignIn
 import UIKit
 import CoreData
 import BackgroundTasks
-
+import RevenueCat
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     let taskId = "dreamify.refreshAuthToken.backgroundTask"
+    
+    func application(_ app: UIApplication, open url: URL,
+              options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        print("=== APP DELEGATE URL RECEIVED ===")
+        print("URL: \(url)")
+        var handled: Bool
+        handled = GIDSignIn.sharedInstance.handle(url)
+        print("Google handled: \(handled)")
+        if handled {
+            return true
+        }
+        return false
+    }
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {        
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
+        Purchases.configure(withAPIKey: "appl_uvEpadVPPYnPsFqeIOwHFTzadzu")
+              
+              //return true
+        
+        if let clientID = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String {
+            let config = GIDConfiguration(clientID: clientID)
+            GIDSignIn.sharedInstance.configuration = config
+            print("Google Sign In configured with client ID: \(clientID)")
+        } else {
+            print("ERROR: GIDClientID not found in Info.plist")
+        }
         
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskId, using: nil){ task in
             guard let newTask = task as? BGAppRefreshTask  else {return}
             self.handleTask(task: newTask)
-            
         }
 
+        schedule()
         
-         schedule()
+        // CHECK IF TOKENS EXIST BEFORE ATTEMPTING REFRESH
+        guard let refreshToken = TokenManager.shared.getRefreshToken(),
+              !refreshToken.isEmpty else {
+            print("No refresh token available, skipping token refresh")
+            // Restore Google Sign In state
+            GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
+                if error != nil || user == nil {
+                    // Show the app's signed-out state.
+                    print("No previous Google sign in found")
+                } else {
+                    // Show the app's signed-in state.
+                    print("Google sign in restored")
+                }
+            }
+            return true
+        }
+        
+        // Only refresh if we have a valid refresh token
+        APIClientManager.shared.refreshToken { refreshResult in
+            switch refreshResult {
+            case .success(let response):
+                print("Token refresh was executed successfully")
+                TokenManager.shared.saveAccessToken(response.accessToken)
+                TokenManager.shared.saveRefreshToken(response.refreshToken)
+                
+            case .failure(let err):
+                print("Token refresh failed: \(err)")
+                TokenManager.shared.clearTokens()
+                UserSettings.shared.setLoginState(false)
+                self.navigateToLogin()
+            }
+        }
+        
+        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
+            if error != nil || user == nil {
+                // Show the app's signed-out state.
+            } else {
+                // Show the app's signed-in state.
+            }
+        }
+        
+        return true
+//        if let clientID = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String {
+//            let config = GIDConfiguration(clientID: clientID)
+//            GIDSignIn.sharedInstance.configuration = config
+//            print("Google Sign In configured with client ID: \(clientID)")
+//        } else {
+//            print("ERROR: GIDClientID not found in Info.plist")
+//        }
+//        
+//        
+//        BGTaskScheduler.shared.register(forTaskWithIdentifier: taskId, using: nil){ task in
+//            guard let newTask = task as? BGAppRefreshTask  else {return}
+//            self.handleTask(task: newTask)
+//            
+//        }
+//
+//        
+//        schedule()
+//        
+//        
+//        
+//        
+//        APIClientManager.shared.refreshToken{ refreshResult in
+//            switch refreshResult{
+//                case .success(let response):
+//                
+//                    print("token refresh was executed successfully")
+//                    TokenManager.shared.saveAccessToken(response.accessToken)
+//                    TokenManager.shared.saveRefreshToken(response.refreshToken)
+//                
+//                case .failure(let err):
+//                    print("Token refresh failed: \(err)")
+//                    TokenManager.shared.clearTokens()
+//                    UserSettings.shared.setLoginState(false)
+//                    self.navigateToLogin()
+//            }
+//            
+//        }
+//        
+//        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
+//          if error != nil || user == nil {
+//            // Show the app's signed-out state.
+//          } else {
+//            // Show the app's signed-in state.
+//          }
+//        }
+//        return true
         
 
         
         
         
         
-        return true
+        //return true
     }
     
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Schedule when app goes to background
            schedule()
+        
+        
+        APIClientManager.shared.refreshToken{ refreshResult in
+            switch refreshResult{
+                
+            case .success(let response):
+                print("token refresh was executed successfully")
+                TokenManager.shared.saveAccessToken(response.accessToken)
+                TokenManager.shared.saveRefreshToken(response.refreshToken)
+                
+                self.schedule()
+                
+                //task.setTaskCompleted(success: true)
+
+           
+                
+            case .failure(let err):
+                print("Token refresh failed: \(err)")
+                TokenManager.shared.clearTokens()
+                UserSettings.shared.setLoginState(false)
+                self.navigateToLogin()
+               // task.setTaskCompleted(success: false)
+            }
+            
+        }
     }
     
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Optionally reschedule when app comes to foreground
         checkIfLoginNeeded()
 
-        schedule()
+        //schedule()
     }
     
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Also check when app becomes active
         checkIfLoginNeeded()
     }
-
+    
     
 
 
@@ -170,7 +308,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
     internal func checkIfLoginNeeded() {
-        if !UserSettings.shared.userLoginState {
+        if TokenManager.shared.getAccessToken() == nil && TokenManager.shared.getRefreshToken() == nil {
             DispatchQueue.main.async {
                 self.navigateToLogin()
             }

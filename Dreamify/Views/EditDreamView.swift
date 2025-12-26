@@ -24,6 +24,17 @@ class EditDreamView: UIView {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+    lazy var tagButton: UIButton = {
+        let label = UIButton()
+        label.backgroundColor = UIColor.systemGreen
+        label.tintColor = .white
+        label.layer.cornerRadius = 12
+        label.setTitle("Add tag", for: .normal)
+        label.titleLabel?.font = .systemFont(ofSize: 10, weight: .medium)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     
     private let dreamTitleLabel: UILabel = {
         let label = UILabel()
@@ -32,6 +43,16 @@ class EditDreamView: UIView {
         label.textColor = .secondaryLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
+    }()
+    lazy var addTagButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.backgroundColor = UIColor.systemGreen
+        button.tintColor = .white
+        button.layer.cornerRadius = 12
+        button.setTitle("+ Add Tag", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 10, weight: .medium)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
     }()
     
     let dreamTitleTextView: UITextView = {
@@ -86,14 +107,29 @@ class EditDreamView: UIView {
         return label
     }()
     
+    
+
+    
     // MARK: - Properties
     
     var dream: DreamViewModel
+    let dataSource: [(String, UIColor)]
+
     
     // MARK: - Initialization
     
     init(frame: CGRect, dream: DreamViewModel) {
         self.dream = dream
+        self.dataSource = [
+            ("No Tag", UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)), // Medium gray
+            ("Nightmare", UIColor(red: 0.8, green: 0.1, blue: 0.2, alpha: 1.0)), // Deep crimson
+            ("Lucid", UIColor(red: 0.5, green: 0.0, blue: 0.8, alpha: 1.0)), // Electric purple
+            ("Recurring", UIColor(red: 1.0, green: 0.4, blue: 0.0, alpha: 1.0)), // Bright orange
+            ("Pleasant", UIColor(red: 0.2, green: 0.8, blue: 0.5, alpha: 1.0)), // Mint green
+            ("Adventure", UIColor(red: 0.0, green: 0.6, blue: 1.0, alpha: 1.0)), // Sky blue
+            ("Anxiety", UIColor(red: 0.7, green: 0.5, blue: 0.2, alpha: 1.0)) // Dark mustard
+        ]
+
         super.init(frame: frame)
         setupView()
         configureView()
@@ -118,6 +154,7 @@ class EditDreamView: UIView {
         contentView.addSubview(descriptionTextView)
         contentView.addSubview(dateLabel)
         contentView.addSubview(dateValueLabel)
+        contentView.addSubview(tagButton)
         
         NSLayoutConstraint.activate([
             // Scroll view
@@ -164,18 +201,64 @@ class EditDreamView: UIView {
             dateValueLabel.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 8),
             dateValueLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             dateValueLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            dateValueLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
+            //dateValueLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
+            
+            
+            tagButton.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 50),
+            tagButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            tagButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -220),
+            tagButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
+
+            
         ])
     }
+
     
     private func configureView() {
+        
         dreamTitleTextView.text = dream.title
         descriptionTextView.text = dream.transcribedText ?? "No description available"
-        
+
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
         dateFormatter.timeStyle = .short
         dateValueLabel.text = dateFormatter.string(from: dream.createdDate)
+        
+        
+        var menuChildren: [UIMenuElement] = []
+        for (tag, color) in dataSource {
+            let action = UIAction(title: tag) { [weak self] action in
+                guard let self = self else { return }
+                self.tagButton.backgroundColor = color
+                self.tagButton.setTitle(tag, for: .normal)
+                
+   
+            }
+            
+            let config = UIImage.SymbolConfiguration(pointSize: 12)
+            action.image = UIImage(systemName: "circle.fill", withConfiguration: config)?
+                .withTintColor(color, renderingMode: .alwaysOriginal)
+            
+            menuChildren.append(action)
+        }
+
+        tagButton.menu = UIMenu(options: .displayInline, children: menuChildren)
+        tagButton.showsMenuAsPrimaryAction = true
+        // Remove this line: tagButton.changesSelectionAsPrimaryAction = true
+
+        // Set initial button appearance if tag exists
+        if let existingTag = dream.dreamTag {
+            if let match = dataSource.first(where: { $0.0 == existingTag }) {
+                tagButton.backgroundColor = match.1
+                tagButton.setTitle(existingTag, for: .normal)
+            }
+        } else {
+            // Set default "No Tag" appearance
+            tagButton.backgroundColor = dataSource[0].1
+            tagButton.setTitle("No Tag", for: .normal)
+        }
+
+
     }
     
     private func setupKeyboardObservers() {

@@ -2,6 +2,22 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>GIDServerClientID</key>
+    <string>371719795176-i9k1ikqra3l04m80k7g6enc3dgkbvner.apps.googleusercontent.com</string>
+    
+    
+    
+    <key>GIDClientID</key>
+    <string>371719795176-4pp1efg63an07v53bgftetngl6ttfdaj.apps.googleusercontent.com</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>com.googleusercontent.apps.371719795176-4pp1efg63an07v53bgftetngl6ttfdaj</string>
+            </array>
+        </dict>
+    </array>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>dreamify.refreshAuthToken.backgroundTask</string>

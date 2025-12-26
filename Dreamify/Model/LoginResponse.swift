@@ -9,4 +9,5 @@ struct LoginResponse: Codable {
     let accessToken: String
     let expiresIn: Int
     let refreshToken: String
+    let isFirstLogin:Bool
 }

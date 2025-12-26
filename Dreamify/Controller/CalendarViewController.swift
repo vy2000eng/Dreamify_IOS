@@ -12,8 +12,13 @@ import CalendarKit
 
 class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, DeleteSectionFromCollectionView ,UpdateDreamTitleAndTranscription{
     func updateTitleAndDescriptionInCollection() throws {
-        //print("update delegate called in CalendarViewController")
-        dreamRecordingView.collectionView.reloadData()
+        print("update delegate called in CalendarViewController")
+        
+        var dreams =  try dreamRecordingViewModel.getAllDreamsForUser()
+        dreamRecordingViewModel.dreams = dreams
+        filterDreamsForDate(current_date)
+        
+        dreamRecordingView.collectionView.reloadInputViews()
 
     }
 

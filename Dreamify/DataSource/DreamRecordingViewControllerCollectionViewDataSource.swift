@@ -8,45 +8,7 @@
 import UIKit
 class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
 
-    
-//    func updateTitleAndDescriptionInCollection(controllerMangedByDataSource :ControllerManagedByAudioPlayerClass) throws {
-//        
-//        switch(controllerMangedByDataSource){
-//        case .CalendarViewController:
-//            guard let  cvc = self.controller as? CalendarViewController else{
-//                throw NSError(domain: "CalendarViewController Casting Exception", code: 1, userInfo: [NSLocalizedDescriptionKey: "could not cast controller to DreamViewContoller"])
-//                
-//            }
-//           // do{
-//            DispatchQueue.main.async{ [weak self] in
-//                guard let self = self else{ return }
-//                cvc.dreamRecordingView.collectionView.reloadData()//.insertItems(at: [IndexPath(row: section-1, section: 0)])
-//            }
-//            
-//            break
-//        case .DreamViewController:
-//            guard let  dvc = self.controller as? DreamRecordingsViewController else{
-//                throw NSError(domain: "DreamViewController Casting Exception", code: 1, userInfo: [NSLocalizedDescriptionKey: "could not cast controller to DreamViewContoller"])
-//                
-//            }
-//
-//            DispatchQueue.main.async{ [weak self] in
-//                guard let self = self else{ return }
-//                dvc.dreamRecordingView.collectionView.reloadData()//.insertItems(at: [IndexPath(row: section-1, section: 0)])
-//            }
-//            break
-//        }
-//        
-//
-//            
-//        //}
-//  
-//            
-//
-//    }
-
     var dreamRecordingViewModel:DreamRecordingViewModel
-    //var dreamRecordingsView:DreamRecordsView
     var controller:UIViewController
     var audioPlayerManager: AudioPlayerManager
     var controllerManagedByAudioPlayer:ControllerManagedByAudioPlayerClass
@@ -59,7 +21,6 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     init(dreamRecordingView:DreamRecordsView, dreamRecordingViewModel:DreamRecordingViewModel,controller:UIViewController) {
         self.controller = controller
         
-        //self.dreamRecordingsView = dreamRecordingView
         self.dreamRecordingViewModel = dreamRecordingViewModel
         // Cleaner type checking
         switch controller {
@@ -231,8 +192,13 @@ extension DreamRecordingViewDataSourceManager{
                     guard let controllerToUpdateCollectionInsideOf = controller as? DreamRecordingsViewController else{
                         throw NSError(domain: "Could not cast controller to DreamRecordingsViewController", code: 0, userInfo: nil)
                     }
-                    controllerToUpdateCollectionInsideOf.dreamRecordingView.collectionView.reloadItems(at: [indexPath])
+                    //MARK: this should be in try catch
+                    dreamRecordingViewModel.dreams = try dreamRecordingViewModel.getAllDreamsForUser()
                     try updateDreamTitleAndTranscriptionDelegate?.updateTitleAndDescriptionInCollection()
+                    DispatchQueue.main.async {
+                        controllerToUpdateCollectionInsideOf.dreamRecordingView.collectionView.reloadItems(at: [indexPath])
+                    }
+                    
                     
                     
                     
@@ -243,9 +209,14 @@ extension DreamRecordingViewDataSourceManager{
                     guard let controllerToUpdateCollectionInsideOf = controller as? CalendarViewController else{
                         throw NSError(domain: "Could not cast controller to CalendarViewController", code: 0, userInfo: nil)
                     }
-                    controllerToUpdateCollectionInsideOf.dreamRecordingView.collectionView.reloadItems(at: [indexPath])
-                    
+                    guard let  currently_selected_date = retrieveCurrentlySelectedDateDelegate?.retrieveCurrentlySelectedDate() else{
+                        return
+                    }
+                    dreamRecordingViewModel.dreams = try dreamRecordingViewModel.getAllDreamsCreatedByDate(seleectedDate: currently_selected_date)
                     try updateDreamTitleAndTranscriptionDelegate?.updateTitleAndDescriptionInCollection()
+                    DispatchQueue.main.async {
+                        controllerToUpdateCollectionInsideOf.dreamRecordingView.collectionView.reloadItems(at: [indexPath])
+                    }
 
                     print("Edit occured in CalendaarViewController")
 

@@ -1,3 +1,4 @@
+
 //
 //  Dream+CoreDataProperties.swift
 //  Dreamify
@@ -22,6 +23,8 @@ extension Dream {
     @NSManaged public var title: String?
     @NSManaged public var transcribedText: String?
     @NSManaged public var url: String?
+    @NSManaged public var tag: String?
+
     @NSManaged public var userRelationShip: UserEntity?
 
 }

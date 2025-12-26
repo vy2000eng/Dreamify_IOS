@@ -14,6 +14,7 @@ import AVFAudio
 class DreamRecordingsViewController:UIViewController, DeleteSectionFromCollectionView, UpdateDreamTitleAndTranscription{
     func updateTitleAndDescriptionInCollection() throws {
         print("update delegate called in dream recordingViewController")
+        dreamRecordingViewModel.dreams = try dreamRecordingViewModel.getAllDreamsForUser()
         dreamRecordingView.collectionView.reloadData()
     }
 
@@ -22,9 +23,9 @@ class DreamRecordingsViewController:UIViewController, DeleteSectionFromCollectio
     func deleteRecording(id:UUID) {
         print("dream vc delegate called")
         do{
-            try self.dreamRecordingViewModel.removeDreamFromArray(id: id)//removeDreamByIDFromArray(id:id)//removeDreamFromArray(id: dream.id)
+            try self.dreamRecordingViewModel.removeDreamFromArray(id: id)
 
-                self.dreamRecordingView.collectionView.reloadData()//deleteSections(IndexSet(integer: indexPath.section))
+                self.dreamRecordingView.collectionView.reloadData()
             
         }catch let err{
             print("an error occured whilst removing dream from collection view in dreamRecordingViewController: \(err)")

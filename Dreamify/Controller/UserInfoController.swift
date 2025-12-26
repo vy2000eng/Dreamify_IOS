@@ -22,10 +22,6 @@ class UserInfoViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-//    override func loadView() {
-//        view = userInfoView
-//    }
-    
     override func viewDidLoad() {
         title = "Profile"
         userInfoView.onResetPasswordTapped = { [weak self] in
@@ -71,9 +67,6 @@ class UserInfoViewController: UIViewController {
                     print("Successfully retrieved details")
                     print(response)
                     
-                    //UserSettings.shared.setUserDetails(userDetails: response)
-                    //self.userInfoView.configure(with: response)
-                    
                 case .failure(let error):
                     print("Request failed: \(error)")
                     // TODO: Show error alert
@@ -91,19 +84,6 @@ class UserInfoViewController: UIViewController {
             
         })
         
-        
-        
-        // Create your InfoRequest
-//        let request = InfoRequest(
-//            newEmail: email,
-//            newUserName: username,
-//            newPassword: "" // Empty since we're not changing password
-//        )
-        
-        // Call your API
-        // networkManager.updateUserInfo(request) { result in
-        //     // Handle response
-        // }
     }
     
     

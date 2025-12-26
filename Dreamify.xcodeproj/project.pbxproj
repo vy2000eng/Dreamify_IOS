@@ -9,6 +9,12 @@
 /* Begin PBXBuildFile section */
 		C00B12462E2416DD00B4704D /* SwipeCellKit in Frameworks */ = {isa = PBXBuildFile; productRef = C00B12452E2416DD00B4704D /* SwipeCellKit */; };
 		C00B12B72E67F7FF00B4704D /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = C00B12B62E67F7FF00B4704D /* KeychainAccess */; };
+		C00F226B2EE290C1002F7751 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C00F226A2EE290C1002F7751 /* GoogleSignIn */; };
+		C00F226D2EE290C1002F7751 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C00F226C2EE290C1002F7751 /* GoogleSignInSwift */; };
+		C039B7122EEF0C2800A84419 /* ReceiptParser in Frameworks */ = {isa = PBXBuildFile; productRef = C039B7112EEF0C2800A84419 /* ReceiptParser */; };
+		C039B7142EEF0C2800A84419 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = C039B7132EEF0C2800A84419 /* RevenueCat */; };
+		C039B7162EEF0C2800A84419 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = C039B7152EEF0C2800A84419 /* RevenueCatUI */; };
+		C039B71F2EF729B900A84419 /* DreamifyIAP.storekit in Resources */ = {isa = PBXBuildFile; fileRef = C039B71E2EF729B900A84419 /* DreamifyIAP.storekit */; };
 		C0A8865F2E95DF8E007163EC /* CalendarKit in Frameworks */ = {isa = PBXBuildFile; productRef = C0A8865E2E95DF8E007163EC /* CalendarKit */; };
 /* End PBXBuildFile section */
 
@@ -30,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C039B71E2EF729B900A84419 /* DreamifyIAP.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = DreamifyIAP.storekit; sourceTree = "<group>"; };
 		C0A893602E087364008B1730 /* Dreamify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dreamify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0A8937A2E087365008B1730 /* DreamifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DreamifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0A893842E087365008B1730 /* DreamifyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DreamifyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -71,7 +78,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C039B7122EEF0C2800A84419 /* ReceiptParser in Frameworks */,
+				C00F226D2EE290C1002F7751 /* GoogleSignInSwift in Frameworks */,
+				C039B7142EEF0C2800A84419 /* RevenueCat in Frameworks */,
 				C00B12B72E67F7FF00B4704D /* KeychainAccess in Frameworks */,
+				C039B7162EEF0C2800A84419 /* RevenueCatUI in Frameworks */,
+				C00F226B2EE290C1002F7751 /* GoogleSignIn in Frameworks */,
 				C0A8865F2E95DF8E007163EC /* CalendarKit in Frameworks */,
 				C00B12462E2416DD00B4704D /* SwipeCellKit in Frameworks */,
 			);
@@ -97,6 +109,7 @@
 		C0A893572E087364008B1730 = {
 			isa = PBXGroup;
 			children = (
+				C039B71E2EF729B900A84419 /* DreamifyIAP.storekit */,
 				C0A893622E087364008B1730 /* Dreamify */,
 				C0A8937D2E087365008B1730 /* DreamifyTests */,
 				C0A893872E087365008B1730 /* DreamifyUITests */,
@@ -137,6 +150,11 @@
 				C00B12452E2416DD00B4704D /* SwipeCellKit */,
 				C00B12B62E67F7FF00B4704D /* KeychainAccess */,
 				C0A8865E2E95DF8E007163EC /* CalendarKit */,
+				C00F226A2EE290C1002F7751 /* GoogleSignIn */,
+				C00F226C2EE290C1002F7751 /* GoogleSignInSwift */,
+				C039B7112EEF0C2800A84419 /* ReceiptParser */,
+				C039B7132EEF0C2800A84419 /* RevenueCat */,
+				C039B7152EEF0C2800A84419 /* RevenueCatUI */,
 			);
 			productName = Dreamify;
 			productReference = C0A893602E087364008B1730 /* Dreamify.app */;
@@ -224,6 +242,8 @@
 				C00B12192E22EF8400B4704D /* XCRemoteSwiftPackageReference "swipecellkit" */,
 				C00B12B52E67F7FF00B4704D /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				C0A8865D2E95DC3D007163EC /* XCRemoteSwiftPackageReference "CalendarKit" */,
+				C00F21DD2EE24FA8002F7751 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				C039B7102EEF0C2800A84419 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C0A893612E087364008B1730 /* Products */;
@@ -242,6 +262,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C039B71F2EF729B900A84419 /* DreamifyIAP.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -312,6 +333,7 @@
 				INFOPLIST_FILE = Dreamify/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Dreamify;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs access to the microphone to record audio for video capture.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -346,6 +368,7 @@
 				INFOPLIST_FILE = Dreamify/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Dreamify;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs access to the microphone to record audio for video capture.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -612,6 +635,22 @@
 				kind = branch;
 			};
 		};
+		C00F21DD2EE24FA8002F7751 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+		C039B7102EEF0C2800A84419 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.50.1;
+			};
+		};
 		C0A8865D2E95DC3D007163EC /* XCRemoteSwiftPackageReference "CalendarKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/richardtop/CalendarKit.git";
@@ -632,6 +671,31 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C00B12B52E67F7FF00B4704D /* XCRemoteSwiftPackageReference "KeychainAccess" */;
 			productName = KeychainAccess;
+		};
+		C00F226A2EE290C1002F7751 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C00F21DD2EE24FA8002F7751 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		C00F226C2EE290C1002F7751 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C00F21DD2EE24FA8002F7751 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		C039B7112EEF0C2800A84419 /* ReceiptParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C039B7102EEF0C2800A84419 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = ReceiptParser;
+		};
+		C039B7132EEF0C2800A84419 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C039B7102EEF0C2800A84419 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+		C039B7152EEF0C2800A84419 /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C039B7102EEF0C2800A84419 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCatUI;
 		};
 		C0A8865E2E95DF8E007163EC /* CalendarKit */ = {
 			isa = XCSwiftPackageProductDependency;

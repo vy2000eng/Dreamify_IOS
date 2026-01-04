@@ -148,4 +148,11 @@ extension AudioPlayerManager:AVAudioPlayerDelegate{
         print("🔇 Audio interrupted")
     }
     
+    func getCurrentTime() -> TimeInterval {
+        return audioPlayer?.currentTime ?? 0
+    }
+
+    func getDuration() -> TimeInterval {
+        return audioPlayer?.duration ?? 0
+    }
 }

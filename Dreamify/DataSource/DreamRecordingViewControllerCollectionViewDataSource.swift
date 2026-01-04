@@ -12,6 +12,7 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     var controller:UIViewController
     var audioPlayerManager: AudioPlayerManager
     var controllerManagedByAudioPlayer:ControllerManagedByAudioPlayerClass
+    var progressTimer: Timer?
    
     weak var retrieveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
     weak var deleteSectionFromCollectionViewDelegateInCalendarViewController:DeleteSectionFromCollectionView?
@@ -275,6 +276,10 @@ extension DreamRecordingViewDataSourceManager{
             //stopAudio()
             do{
                 try self.audioPlayerManager.stopAudio()
+                progressTimer?.invalidate()
+                progressTimer = nil
+                curr_cell.progressBar.progress = 0.0
+                curr_cell.currentTimeLabel.text = "0:00"
 
                 
             }catch let err as NSError{
@@ -306,6 +311,10 @@ extension DreamRecordingViewDataSourceManager{
                     dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.row,isPlaying: true)
                     let url = dream.url//URL(string: dream.url)
                     try     self.audioPlayerManager.playAudio(fileName: url)
+                    progressTimer?.invalidate()
+                    progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+                        self?.updateProgress()
+                    }
                     
 
                 }catch let err as NSError{
@@ -314,6 +323,10 @@ extension DreamRecordingViewDataSourceManager{
                     //self.stopAudio()
                     do{
                         try self.audioPlayerManager.stopAudio()
+                        progressTimer?.invalidate()
+                        progressTimer = nil
+                        curr_cell.progressBar.progress = 0.0
+                        curr_cell.currentTimeLabel.text = "0:00"
 
                         
                     }catch let err as NSError{
@@ -370,6 +383,10 @@ extension DreamRecordingViewDataSourceManager{
             
             do{
                 try self.audioPlayerManager.stopAudio()
+                progressTimer?.invalidate()
+                progressTimer = nil
+                curr_cell.progressBar.progress = 0.0
+                curr_cell.currentTimeLabel.text = "0:00"
 
                 
             }catch let err as NSError{
@@ -392,12 +409,22 @@ extension DreamRecordingViewDataSourceManager{
             
             do{
                 try  self.audioPlayerManager.playAudio(fileName: url)
+                progressTimer?.invalidate()
+                progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+                    self?.updateProgress()
+                }
+                
+                
                 
             }catch{
                 curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
                 //self.stopAudio()
                 do{
                     try self.audioPlayerManager.stopAudio()
+                    progressTimer?.invalidate()
+                    progressTimer = nil
+                    curr_cell.progressBar.progress = 0.0
+                    curr_cell.currentTimeLabel.text = "0:00"
 
                     
                 }catch let err as NSError{
@@ -568,5 +595,35 @@ extension DreamRecordingViewDataSourceManager{
                  dreamRecordingsView.collectionView.reconfigureItems(at: [indexPath])
              }, completion: nil)
          }
+    }
+    
+    func updateProgress() {
+        guard let currentPlayingIndex = dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying,
+              let cell = dreamRecordingsView.collectionView.cellForItem(at: IndexPath(row: currentPlayingIndex, section: 0)) as? DreamRecordingViewCell else {
+            progressTimer?.invalidate()
+            progressTimer = nil
+            return
+        }
+        
+        // Get current time and duration from your audio player
+        let currentTime = audioPlayerManager.getCurrentTime()
+        let duration = audioPlayerManager.getDuration()
+        
+        if duration > 0 {
+            cell.progressBar.progress = Float(currentTime / duration)
+            
+            // Format current time using your function
+            do {
+                // Create a temporary URL just to format the time
+                let formatter = DateComponentsFormatter()
+                formatter.allowedUnits = [.hour, .minute, .second]
+                formatter.unitsStyle = .positional
+                formatter.zeroFormattingBehavior = .pad
+                
+                if let formattedTime = formatter.string(from: currentTime) {
+                    cell.currentTimeLabel.text = formattedTime
+                }
+            }
+        }
     }
 }

@@ -5,13 +5,7 @@
 //  Created by Vladyslav Yatsuta on 12/26/25.
 //
 
-import UIKit
-//
-//  SubscriptionPageView.swift
-//  Dreamify
-//
-//  Created by Vladyslav Yatsuta on 12/26/25.
-//
+
 
 import UIKit
 
@@ -28,7 +22,7 @@ class SubscriptionPageView: UIView {
     private let closeButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "xmark"), for: .normal)
-        button.tintColor = .black
+        button.tintColor = .systemBlue
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()

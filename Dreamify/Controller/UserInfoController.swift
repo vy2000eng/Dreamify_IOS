@@ -44,7 +44,7 @@ class UserInfoViewController: UIViewController {
         view.endEditing(true)
     }
     private func updateUserInfo(username: String) {
-      
+      //TODO: this doesnt work lol, fix api porbs get rid of this
         print("update user info submitted")
         showLoading()
 
@@ -158,8 +158,7 @@ class UserInfoViewController: UIViewController {
    }
     private func resetPassword(oldPassword: String, newPassword: String) {
         print("reset pwd \(oldPassword) \(newPassword)")
-        // Call your API to reset password
-        // Use your InfoRequest model with the old and new passwords
+
     }
 }
 

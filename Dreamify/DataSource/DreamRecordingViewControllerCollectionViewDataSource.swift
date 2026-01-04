@@ -22,7 +22,6 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         self.controller = controller
         
         self.dreamRecordingViewModel = dreamRecordingViewModel
-        // Cleaner type checking
         switch controller {
         case is DreamRecordingsViewController:
             self.controller =  self.controller as! DreamRecordingsViewController
@@ -221,14 +220,8 @@ extension DreamRecordingViewDataSourceManager{
                     print("Edit occured in CalendaarViewController")
 
                 }
-                
-            
-                
-            
-            }
-            
-            
 
+            }
 
         }
 
@@ -489,18 +482,17 @@ extension DreamRecordingViewDataSourceManager{
                       print("Analysis completed successfully")
                       // Optionally refresh your collection view or show success message
                       
-                  case .failure(_):
+                  case .failure(let err):
                       // Error is already handled by the delegate in the view model
-                      UserSettings.shared.setLoginState(false)
-                      
-                      let loginViewController = LoginViewController()
-                      
-                      if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                         let window = windowScene.windows.first {
-                          window.rootViewController = UINavigationController(rootViewController: loginViewController)
-                          window.makeKeyAndVisible()
+                      print("Error analyzing dream: \(err)")
+                      if case .rateLimitExceeded = err {
+                          let subscriptionViewController = SubscriptionViewController()//premiumVC = //PremiumSubscriptionViewController()
+                          subscriptionViewController.modalPresentationStyle = .formSheet    //premiumVC.modalPresentationStyle = .fullScreen
+
+                          self.controller .present(subscriptionViewController, animated: true)//navigationController?.pushViewController(subscriptionViewController, animated: true)
+                          
                       }
-                      
+
                       print("Analysis failed")
                   }
               }
@@ -564,13 +556,5 @@ extension DreamRecordingViewDataSourceManager{
                  dreamRecordingsView.collectionView.reconfigureItems(at: [indexPath])
              }, completion: nil)
          }
-        
-        
-
-        
-
-        
-        
     }
-    
 }

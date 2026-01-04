@@ -9,10 +9,11 @@ import Foundation
 import UIKit
 import KeychainAccess
 import GoogleSignIn
+import RevenueCat
 class LoginViewController:UIViewController{
     
     var loginView : LoginView;
-    //var alert :UIAlertController;
+
     var userEntityViewModel:UserEntityViewModel?
     weak var userIsLoggedInChangeAccountMAnagementOptionsDelegate:UserIsLoggedInChangeAccountMAnagementOptions?
     private var loadingOverlay: LoadingOverlayView?
@@ -84,6 +85,7 @@ class LoginViewController:UIViewController{
     }
     
     func authenticateWithBackend(googleIdToken: String, email: String?, name: String?) {
+        self.showLoading()
         APIClientManager.shared.request(endpoint: "/account/SignInWithGoogle",method: "POST",body: ["IdToken":googleIdToken],type: LoginResponse.self){ [weak self ] result in
             guard let self = self else{return}
             DispatchQueue.main.async{
@@ -107,6 +109,21 @@ class LoginViewController:UIViewController{
                         TokenManager.shared.saveAccessToken(response.accessToken)
                         TokenManager.shared.saveRefreshToken(response.refreshToken)
                         TokenManager.shared.saveUserEmail(email: userEmail)
+                        TokenManager.shared.saveUserId(userId: response.userId)
+
+                        Task{
+                            do {
+                                let (customerInfo, created) = try await Purchases.shared.logIn(response.userId)
+                                let isPro = !customerInfo.activeSubscriptions.isEmpty
+                            
+                                
+                                TokenManager.shared.saveIsUserSubscribed(isUserSubscribed: isPro)
+                            } catch {
+                                TokenManager.shared.saveIsUserSubscribed(isUserSubscribed: false)
+                            }
+                            
+                        }
+                        
                         if(response.isFirstLogin){
                             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                                let window = windowScene.windows.first {
@@ -135,9 +152,8 @@ class LoginViewController:UIViewController{
                         print("\(err.localizedDescription)")
                         
                     }
-                    
-                   // self.setLoadingState(false)
                     print("Success: \(response.accessToken)")
+                    self.hideLoading()
                     
                     
                 case.failure(let error):
@@ -184,8 +200,6 @@ extension LoginViewController{
                     throw NSError(domain: "LoginViewController", code: 1, userInfo: [NSLocalizedDescriptionKey : "An Unexpected Error Occured While Signing in With Google"])
 
                 }
-                
-                // Get the ID token to send to your backend
                 guard let idToken = signInResult.user.idToken?.tokenString else {
                     //TODO: add an actual error here
                  
@@ -200,10 +214,7 @@ extension LoginViewController{
 
                 self.authenticateWithBackend(googleIdToken: idToken, email: email, name: name)
                 
-                
-//                let vc = EmailVerififcationController()
-//                
-//                self.navigationController?.pushViewController(vc, animated: true)
+
                 
             }catch let err as NSError{
                 self.hideLoading()
@@ -211,11 +222,7 @@ extension LoginViewController{
                 alert.addAction(UIAlertAction(title: "OK", style: .destructive))
                 
                 self.present(alert, animated: true)
-                
-                
             }
-    
-
         }
     }
     
@@ -232,21 +239,7 @@ extension LoginViewController{
             navigationController?.pushViewController(vc, animated: true)
             
         }
-//        let alert = UIAlertController(
-//            title: "Forgot Password",
-//            message: "Please enter your email address to reset your password",
-//            preferredStyle: .alert
-//        )
-//        
-//        alert.addTextField { textField in
-//            textField.placeholder = "Email"
-//            textField.keyboardType = .emailAddress
-//        }
-//        
-//        let resetAction = UIAlertAction(title: "Reset", style: .default) { _ in
-//            // Handle password reset
-//            print("Password reset requested")
-//        }
+
 
     }
     @objc private func signUpButtonTapped() {
@@ -260,7 +253,7 @@ extension LoginViewController{
         print("login tapped")
         guard validateInput() else { return }
         
-        // Show loading state
+   
         //setLoadingState(true)
         showLoading()
         let email = loginView.emailTextField.text
@@ -287,6 +280,19 @@ extension LoginViewController{
                            TokenManager.shared.saveAccessToken(response.accessToken)
                            TokenManager.shared.saveRefreshToken(response.refreshToken)
                             TokenManager.shared.saveUserEmail(email: user!.userEmail)
+                            TokenManager.shared.saveUserId(userId: response.userId)
+                            Task{
+                                do {
+                                    let (customerInfo, created) = try await Purchases.shared.logIn(response.userId)
+                                    let isPro = !customerInfo.activeSubscriptions.isEmpty
+                                    TokenManager.shared.saveIsUserSubscribed(isUserSubscribed: isPro)
+                                } catch {
+                                    print("🔴 RevenueCat login failed: \(error)")
+                                    TokenManager.shared.saveIsUserSubscribed(isUserSubscribed: false)
+                                }
+
+                            }
+                            
                             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                                  let window = windowScene.windows.first {
                                   let mainViewController = TabsViewController()
@@ -303,14 +309,12 @@ extension LoginViewController{
                             
                         }
                         
-                        //self.setLoadingState(false)
                         self.hideLoading()
                         
                         print("Success: \(response.accessToken)")
                     case .failure(let error):
                         //TODO: add an actual error lol
                         print("Error: \(error)")
-                       // self.setLoadingState(false)
                         self.hideLoading()
                 
                         let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
@@ -340,18 +344,25 @@ extension LoginViewController{
                             TokenManager.shared.saveAccessToken(response.accessToken)
                             TokenManager.shared.saveRefreshToken(response.refreshToken)
                             TokenManager.shared.saveUserEmail(email: user!.userEmail)
+                            TokenManager.shared.saveUserId(userId: response.userId)
+                            
+                            Task{
+                                do {
+                                    let (customerInfo, created) = try await Purchases.shared.logIn(response.userId)
+                                    let isPro = !customerInfo.activeSubscriptions.isEmpty
+                                    TokenManager.shared.saveIsUserSubscribed(isUserSubscribed: isPro)
+                                } catch {
+                                    print("🔴 RevenueCat login failed: \(error)")
+                                    TokenManager.shared.saveIsUserSubscribed(isUserSubscribed: false)
+                                }
 
-                            //UserSettings.shared.setLoginState(true)
-                            
-                            
+                            }
                             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                                  let window = windowScene.windows.first {
                                   let mainViewController = EmailVerififcationController()
                                   window.rootViewController = UINavigationController(rootViewController: mainViewController)
                                   window.makeKeyAndVisible()
                             }
-                            
-                            //self.setLoadingState(false)
                             self.hideLoading()
                             print("Success: \(response.accessToken)")
                             
@@ -365,7 +376,6 @@ extension LoginViewController{
                     case .failure(let error):
                         //TODO: add an actual error lol
                         print("Error: \(error)")
-                        //self.setLoadingState(false)
                         self.hideLoading()
                         let alert = UIAlertController(title: "Registration Error", message: error.localizedDescription, preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "OK", style: .destructive))
@@ -450,19 +460,5 @@ extension LoginViewController{
        loadingOverlay?.hide()
        loadingOverlay = nil
     }
-    
-//    func setLoadingState(_ isLoading: Bool) {
-//        loginView.loginButton.isEnabled = !isLoading
-//        
-//        if isLoading {
-//            loginView.loginButton.setTitle("", for: .normal)
-//            loginView.activityIndicator.startAnimating()
-//        } else {
-//            loginView.loginButton.setTitle("Sign In", for: .normal)
-//            loginView.activityIndicator.stopAnimating()
-//        }
-//    }
-    
-    
     
 }

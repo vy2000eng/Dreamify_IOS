@@ -171,9 +171,23 @@ public class DreamRecordingViewModel{
                 completion(.success(response))
                 
             case .failure(let err):
-                let (title, message) = getErrorMessage(for: err)
-                presentErrIfAnalysisFailsDelagate?.presentUiAlertErr(title: title, errMessage: message)
-                completion(.failure(err))
+                
+                if case .rateLimitExceeded = err {
+                    print("rat limit exceeded")
+
+                    completion(.failure(err))
+                    //return
+
+                    
+                }else{
+                    //print("Error analyzing dream: \(err)")
+                    let (title, message) = getErrorMessage(for: err)
+                    
+                    presentErrIfAnalysisFailsDelagate?.presentUiAlertErr(title: title, errMessage: message)
+                    completion(.failure(err))
+                    
+                }
+ 
             }
         }
     }
@@ -181,8 +195,8 @@ public class DreamRecordingViewModel{
         switch error {
         case .networkError:
             return ("Network Error", "Please check your internet connection and try again.")
-        case .serverError(let code):
-            return ("Server Error", "Server returned error code: \(code). Please try again later.")
+        case .serverError(let code,let message ):
+            return ("Server Error", "Server returned error code: \(code) with message: \(message). Please try again later.")
         case .noData:
             return ("No Data", "No response received from server.")
         case .decodingError:
@@ -193,7 +207,10 @@ public class DreamRecordingViewModel{
         case .authenticationError:
             return ("Authentication Error", "Unable to process server response.")
             
-        }
+        case .rateLimitExceeded(let message):
+            return ("Usage Limit Exceeded", "You can only make 1 Analysis in a 24h period")
+
+}
     }
     
     func updateAnalyzedText(dreamId: UUID, analyzedText:String){

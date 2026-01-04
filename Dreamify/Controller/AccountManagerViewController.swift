@@ -8,6 +8,9 @@
 import UIKit
 import GoogleSignIn
 
+import RevenueCat
+import RevenueCatUI
+
 
 class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccountMAnagementOptions {
     func userIsLoggedInChangeAccountMAnagementOptions() {
@@ -15,9 +18,9 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
     }
     
     private let accountManagerViewModel = AccountManangerViewModel()
-    private let accountManagerView = AccountManagerView()
-    private var loadingOverlay: LoadingOverlayView?
-
+    private let accountManagerView      = AccountManagerView()
+    private var loadingOverlay:           LoadingOverlayView?
+    
     
     override func viewDidLoad()  {
         super.viewDidLoad()
@@ -33,16 +36,24 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
             accountManagerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        // Handle item taps
-         accountManagerView.onItemTapped = { [weak self] itemTitle in
+        accountManagerView.onItemTapped = { [weak self] itemTitle in
             guard let self = self else {return}
             print("Tapped: \(itemTitle)")
             if(itemTitle == "Log Out"){
+                Task{
+                    let customerInfo = try await Purchases.shared.logOut()
+                    print("🟢 RevenueCat logged out")
+                    print("🟢 New anonymous user ID: \(customerInfo.originalAppUserId)")
+                    TokenManager.shared.saveIsUserSubscribed(isUserSubscribed: false)
+                }
+                
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                    let window = windowScene.windows.first {
+                   let window = windowScene.windows.first {
                     let mainViewController = LoginViewController()
                     TokenManager.shared.clearTokens()
+                    
                     accountManagerView.changeAccountSection()
+                    
                     let loginViewController = LoginViewController()
                     loginViewController.userIsLoggedInChangeAccountMAnagementOptionsDelegate = self
                     GIDSignIn.sharedInstance.signOut()
@@ -54,15 +65,15 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
             if(itemTitle == "Create An Account"){
                 let loginViewController = LoginViewController()
                 loginViewController.userIsLoggedInChangeAccountMAnagementOptionsDelegate = self
-                await self.navigationController?.pushViewController(loginViewController, animated: true)
+                self.navigationController?.pushViewController(loginViewController, animated: true)
                 return
             }
-        
             
-       
+            
+            
             if(itemTitle == "Manage Account"){
                 let userInfo = UserInfoViewController()
-                await self.navigationController?.pushViewController(userInfo, animated: true)
+                self.navigationController?.pushViewController(userInfo, animated: true)
                 return
                 
             }
@@ -71,19 +82,19 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
             if(itemTitle == "Privacy Policy"){
                 let privacyPolicyViewController = PrivacyPolicyTermsOfServiceController(privacyPolicyTermsOfService: 0)
                 
-                await self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
+                self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
                 return
             }
             if(itemTitle == "Terms of Service"){
                 let privacyPolicyViewController = PrivacyPolicyTermsOfServiceController(privacyPolicyTermsOfService: 1)
                 
-               await  self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
+                self.navigationController?.pushViewController(privacyPolicyViewController, animated: true)
                 return
             }
             
             if(itemTitle == "Delete All Data"){
                 let alert = UIAlertController(title: "Are you sure you want to delete all your data?", message: "This action cannot be undone.", preferredStyle: .alert)
-
+                
                 alert.addAction(
                     UIAlertAction(
                         title: "delete",
@@ -91,13 +102,13 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
                         handler: { [weak self] UIAlertAction in
                             guard let self = self else { return }
                             showLoading()
-
+                            
                             APIClientManager.shared.authRequest(endpoint: "/account/DeleteUser", method: "POST", type:DeleteUserResponse.self, completion: { [weak self] result in
                                 guard let self = self else{return}
                                 
                                 DispatchQueue.main.async {
                                     self.hideLoading()
-
+                                    
                                     switch result{
                                     case .success(let response):
                                         
@@ -106,9 +117,9 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
                                             GIDSignIn.sharedInstance.disconnect { error in
                                                 guard error == nil else { return }
                                             }
-                                  
+                                            
                                             self.navigateToLoginView()
-
+                                            
                                         }catch let error as NSError{
                                             self.showErrorAlert(message: "Failed to delete local data: \(error.localizedDescription)")
                                         }
@@ -117,38 +128,20 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
                                         self.showErrorAlert(message: "Failed to delete account: \(error.localizedDescription)")
                                     }
                                 }
-                                
-                        
                             })
-                             //self.navigateToLoginView()
-
-                            
                         })
-                    )
+                )
                 
                 alert.addAction(UIAlertAction( title: "Cancel", style: .cancel))
-                await present(alert, animated: true)
+                self.present(alert, animated: true)
             }
             if(itemTitle == "Manage Subscription"){
-                do{
-                     try await  purchase(ProductID: "monthly_subscription.dreamify")
-
-                    
-                }catch{
-                    let alert = UIAlertController(title: "The Subscription purchase failed", message: error.localizedDescription, preferredStyle: .alert)
-
-                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-
-                    
-                    //alert.addAction(UIAlertAction( title: "Cancel", style: .cancel))
-                    self.present(alert, animated: true)
-
-                    //present(alert, animated: true)
-                    
-                }
+                let subscriptionViewController = SubscriptionViewController()//premiumVC = //PremiumSubscriptionViewController()
+                subscriptionViewController.modalPresentationStyle = .fullScreen    //premiumVC.modalPresentationStyle = .fullScreen
+                
+                self.navigationController?.present(subscriptionViewController, animated: true)//pushViewController(subscriptionViewController, animated: true)
             }
         }
-        
     }
     
     private func showErrorAlert(message: String) {
@@ -162,25 +155,24 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
     }
     
     private func showLoading() {
-           hideLoading() // Remove any existing overlay
-           
-           let loading = LoadingOverlayView(
-               title: "Analyzing dream...",
-               subtitle: "Please wait while we analyze your dream"
-           )
-           loading.show(in: view)
-           loadingOverlay = loading
-       }
-       
-    private func hideLoading() {
-       loadingOverlay?.hide()
-       loadingOverlay = nil
+        hideLoading() // Remove any existing overlay
+        
+        let loading = LoadingOverlayView(
+            title: "Analyzing dream...",
+            subtitle: "Please wait while we analyze your dream"
+        )
+        loading.show(in: view)
+        loadingOverlay = loading
     }
     
+    private func hideLoading() {
+        loadingOverlay?.hide()
+        loadingOverlay = nil
+    }
     
     func navigateToLoginView(){
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-            let window = windowScene.windows.first {
+           let window = windowScene.windows.first {
             let mainViewController = LoginViewController()
             TokenManager.shared.clearTokens()
             accountManagerView.changeAccountSection()
@@ -189,18 +181,6 @@ class AccountManagerViewController: UIViewController, UserIsLoggedInChangeAccoun
             window.rootViewController = UINavigationController(rootViewController: mainViewController)
             window.makeKeyAndVisible()
         }
-        
     }
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 }
+

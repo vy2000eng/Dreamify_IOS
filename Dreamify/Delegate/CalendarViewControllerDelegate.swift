@@ -13,8 +13,6 @@ extension CalendarViewController:UICalendarViewDelegate,UICalendarSelectionSingl
     func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
          guard let date = Calendar.current.date(from: dateComponents) else { return nil }
     
-         
-         // Check if this date has dreams
         if dreamRecordingViewModel.hasDreamsForDate(date: date) {
              return UICalendarView.Decoration.image(
                  UIImage(systemName: "moon.stars.fill"),

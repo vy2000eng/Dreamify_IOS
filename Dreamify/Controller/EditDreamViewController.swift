@@ -58,21 +58,19 @@ class EditDreamViewController:UIViewController {
     private func setupNavigationBar() {
         title = "Edit Dream"
         
-        // Cancel button (left)
+
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .cancel,
             target: self,
             action: #selector(cancelButtonTapped)
         )
         
-        // Save button (right)
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .save,
             target: self,
             action: #selector(saveButtonTapped)
         )
         
-        // Style the navigation bar
         navigationController?.navigationBar.prefersLargeTitles = false
     }
     private func setupTextFieldDelegates() {
@@ -157,7 +155,7 @@ class EditDreamViewController:UIViewController {
     
 extension EditDreamViewController: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
-        // Auto-resize text view
+ 
         let size = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .infinity))
         textView.invalidateIntrinsicContentSize()
     }

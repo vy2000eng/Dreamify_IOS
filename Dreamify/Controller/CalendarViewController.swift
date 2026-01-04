@@ -229,16 +229,16 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
         if (isCalendarExpanded){
             guard var config = calendarButton?.configuration else { return }
             
-            // Change the chevron (example)
-            config.image = UIImage(systemName: "chevron.down") // or whatever you need
+         
+            config.image = UIImage(systemName: "chevron.down")
             
             calendarButton?.configuration = config
             
         }else{
             guard var config = calendarButton?.configuration else { return }
             
-            // Change the chevron (example)
-            config.image = UIImage(systemName: "chevron.up") // or whatever you need
+          
+            config.image = UIImage(systemName: "chevron.up")
             
             calendarButton?.configuration = config
             
@@ -252,7 +252,6 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
             self.view.layoutIfNeeded()
         }
     }
-    
 }
 
 

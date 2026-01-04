@@ -64,7 +64,8 @@ class MainViewController: UIViewController{
             
             let recordingSession = audioRecordingManager.getRecordingSession()
             
-            recordingSession.requestRecordPermission() { [unowned self] allowed in
+            recordingSession.requestRecordPermission() { [weak self] allowed in
+                guard let self = self else { return }
                 DispatchQueue.main.async {
                     
                     if allowed {
@@ -140,43 +141,80 @@ class MainViewController: UIViewController{
 }
 
 extension MainViewController{
-
-
     private func startRecording() {
-        do {
-            try audioRecordingManager.setupAudioRecorder()
-            audioRecordingManager.getRecorder().delegate = self
-            
-            audioRecordingManager.record()
-            
-            // Start live transcription
-            SpeechTranscriberManager.shared.startLiveTranscription(
-                onUpdate: { [weak self] transcribedText in
-                    // Update your UI with the transcribed text in real-time
-                    self?.currentTranscription = transcribedText
-                    self?.mainContentView.updateTranscription(text: transcribedText)
-                },
-                onError: { [weak self] error in
-                    print("Transcription error: \(error.localizedDescription)")
-                    // Optionally show error to user
-                }
-            )
-            
-            mainContentView.startRecording()
-            
-        } catch let err as NSError {
-            let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                          message: err.localizedDescription,
-                                          preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-            self.present(alert, animated: true)
-        }
+        APIClientManager.shared.authRequest(
+            endpoint: "/account/GetTimeSinceLastRecording",
+            method: "POST",
+            body: ["AnalysisOrRecording":"Recording"],
+            type: TimeSinceLastAnalysisOrRecordingResponse.self,
+            completion: { [weak self] result in
+                guard let self = self else { return }
+                
+                // Add 'execute:' parameter label
+                DispatchQueue.main.async(execute: {
+                    switch result {
+                    case .success(let response):
+                        print(response)
+                        if response.TimeSinceLastRecordingOrAnalysis {
+                            do {
+                                try self.audioRecordingManager.setupAudioRecorder()
+                                self.audioRecordingManager.getRecorder().delegate = self
+                                self.audioRecordingManager.record()
+                                
+                                SpeechTranscriberManager.shared.startLiveTranscription(
+                                    onUpdate: { [weak self] transcribedText in
+                                        self?.currentTranscription = transcribedText
+                                        self?.mainContentView.updateTranscription(text: transcribedText)
+                                    },
+                                    onError: { [weak self] error in
+                                        print("Transcription error: \(error.localizedDescription)")
+                                    }
+                                )
+                                
+                                self.mainContentView.startRecording()
+                                
+                            } catch let err as NSError {
+                                let alert = UIAlertController(
+                                    title: "An Unexpected Error Occurred",
+                                    message: err.localizedDescription,
+                                    preferredStyle: .alert
+                                )
+                                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                                self.present(alert, animated: true)
+                            }
+                            
+                        } else {
+                            let alert = UIAlertController(
+                                title: "Recording Limit Exceeded",
+                                message: "You can only make 1 recording per 24 hours. Upgrade to Premium for unlimited recordings.",
+                                preferredStyle: .alert
+                            )
+                            
+                            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                            
+                            alert.addAction(UIAlertAction(title: "Upgrade", style: .default, handler: { [weak self] _ in
+                                let subscriptionViewController = SubscriptionViewController()
+                                subscriptionViewController.modalPresentationStyle = .fullScreen
+                                self?.navigationController?.present(subscriptionViewController, animated: true)
+                            }))
+                            
+                            self.present(alert, animated: true)
+                        }
+                        
+                    case .failure(let error):
+                        let errorAlert = UIAlertController(
+                            title: "Error",
+                            message: error.localizedDescription,
+                            preferredStyle: .alert
+                        )
+                        errorAlert.addAction(UIAlertAction(title: "OK", style: .default))
+                        self.present(errorAlert, animated: true)
+                    }
+                })
+            }
+        )
     }
-    
-    
-
     func finishRecording(success: Bool) {
-        // Stop live transcription
         SpeechTranscriberManager.shared.stopLiveTranscription()
         
         audioRecordingManager.stop()
@@ -226,6 +264,7 @@ extension MainViewController{
         
         
         if audioRecordingManager.getState()  == .stopped {
+            
             
             startRecording()
         } else {

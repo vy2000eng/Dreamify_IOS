@@ -10,4 +10,6 @@ struct LoginResponse: Codable {
     let expiresIn: Int
     let refreshToken: String
     let isFirstLogin:Bool
+    let userId:String
+
 }

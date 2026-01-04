@@ -9,12 +9,6 @@
 import UIKit
 public class SendPasswordResetEmailViewController: UIViewController {
     var sendPasswordresetEmailView:SendPasswordResetView
-    
-//    var onResetPasswordTapped: (() -> Void)?
-//    var onSaveChangesTapped: ((String) -> Void)?
-    
-    
-    
     init() {
         self.sendPasswordresetEmailView = SendPasswordResetView(frame: .zero)
         super.init(nibName: nil, bundle: nil)
@@ -34,13 +28,8 @@ public class SendPasswordResetEmailViewController: UIViewController {
             
             print("password reset button tapped")
             sendPasswordResetEmail(email: email)
-            
-            
-            
-            
-            
         }
-
+        
         
     }
     
@@ -50,16 +39,11 @@ public class SendPasswordResetEmailViewController: UIViewController {
         sendPasswordresetEmailView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            
-            
+
             sendPasswordresetEmailView.topAnchor.constraint(equalTo: view.topAnchor),
             sendPasswordresetEmailView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             sendPasswordresetEmailView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             sendPasswordresetEmailView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
-            
-
-        
         ])
         
         
@@ -79,23 +63,14 @@ public class SendPasswordResetEmailViewController: UIViewController {
                 DispatchQueue.main.async {[weak self] in
                     guard let self = self else {return}
                     let vc = ResetPasswordViewController()//ResetPasswordViewController(frame: .zero)
-
                     navigationController?.pushViewController(vc, animated: true)
 
-                    
-                    
                 }
-                
-                
-                
-                
-                
-                
             case .failure(let error):
                 print("request error: \(error)")
-
+                
                 let alert = UIAlertController(title: "Forgot Password Failure", message: "The forgot password action was unsucessful because \(error)", preferredStyle: .alert)
-
+                
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: {[weak self] UIAlertAction in
                     guard let self = self else{return}
                     DispatchQueue.main.async {[weak self] in
@@ -110,34 +85,12 @@ public class SendPasswordResetEmailViewController: UIViewController {
                         }
                         
                     }
-                    
-                    
-                    
-                    
-                    
                 }))
                 DispatchQueue.main.async {[weak self] in
                     guard let self = self else{return}
                     present(alert, animated: true)
-
-                    
                 }
-
-
-                
             }
-            
-            
-            
         })
-        
-        
     }
-    
-    
-    
-    
-    
-    
-    
 }

@@ -18,6 +18,8 @@
   ],
   "settings" : {
     "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
     "_storeKitErrors" : [
       {
         "current" : null,
@@ -93,7 +95,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "monthly_subscription.dreamify",
+          "productID" : "dreamify.monthly_subscription",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "monthly_subscription",
           "subscriptionGroupID" : "C0DCE0BD",

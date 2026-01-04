@@ -26,15 +26,8 @@ class EmailVerififcationController:UIViewController{
             guard let self = self else{return}
             sendVerificationCodeToBackend(code:code)
         }
-        
-        
-        
-        
-        
     }
-    
-    
-    
+
     private func setupView(){
         view.addSubview(emailVerificationView);
         emailVerificationView.translatesAutoresizingMaskIntoConstraints = false
@@ -79,56 +72,22 @@ class EmailVerififcationController:UIViewController{
 
                     
                 }
-
-               // navigateToScreenBasedOnResponse(isSuccess: true)
-                //                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-//                   let window = windowScene.windows.first {
-//                    let mainViewController = TabsViewController()
-//                    window.rootViewController = UINavigationController(rootViewController: mainViewController)
-//                    window.makeKeyAndVisible()
-//                }
             case .failure(let error):
                 print(error.localizedDescription)
                 DispatchQueue.main.async{ [weak self] in
                     guard let self = self else{ return}
                     
                     navigateToScreenBasedOnResponse(isSuccess: false)
-
-                        
                 }
-
-//                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-//                   let window = windowScene.windows.first {
-//                    let mainViewController = LoginViewController()
-//                    window.rootViewController = UINavigationController(rootViewController: mainViewController)
-//                    window.makeKeyAndVisible()
-//                }
-                
-            
-                
-                
-                
             }
-            
-            
-            
-            
-            
-            
         })
-        
-        
-        
     }
     
     func navigateToScreenBasedOnResponse(isSuccess:Bool){
         let vc = isSuccess ? TabsViewController() : LoginViewController()
-        
-        
-        
+
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
-            //let mainViewController = TabsViewController()
             window.rootViewController = UINavigationController(rootViewController: vc)
             window.makeKeyAndVisible()
         }
@@ -147,7 +106,6 @@ class EmailVerififcationController:UIViewController{
                 message: "You will not be able to do certain actions, such as changing updating your email, resetting your password, or deleting your account",
                 preferredStyle: .alert
             )
-            
             alert.addAction(UIAlertAction(title: "Discard", style: .destructive) { [weak self] _ in
                 //self?.dismiss(animated: true)
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -159,25 +117,5 @@ class EmailVerififcationController:UIViewController{
                 
             })
             present(alert, animated: true)
-       
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 }

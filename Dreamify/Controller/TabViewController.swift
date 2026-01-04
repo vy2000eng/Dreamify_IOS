@@ -8,12 +8,6 @@
 import UIKit
 import BackgroundTasks
 
-
-
-
-
-
-
 class TabsViewController:UITabBarController{
     let taskId = "dreamify.refreshAuthToken.backgroundTask"
     

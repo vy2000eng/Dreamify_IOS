@@ -129,3 +129,22 @@ func checkEntitlement() async throws->Bool {
 
 
 
+import AVFoundation
+
+func getAudioDuration(url: URL) throws -> String {
+        let audioPlayer = try AVAudioPlayer(contentsOf: url)
+     let timeInterval  =  audioPlayer.duration
+        
+
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.unitsStyle = .positional // e.g., "1:02:30"
+        formatter.zeroFormattingBehavior = .pad // pads with leading zeros if needed, e.g. "01:02:30"
+        
+    
+    guard let res = formatter.string(from: timeInterval) else{
+        throw NSError(domain: "Utils ", code: 1, userInfo: [NSLocalizedDescriptionKey : "Invalid Time Interval"])
+
+    }
+    return res
+}

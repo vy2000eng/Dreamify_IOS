@@ -59,7 +59,19 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
             fatalError("Unable to dequeue TopicViewCell. This is a developer error.")
         }
         let dream = dreamRecordingViewModel.dream(by: indexPath.row)
-        cell.configure(with: dream)
+        do{
+            try cell.configure(with: dream)
+            
+        }catch  {
+            let alert = UIAlertController(title: "An Unexpected Error Occurred",
+                                          message: error.localizedDescription,
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.controller.present(alert, animated: true)
+            
+            
+        }
+        
 
         
         // Create separate gesture recognizers

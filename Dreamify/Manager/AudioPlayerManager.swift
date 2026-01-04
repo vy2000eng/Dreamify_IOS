@@ -155,4 +155,19 @@ extension AudioPlayerManager:AVAudioPlayerDelegate{
     func getDuration() -> TimeInterval {
         return audioPlayer?.duration ?? 0
     }
+    
+    func pauseAudio() {
+        audioPlayer?.pause()
+        // Keeps current position, doesn't reset to 0
+    }
+
+    func resumeAudio() {
+        audioPlayer?.play()
+        // Continues from paused position
+    }
+    
+    func seek(to time: TimeInterval) {
+        audioPlayer?.currentTime = time
+    }
+    
 }

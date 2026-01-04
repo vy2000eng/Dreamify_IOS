@@ -5,6 +5,9 @@
 //  Created by Vladyslav Yatsuta on 7/12/25.
 //
 
+//This class is responsible for managing the lifecycle of individual cells and their inherent functionality such as dream analysis, play pause, audio scrubing, transition b/w analysis and transcripiton, and an api call to analyze the transcribed text
+//
+//
 import UIKit
 class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
 
@@ -13,6 +16,8 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
     var audioPlayerManager: AudioPlayerManager
     var controllerManagedByAudioPlayer:ControllerManagedByAudioPlayerClass
     var progressTimer: Timer?
+    var audioProgress: [String: TimeInterval] = [:]
+    
    
     weak var retrieveCurrentlySelectedDateDelegate:RetrieveCurrentlySelectedDate?
     weak var deleteSectionFromCollectionViewDelegateInCalendarViewController:DeleteSectionFromCollectionView?
@@ -62,19 +67,34 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         let dream = dreamRecordingViewModel.dream(by: indexPath.row)
         do{
             try cell.configure(with: dream)
+            // CHECK IF THERE'S SAVED PROGRESS
+           if let savedProgress = audioProgress[dream.url] {
+               let duration = audioPlayerManager.getDuration()
+               if duration > 0 {
+                   cell.progressBar.progress = Float(savedProgress / duration)
+               }
+               
+               // Format saved time
+               let formatter = DateComponentsFormatter()
+               formatter.allowedUnits = [.hour, .minute, .second]
+               formatter.unitsStyle = .positional
+               formatter.zeroFormattingBehavior = .pad
+               if let formattedTime = formatter.string(from: savedProgress) {
+                   cell.currentTimeLabel.text = formattedTime
+               }
+           } else {
+               cell.currentTimeLabel.text = "0:00"
+               cell.progressBar.progress = 0.0
+           }
             
         }catch  {
-            let alert = UIAlertController(title: "An Unexpected Error Occurred",
-                                          message: error.localizedDescription,
-                                          preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            let alert = DreamRecordingViewDataSourceManagerUtils.createAlert(title: "An Unexpected Error Occurred", message: error.localizedDescription)
             self.controller.present(alert, animated: true)
             
             
         }
         
 
-        
         // Create separate gesture recognizers
         let headerLongPress = UILongPressGestureRecognizer(target: self, action: #selector(handleTitleLongPress))
         let mainLongPress = UILongPressGestureRecognizer(target: self, action: #selector(handleTitleLongPress))
@@ -96,6 +116,11 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         cell.transcriptionAnalysisButton.tag = indexPath.row
         cell.transcriptionAnalysisButton.addTarget(self, action: #selector(handleAnalysisTranscriptionButton), for: .touchUpInside)
         
+        cell.skipForwardButton.tag    = indexPath.row
+        cell.skipForwardButton.addTarget(self, action: #selector(seekForward5), for: .touchUpInside)
+        
+        cell.skipBackwardButton.tag    = indexPath.row
+        cell.skipBackwardButton.addTarget(self, action: #selector(seekBackwards5), for: .touchUpInside)
         
         
         let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
@@ -158,11 +183,20 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         dream.toggleIsOpen()
         dreamRecordingViewModel.previouslyOpenedDreamId = indexPath.row
         
+        
+        
         // Animate the changes
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
             collectionView.performBatchUpdates({
                 collectionView.reloadItems(at: indexPathsToReload)
-            }, completion: nil)
+            }, completion: { [weak self] finished in
+                guard let self = self else{return}
+                if finished{
+                    if( self.dreamRecordingViewModel.getIsPlaying()){
+                        pauseAudio(dream: dream)
+                    }
+                }
+            })
         }
     }
     
@@ -172,6 +206,79 @@ class DreamRecordingViewDataSourceManager:NSObject,UICollectionViewDataSource{
         
 
         
+    }
+    
+    func pauseAudio(dream:DreamViewModel,isTransitioningBetweenViews:Bool = false){
+        if(!isTransitioningBetweenViews){
+            let generator = UIImpactFeedbackGenerator(style: .heavy)
+            generator.impactOccurred()
+            
+        }
+
+
+        
+        self.audioPlayerManager.pauseAudio()
+        progressTimer?.invalidate()
+        progressTimer = nil
+        dreamRecordingViewModel.setPlayPauseController(dreamViewModel: nil, selectedIndex: nil,isPlaying: false)
+        let currentTime = audioPlayerManager.getCurrentTime()
+        audioProgress[dream.url] = currentTime
+    }
+    func updateProgress() {
+        guard let currentPlayingIndex = dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying,
+              let cell = dreamRecordingsView.collectionView.cellForItem(at: IndexPath(row: currentPlayingIndex, section: 0)) as? DreamRecordingViewCell else {
+            progressTimer?.invalidate()
+            progressTimer = nil
+            return
+        }
+        
+        // Get current time and duration from your audio player
+        let currentTime = audioPlayerManager.getCurrentTime()
+        let duration = audioPlayerManager.getDuration()
+        
+        if duration > 0 {
+            cell.progressBar.progress = Float(currentTime / duration)
+            
+            // Format current time using your function
+            do {
+                // Create a temporary URL just to format the time
+                let formatter = DateComponentsFormatter()
+                formatter.allowedUnits = [.hour, .minute, .second]
+                formatter.unitsStyle = .positional
+                formatter.zeroFormattingBehavior = .pad
+                
+                if let formattedTime = formatter.string(from: currentTime) {
+                    cell.currentTimeLabel.text = formattedTime
+                }
+            }
+        }
+    }
+    
+    func playAudio(curr_cell: DreamRecordingViewCell,dream:DreamViewModel, indexPath:IndexPath, isTransitioningBetweenViews:Bool = false) throws ->Void{
+        if(!isTransitioningBetweenViews){
+            let generator = UIImpactFeedbackGenerator(style: .heavy)
+            generator.impactOccurred()
+            
+        }
+        
+        
+        let config    = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
+
+        curr_cell.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
+        dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.row, isPlaying: true)
+        let url = dream.url
+        try self.audioPlayerManager.playAudio(fileName: url)
+        
+        // SEEK TO SAVED POSITION IF IT EXISTS
+        if let savedProgress = audioProgress[url] {
+            audioPlayerManager.seek(to: savedProgress)
+        }
+        
+        // START TIMER
+        progressTimer?.invalidate()
+        progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            self?.updateProgress()
+        }
     }
     
     
@@ -242,6 +349,7 @@ extension DreamRecordingViewDataSourceManager{
     
     
     
+    
     @objc
     func handlePlayPause(_ sender:UIButton)  throws -> Void{
         
@@ -253,14 +361,8 @@ extension DreamRecordingViewDataSourceManager{
         let isTheCurrentlySelectedIndexPlayingRightNow = dreamRecordingViewModel.getIsPlaying    ()
         
         guard let curr_cell = dreamRecordingsView.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell else{
-            let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                          message: "Item Cannot Be Selected.",//"You tapped the start recording button, but the action failed",
-                                          preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-            
-            //viewCon
-            
-            
+
+            let alert = DreamRecordingViewDataSourceManagerUtils.createAlert(title: "An Unexpected Error Occured", message: "Item Cannot Be Selected.")
             self.controller.present(alert, animated: true)
             return
             
@@ -272,84 +374,26 @@ extension DreamRecordingViewDataSourceManager{
         
         // if it is the same index, so pausing the current recording
         if(dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying == indexPath.row){
-            curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
-            //stopAudio()
-            do{
-                try self.audioPlayerManager.stopAudio()
-                progressTimer?.invalidate()
-                progressTimer = nil
-                curr_cell.progressBar.progress = 0.0
-                curr_cell.currentTimeLabel.text = "0:00"
+                curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
+  
+                pauseAudio(dream: dream)
 
-                
-            }catch let err as NSError{
-                
-                let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                              message: "An error occured when the audio player was attempting to stop",//"You tapped the start recording button, but the action failed",
-                                              preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                self.controller.present(alert, animated: true)
                 return
-                
-                
-            }
-            
-            dreamRecordingViewModel.setPlayPauseController(dreamViewModel: nil, selectedIndex: nil,isPlaying: false)
 
-
-            return
-            
-            
         }
         // if there is nothing playing
         if(!dreamRecordingViewModel.getIsPlaying()){
           
                 do{
-                    
-                    
-                    curr_cell.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
-                    dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.row,isPlaying: true)
-                    let url = dream.url//URL(string: dream.url)
-                    try     self.audioPlayerManager.playAudio(fileName: url)
-                    progressTimer?.invalidate()
-                    progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-                        self?.updateProgress()
-                    }
-                    
+                    try playAudio(curr_cell: curr_cell, dream: dream, indexPath: indexPath)
 
                 }catch let err as NSError{
-                
                     curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
-                    //self.stopAudio()
-                    do{
-                        try self.audioPlayerManager.stopAudio()
-                        progressTimer?.invalidate()
-                        progressTimer = nil
-                        curr_cell.progressBar.progress = 0.0
-                        curr_cell.currentTimeLabel.text = "0:00"
+                    pauseAudio(dream: dream)
 
-                        
-                    }catch let err as NSError{
-                        let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                                      message: "An error occured when the audio player was attempting to stop",//"You tapped the start recording button, but the action failed",
-                                                      preferredStyle: .alert)
-                        alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                        self.controller.present(alert, animated: true)
-                        return
-                        
-                        
-                    }
-                    
-                    
                     print(err.localizedDescription)
-                    let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                                  message: "Issue with audio player please try again later.",//"You tapped the start recording button, but the action failed",
-                                                  preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                    let alert = DreamRecordingViewDataSourceManagerUtils.createAlert(title: "An Unexpected Error Occured", message: "Issue with audio player please try again later.")
                     self.controller.present(alert, animated: true)
-
-                    
-                    
                 }
             
 
@@ -361,87 +405,30 @@ extension DreamRecordingViewDataSourceManager{
         else{
             let prevPlayDetails = dreamRecordingViewModel.getPlayPauseController()
             guard let currentPlayingIndex = prevPlayDetails.indexThatIsCurrentlyPlaying else{
-                let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                              message: "Cannot Be Played at this time.",//"You tapped the start recording button, but the action failed",
-                                              preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                let alert = DreamRecordingViewDataSourceManagerUtils.createAlert(title: "An Unexpected Error Occured", message: "Cannot be played at this time.")
                 self.controller.present(alert, animated: true)
                 return
             }
             
             guard let prev_cell = dreamRecordingsView.collectionView.cellForItem(at: IndexPath(row: currentPlayingIndex, section: 0) ) as? DreamRecordingViewCell else{
-                let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                              message: "Cannot Stop Playing the previous Recording",//"You tapped the start recording button, but the action failed",
-                                              preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                let alert = DreamRecordingViewDataSourceManagerUtils.createAlert(title: "An Unexpected Error Occured", message: "You tapped the start recording button, but the action failed")
                 self.controller.present(alert, animated: true)
                 return
                 
             }
             
             prev_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
-            
-            do{
-                try self.audioPlayerManager.stopAudio()
-                progressTimer?.invalidate()
-                progressTimer = nil
-                curr_cell.progressBar.progress = 0.0
-                curr_cell.currentTimeLabel.text = "0:00"
-
-                
-            }catch let err as NSError{
-                let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                              message: "An error occured when the audio player was attempting to stop",//"You tapped the start recording button, but the action failed",
-                                              preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                self.controller.present(alert, animated: true)
-                return
-                
-                
-            }
-            
-            
-            
-            
+            pauseAudio(dream: dream)
             curr_cell.playPauseButton.setImage(UIImage(systemName: "pause", withConfiguration: config), for: .normal)
             dreamRecordingViewModel.setPlayPauseController(dreamViewModel: dream, selectedIndex: indexPath.row,isPlaying: true)
-            let url = dream.url
             
             do{
-                try  self.audioPlayerManager.playAudio(fileName: url)
-                progressTimer?.invalidate()
-                progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-                    self?.updateProgress()
-                }
-                
-                
+                try playAudio(curr_cell: curr_cell, dream: dream, indexPath: indexPath)
                 
             }catch{
                 curr_cell.playPauseButton.setImage(UIImage(systemName: "play", withConfiguration: config), for: .normal)
-                //self.stopAudio()
-                do{
-                    try self.audioPlayerManager.stopAudio()
-                    progressTimer?.invalidate()
-                    progressTimer = nil
-                    curr_cell.progressBar.progress = 0.0
-                    curr_cell.currentTimeLabel.text = "0:00"
-
-                    
-                }catch let err as NSError{
-                    let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                                  message: "An error occured when the audio player was attempting to stop",//"You tapped the start recording button, but the action failed",
-                                                  preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                    self.controller.present(alert, animated: true)
-                    return
-                    
-                    
-                }
-                
-                let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                              message: "Issue with audio player please try again later.",//"You tapped the start recording button, but the action failed",
-                                              preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                pauseAudio(dream: dream)
+                let alert = DreamRecordingViewDataSourceManagerUtils.createAlert(title: "An Unexpected Error Occured", message: "Issue with audio player please try again later.")
                 self.controller.present(alert, animated: true)
                 
                 
@@ -476,6 +463,7 @@ extension DreamRecordingViewDataSourceManager{
         }
         
     }
+    
     @objc
     func analyzeDream(_ sender:UIButton) {
         print("analyzze tapped")
@@ -488,7 +476,7 @@ extension DreamRecordingViewDataSourceManager{
            )
         loading.show(in: self.controller.view)
         
-        
+        //TODO: this doesn't make sense, look into later
         dreamRecordingViewModel.analyzeDream(dreamViewModel: dream) { [weak self] result in
             guard let self = self else{return}
               DispatchQueue.main.async {
@@ -497,13 +485,9 @@ extension DreamRecordingViewDataSourceManager{
                   switch result {
                   case .success(_):
                       guard let curr_cell = self.dreamRecordingsView.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell else{
-                          let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                                        message: "Item Cannot Be Selected.",//"You tapped the start recording button, but the action failed",
-                                                        preferredStyle: .alert)
-                          alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                          let alert = DreamRecordingViewDataSourceManagerUtils.createAlert(title: "An Unexpected Error Occured", message: "Item Cannot Be Selected.")
                           self.controller.present(alert, animated: true)
                           return
-                          
                           
                       }
                       curr_cell.transcriptionAnalysisButton.setTitle("Analysis", for: .normal)
@@ -536,6 +520,7 @@ extension DreamRecordingViewDataSourceManager{
                   }
               }
           }
+        
         
         
         
@@ -597,33 +582,96 @@ extension DreamRecordingViewDataSourceManager{
          }
     }
     
-    func updateProgress() {
-        guard let currentPlayingIndex = dreamRecordingViewModel.getPlayPauseController().indexThatIsCurrentlyPlaying,
-              let cell = dreamRecordingsView.collectionView.cellForItem(at: IndexPath(row: currentPlayingIndex, section: 0)) as? DreamRecordingViewCell else {
-            progressTimer?.invalidate()
-            progressTimer = nil
+
+    
+    
+    @objc
+    func seekForward5(_ sender:UIButton) {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+        
+        let indexPath = IndexPath (row: sender.tag, section: 0)
+        let dream = dreamRecordingViewModel.dream(by: indexPath.row)
+        
+        guard let curr_cell = dreamRecordingsView.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell else{
+            let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                          message: "Item Cannot Be Selected.",//"You tapped the start recording button, but the action failed",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.controller.present(alert, animated: true)
             return
+            
         }
         
-        // Get current time and duration from your audio player
+        // Get current time and duration
         let currentTime = audioPlayerManager.getCurrentTime()
         let duration = audioPlayerManager.getDuration()
         
+        // Calculate new time (5 seconds forward, but don't exceed duration)
+        let newTime = min(currentTime + 5.0, duration)
+        audioProgress[dream.url] = newTime
+        
+        // Seek to new time
+        audioPlayerManager.seek(to: newTime)
+        
+        // Update progress bar and label immediately
         if duration > 0 {
-            cell.progressBar.progress = Float(currentTime / duration)
+            curr_cell.progressBar.progress = Float(newTime / duration)
             
-            // Format current time using your function
-            do {
-                // Create a temporary URL just to format the time
-                let formatter = DateComponentsFormatter()
-                formatter.allowedUnits = [.hour, .minute, .second]
-                formatter.unitsStyle = .positional
-                formatter.zeroFormattingBehavior = .pad
-                
-                if let formattedTime = formatter.string(from: currentTime) {
-                    cell.currentTimeLabel.text = formattedTime
-                }
+            // Format time
+            let formatter = DateComponentsFormatter()
+            formatter.allowedUnits = [.hour, .minute, .second]
+            formatter.unitsStyle = .positional
+            formatter.zeroFormattingBehavior = .pad
+            
+            if let formattedTime = formatter.string(from: newTime) {
+                curr_cell.currentTimeLabel.text = formattedTime
             }
         }
+
+        
+    }
+    @objc
+    func seekBackwards5(_ sender:UIButton) {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+        let indexPath = IndexPath (row: sender.tag, section: 0)
+        let dream = dreamRecordingViewModel.dream(by: indexPath.row)
+        
+        guard let curr_cell = dreamRecordingsView.collectionView.cellForItem(at: indexPath) as? DreamRecordingViewCell else{
+            let alert = UIAlertController(title: "An Unexpected Error Occured",
+                                          message: "Item Cannot Be Selected.",//"You tapped the start recording button, but the action failed",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+            self.controller.present(alert, animated: true)
+            return
+            
+        }
+        // Get current time
+        let currentTime = audioPlayerManager.getCurrentTime()
+        let duration = audioPlayerManager.getDuration()
+        
+        // Calculate new time (5 seconds backward, but don't go below 0)
+        let newTime = max(currentTime - 5.0, 0.0)
+        audioProgress[dream.url] = newTime
+        
+        // Seek to new time
+        audioPlayerManager.seek(to: newTime)
+        
+        // Update progress bar and label immediately
+        if duration > 0 {
+            curr_cell.progressBar.progress = Float(newTime / duration)
+            
+            // Format time
+            let formatter = DateComponentsFormatter()
+            formatter.allowedUnits = [.hour, .minute, .second]
+            formatter.unitsStyle = .positional
+            formatter.zeroFormattingBehavior = .pad
+            
+            if let formattedTime = formatter.string(from: newTime) {
+                curr_cell.currentTimeLabel.text = formattedTime
+            }
+        }
+        
     }
 }

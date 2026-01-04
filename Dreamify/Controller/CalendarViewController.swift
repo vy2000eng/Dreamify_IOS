@@ -53,7 +53,16 @@ class CalendarViewController:UIViewController, RetrieveCurrentlySelectedDate, De
             
             self.dreamRecordingView.collectionView.performBatchUpdates({
                 self.dreamRecordingView.collectionView.reloadItems(at: [IndexPath(row: previosulyOpenDreamID, section: 0)])
-            }, completion: nil)
+            }, completion: {[weak self]finished in
+                guard let self = self else{return}
+                if finished {
+                    dreamRecordingDataSourceManager.pauseAudio(dream: dream,isTransitioningBetweenViews: true)
+                }
+                
+                
+                
+                
+            })
         }
         dreamRecordingViewModel.previouslyOpenedDreamId = nil
         

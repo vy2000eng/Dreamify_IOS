@@ -4,6 +4,15 @@
 //
 //  Created by Vladyslav Yatsuta on 7/12/25.
 //
+
+
+
+//
+//  DreamRecordingViewCell.swift
+//  Dreamify
+//
+//  Created by Vladyslav Yatsuta on 7/12/25.
+//
 import UIKit
 
 import SwipeCellKit
@@ -37,6 +46,22 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         button.tintColor = .white
         button.layer.cornerRadius = 20
         button.setImage(UIImage(systemName: "play.fill"), for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    lazy var skipBackwardButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.tintColor = .systemBlue
+        button.setImage(UIImage(systemName: "gobackward.5"), for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    lazy var skipForwardButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.tintColor = .systemBlue
+        button.setImage(UIImage(systemName: "goforward.5"), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -269,7 +294,9 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         mainContentView.addSubview(sectionTitle)
         mainContentView.addSubview(createdOnLabel)
         mainContentView.addSubview(textView)
+        mainContentView.addSubview(skipBackwardButton)
         mainContentView.addSubview(playPauseButton)
+        mainContentView.addSubview(skipForwardButton)
         mainContentView.addSubview(analyzeButton)
         mainContentView.addSubview(transcriptionAnalysisButton)
         mainContentView.addSubview(tagLabel)
@@ -331,7 +358,7 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         // Re-setup header
         setupHeaderCell()
     }
-    func configure(with dream: DreamViewModel) throws -> Void{
+    func configure(with dream: DreamViewModel) throws ->Void{
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .short
         dateFormatter.timeStyle = .short
@@ -343,6 +370,7 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         mainSectionTitle.text = dream.title
         mainCreatedOnLabel.text = formattedDate
         durationLabel.text = try  getAudioDuration(url: getDocumentsDirectory().appendingPathComponent(dream.url))
+
         
         // Configure tags for both header and main view
         if let dreamTag = dream.dreamTag {
@@ -433,7 +461,9 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
         mainContentView.addSubview(mainSectionTitle)
         mainContentView.addSubview(mainCreatedOnLabel)
         mainContentView.addSubview(textView)
+        mainContentView.addSubview(skipBackwardButton)
         mainContentView.addSubview(playPauseButton)
+        mainContentView.addSubview(skipForwardButton)
         mainContentView.addSubview(progressBar)
         mainContentView.addSubview(currentTimeLabel)
         mainContentView.addSubview(durationLabel)
@@ -511,11 +541,23 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
             textView.topAnchor.constraint(equalTo: transcriptionAnalysisButton.bottomAnchor, constant: 12),
             textView.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -16),
             
-            // Play button
+            // Play/pause control buttons (horizontal layout)
             playPauseButton.topAnchor.constraint(equalTo: textView.bottomAnchor, constant: 16),
             playPauseButton.centerXAnchor.constraint(equalTo: mainContentView.centerXAnchor),
             playPauseButton.widthAnchor.constraint(equalToConstant: 40),
             playPauseButton.heightAnchor.constraint(equalToConstant: 40),
+            
+            // Skip backward button (left of play button)
+            skipBackwardButton.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
+            skipBackwardButton.trailingAnchor.constraint(equalTo: playPauseButton.leadingAnchor, constant: -20),
+            skipBackwardButton.widthAnchor.constraint(equalToConstant: 32),
+            skipBackwardButton.heightAnchor.constraint(equalToConstant: 32),
+            
+            // Skip forward button (right of play button)
+            skipForwardButton.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
+            skipForwardButton.leadingAnchor.constraint(equalTo: playPauseButton.trailingAnchor, constant: 20),
+            skipForwardButton.widthAnchor.constraint(equalToConstant: 32),
+            skipForwardButton.heightAnchor.constraint(equalToConstant: 32),
             
             // Progress bar (below play button)
             progressBar.topAnchor.constraint(equalTo: playPauseButton.bottomAnchor, constant: 12),
@@ -544,15 +586,6 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
 
 
 
-
-
-
-////
-////  DreamRecordingViewCell.swift
-////  Dreamify
-////
-////  Created by Vladyslav Yatsuta on 7/12/25.
-////
 //import UIKit
 //
 //import SwipeCellKit
@@ -588,6 +621,36 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
 //        button.setImage(UIImage(systemName: "play.fill"), for: .normal)
 //        button.translatesAutoresizingMaskIntoConstraints = false
 //        return button
+//    }()
+//    
+//    lazy var progressBar: UIProgressView = {
+//        let progressView = UIProgressView(progressViewStyle: .default)
+//        progressView.translatesAutoresizingMaskIntoConstraints = false
+//        progressView.progressTintColor = .systemBlue
+//        progressView.trackTintColor = .systemGray5
+//        progressView.layer.cornerRadius = 2
+//        progressView.clipsToBounds = true
+//        progressView.progress = 0.0
+//        return progressView
+//    }()
+//    
+//    lazy var currentTimeLabel: UILabel = {
+//        let label = UILabel()
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        label.font = .systemFont(ofSize: 11, weight: .regular)
+//        label.textColor = .secondaryLabel
+//        label.text = "0:00"
+//        return label
+//    }()
+//    
+//    lazy var durationLabel: UILabel = {
+//        let label = UILabel()
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        label.font = .systemFont(ofSize: 11, weight: .regular)
+//        label.textColor = .secondaryLabel
+//        label.text = "0:00"
+//        label.textAlignment = .right
+//        return label
 //    }()
 //    
 //    lazy var textView: UITextView = {
@@ -850,7 +913,7 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
 //        // Re-setup header
 //        setupHeaderCell()
 //    }
-//    func configure(with dream: DreamViewModel) {
+//    func configure(with dream: DreamViewModel) throws -> Void{
 //        let dateFormatter = DateFormatter()
 //        dateFormatter.dateStyle = .short
 //        dateFormatter.timeStyle = .short
@@ -861,6 +924,7 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
 //        createdOnLabel.text = formattedDate
 //        mainSectionTitle.text = dream.title
 //        mainCreatedOnLabel.text = formattedDate
+//        durationLabel.text = try  getAudioDuration(url: getDocumentsDirectory().appendingPathComponent(dream.url))
 //        
 //        // Configure tags for both header and main view
 //        if let dreamTag = dream.dreamTag {
@@ -947,14 +1011,17 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
 //
 //        
 //        
-//        // MainContentView gets duplicate labels
+//        // MainContentView gets duplicate labels and progress elements
 //        mainContentView.addSubview(mainSectionTitle)
 //        mainContentView.addSubview(mainCreatedOnLabel)
 //        mainContentView.addSubview(textView)
 //        mainContentView.addSubview(playPauseButton)
+//        mainContentView.addSubview(progressBar)
+//        mainContentView.addSubview(currentTimeLabel)
+//        mainContentView.addSubview(durationLabel)
 //        mainContentView.addSubview(analyzeButton)
 //        mainContentView.addSubview(transcriptionAnalysisButton)
-//        mainContentView.addSubview(tagLabel)  // Add this line
+//        mainContentView.addSubview(tagLabel)
 //
 //        
 //        // Setup header constraints
@@ -1029,9 +1096,22 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
 //            // Play button
 //            playPauseButton.topAnchor.constraint(equalTo: textView.bottomAnchor, constant: 16),
 //            playPauseButton.centerXAnchor.constraint(equalTo: mainContentView.centerXAnchor),
-//            playPauseButton.bottomAnchor.constraint(equalTo: mainContentView.bottomAnchor, constant: -16),
 //            playPauseButton.widthAnchor.constraint(equalToConstant: 40),
-//            playPauseButton.heightAnchor.constraint(equalToConstant: 40)
+//            playPauseButton.heightAnchor.constraint(equalToConstant: 40),
+//            
+//            // Progress bar (below play button)
+//            progressBar.topAnchor.constraint(equalTo: playPauseButton.bottomAnchor, constant: 12),
+//            progressBar.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 16),
+//            progressBar.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -16),
+//            progressBar.heightAnchor.constraint(equalToConstant: 4),
+//            
+//            // Time labels (below progress bar)
+//            currentTimeLabel.topAnchor.constraint(equalTo: progressBar.bottomAnchor, constant: 4),
+//            currentTimeLabel.leadingAnchor.constraint(equalTo: mainContentView.leadingAnchor, constant: 16),
+//            
+//            durationLabel.topAnchor.constraint(equalTo: progressBar.bottomAnchor, constant: 4),
+//            durationLabel.trailingAnchor.constraint(equalTo: mainContentView.trailingAnchor, constant: -16),
+//            durationLabel.bottomAnchor.constraint(equalTo: mainContentView.bottomAnchor, constant: -16)
 //        ]
 //
 //        
@@ -1043,3 +1123,4 @@ class DreamRecordingViewCell: SwipeCollectionViewCell {
 //        headerView.isHidden = false
 //    }
 //}
+

@@ -6,6 +6,14 @@
 //
 
 import UIKit
+//
+//  SubscriptionPageView.swift
+//  Dreamify
+//
+//  Created by Vladyslav Yatsuta on 12/26/25.
+//
+
+import UIKit
 
 class SubscriptionPageView: UIView {
     
@@ -25,13 +33,10 @@ class SubscriptionPageView: UIView {
         return button
     }()
     
-    private let snowflakeImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.image = UIImage(systemName: "snowflake")
-        imageView.tintColor = UIColor(red: 0.4, green: 0.5, blue: 0.9, alpha: 1.0)
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
+    private let moonStarsView: UIView = {
+        let view = MoonStarsView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     private let titleLabel: UILabel = {
@@ -53,20 +58,11 @@ class SubscriptionPageView: UIView {
         return label
     }()
     
-    //    private let ctaButton: UIButton = {
-    //        let button = UIButton(type: .system)
-    //        button.setTitle("Join today with our best offer", for: .normal)
-    //        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
-    //        button.setTitleColor(.black, for: .normal)
-    //        button.backgroundColor = UIColor(red: 0.95, green: 0.85, blue: 0.4, alpha: 1.0)
-    //        button.layer.cornerRadius = 12
-    //        button.translatesAutoresizingMaskIntoConstraints = false
-    //        return button
-    //    }()
+
     
     private let featuresContainerView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(white: 0.96, alpha: 1.0)
+        view.backgroundColor = .systemBackground//UIColor(white: 0.96, alpha: 1.0)
         view.layer.cornerRadius = 16
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -145,7 +141,7 @@ class SubscriptionPageView: UIView {
         backgroundColor = .systemBackground
         
         // Always add all subviews
-        addSubview(snowflakeImageView)
+        addSubview(moonStarsView)
         addSubview(titleLabel)
         addSubview(subtitleLabel)
         addSubview(featuresContainerView)
@@ -174,14 +170,14 @@ class SubscriptionPageView: UIView {
             closeButton.widthAnchor.constraint(equalToConstant: 30),
             closeButton.heightAnchor.constraint(equalToConstant: 30),
             
-            // Snowflake
-            snowflakeImageView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 80),
-            snowflakeImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            snowflakeImageView.widthAnchor.constraint(equalToConstant: 80),
-            snowflakeImageView.heightAnchor.constraint(equalToConstant: 80),
+            // Moon and Stars view
+            moonStarsView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 80),
+            moonStarsView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            moonStarsView.widthAnchor.constraint(equalToConstant: 100),
+            moonStarsView.heightAnchor.constraint(equalToConstant: 80),
             
             // Title
-            titleLabel.topAnchor.constraint(equalTo: snowflakeImageView.bottomAnchor, constant: 24),
+            titleLabel.topAnchor.constraint(equalTo: moonStarsView.bottomAnchor, constant: 24),
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             
@@ -298,3 +294,91 @@ class SubscriptionPageView: UIView {
     }
 }
 
+
+import UIKit
+
+class MoonStarsView: UIView {
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .clear
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        backgroundColor = .clear
+    }
+    
+    override func draw(_ rect: CGRect) {
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+        
+        let moonColor = UIColor(red: 0.2, green: 0.25, blue: 0.4, alpha: 1.0)
+        let starColor = UIColor(red: 0.4, green: 0.5, blue: 0.9, alpha: 1.0)
+        
+        // Draw crescent moon (centered)
+        let moonCenter = CGPoint(x: rect.width * 0.42, y: rect.height * 0.5)
+        let moonRadius = min(rect.width, rect.height) * 0.3
+        
+        context.setFillColor(moonColor.cgColor)
+        context.addArc(center: moonCenter, radius: moonRadius, startAngle: 0, endAngle: .pi * 2, clockwise: true)
+        context.fillPath()
+        
+        // Cut out part to make crescent
+        let cutoutCenter = CGPoint(x: moonCenter.x + moonRadius * 0.5, y: moonCenter.y - moonRadius * 0.15)
+        context.setFillColor(UIColor.systemBackground.cgColor)
+        context.setBlendMode(.destinationOut)
+        context.addArc(center: cutoutCenter, radius: moonRadius * 0.9, startAngle: 0, endAngle: .pi * 2, clockwise: true)
+        context.fillPath()
+        context.setBlendMode(.normal)
+        
+        // Draw stars (ONLY on right side)
+        let starPositions: [(CGFloat, CGFloat, CGFloat)] = [
+            // (x percentage, y percentage, size)
+            // Right side cluster only
+            (0.70, 0.15, 6),
+            (0.85, 0.25, 5),
+            (0.78, 0.38, 4),
+            (0.90, 0.45, 5),
+            (0.82, 0.58, 4),
+            (0.72, 0.70, 5),
+            (0.88, 0.75, 4),
+            (0.95, 0.60, 3)
+        ]
+        
+        for (xPercent, yPercent, size) in starPositions {
+            let starX = rect.width * xPercent
+            let starY = rect.height * yPercent
+            drawStar(at: CGPoint(x: starX, y: starY), size: size, color: starColor, in: context)
+        }
+    }
+    
+    private func drawStar(at center: CGPoint, size: CGFloat, color: UIColor, in context: CGContext) {
+        context.setFillColor(color.cgColor)
+        
+        // Draw 4-pointed star
+        let points = 4
+        let outerRadius = size
+        let innerRadius = size * 0.4
+        
+        var angle: CGFloat = -.pi / 2 // Start at top
+        var path = CGMutablePath()
+        
+        for i in 0..<points * 2 {
+            let radius = i % 2 == 0 ? outerRadius : innerRadius
+            let x = center.x + cos(angle) * radius
+            let y = center.y + sin(angle) * radius
+            
+            if i == 0 {
+                path.move(to: CGPoint(x: x, y: y))
+            } else {
+                path.addLine(to: CGPoint(x: x, y: y))
+            }
+            
+            angle += .pi / CGFloat(points)
+        }
+        
+        path.closeSubpath()
+        context.addPath(path)
+        context.fillPath()
+    }
+}

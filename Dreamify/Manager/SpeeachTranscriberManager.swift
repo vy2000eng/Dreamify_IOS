@@ -17,6 +17,7 @@ public class SpeechTranscriberManager {
     private var currentTask: SFSpeechRecognitionTask?
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var audioEngine: AVAudioEngine?
+    private var audioFile: AVAudioFile?
     
     private init() {
         setupRecognizer()
@@ -50,24 +51,36 @@ public class SpeechTranscriberManager {
     }
     
     // MARK: - Live Transcription
-    
-    func startLiveTranscription(onUpdate: @escaping (String) -> Void, onError: @escaping (NSError) -> Void) {
+    func startLiveTranscription(
+        recordingURL: URL,
+        onUpdate: @escaping (String) -> Void,
+        onError: @escaping (NSError) -> Void
+    ) {
         guard let recognizer = speechRecognizer, recognizer.isAvailable else {
             onError(NSError(domain: "AudioTranscriptionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Speech recognizer unavailable"]))
             return
         }
         
-        // Cancel any existing task
         stopLiveTranscription()
         
-        // Create audio engine
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.record, mode: .measurement, options: [])
+            try audioSession.setPreferredSampleRate(44100.0)
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            Thread.sleep(forTimeInterval: 0.1)
+            print("🎤 Audio session sample rate: \(audioSession.sampleRate)")
+        } catch {
+            onError(NSError(domain: "AudioTranscriptionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to configure audio session: \(error.localizedDescription)"]))
+            return
+        }
+        
         audioEngine = AVAudioEngine()
         guard let audioEngine = audioEngine else {
             onError(NSError(domain: "AudioTranscriptionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to create audio engine"]))
             return
         }
         
-        // Create recognition request
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
         guard let recognitionRequest = recognitionRequest else {
             onError(NSError(domain: "AudioTranscriptionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to create recognition request"]))
@@ -79,16 +92,47 @@ public class SpeechTranscriberManager {
         let inputNode = audioEngine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
         
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
+        print("📊 Format - Sample Rate: \(recordingFormat.sampleRate), Channels: \(recordingFormat.channelCount)")
+        
+        guard recordingFormat.sampleRate > 0 && recordingFormat.channelCount > 0 else {
+            onError(NSError(domain: "AudioTranscriptionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid recording format - SR:\(recordingFormat.sampleRate) CH:\(recordingFormat.channelCount)"]))
+            return
+        }
+        
+        // CREATE M4A FILE WITH AAC COMPRESSION
+        do {
+            let aacSettings: [String: Any] = [
+                AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                AVSampleRateKey: 44100.0,
+                AVNumberOfChannelsKey: 1,
+                AVEncoderBitRateKey: 128000,
+                AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+            ]
+            
+            audioFile = try AVAudioFile(
+                forWriting: recordingURL,
+                settings: aacSettings,
+                commonFormat: .pcmFormatFloat32,
+                interleaved: false
+            )
+            print("✅ Created M4A file for recording")
+        } catch {
+            onError(NSError(domain: "AudioTranscriptionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to create audio file: \(error.localizedDescription)"]))
+            return
+        }
+        
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, _ in
             recognitionRequest.append(buffer)
+            try? self?.audioFile?.write(from: buffer)
         }
         
         audioEngine.prepare()
         
         do {
             try audioEngine.start()
+            print("✅ Audio engine started successfully")
         } catch {
-            onError(NSError(domain: "AudioTranscriptionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Audio engine failed to start"]))
+            onError(NSError(domain: "AudioTranscriptionError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to start audio engine: \(error.localizedDescription)"]))
             return
         }
         
@@ -100,25 +144,23 @@ public class SpeechTranscriberManager {
                 }
                 
                 if let result = result {
-                    let transcribedText = result.bestTranscription.formattedString
-                    onUpdate(transcribedText)
+                    onUpdate(result.bestTranscription.formattedString)
                 }
             }
         }
     }
     func stopLiveTranscription() {
-        // Stop audio engine
         audioEngine?.stop()
         audioEngine?.inputNode.removeTap(onBus: 0)
-        
-        // End recognition request
         recognitionRequest?.endAudio()
         recognitionRequest = nil
-        
-        // Cancel task
         currentTask?.cancel()
         currentTask = nil
         audioEngine = nil
+        audioFile = nil
+        
+        // Deactivate audio session
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
     
 

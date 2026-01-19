@@ -14,11 +14,12 @@ class MainViewController: UIViewController{
     
     var mainContentView          :  MainContentView
     var dreamsRecordingViewModel :  DreamRecordingViewModel
-    var audioRecordingManager    :  AudioRecorderManager
+   // var audioRecordingManager    :  AudioRecorderManager
     weak var addNewRecordToDreamRecordingViewdelegate: AddNewRecordingToCollectionView?
     weak var addNewRecordToCalendarViewdelegate: AddNewRecordingToCollectionView?
     private var currentTranscription: String = ""
-
+    private var isRecording: Bool = false
+    private var currentRecordingFileName: String?
     
     
     let taskId = "dreamify.refreshAuthToken.backgroundTask"
@@ -30,22 +31,22 @@ class MainViewController: UIViewController{
         
         self.mainContentView            = MainContentView()
         self.dreamsRecordingViewModel   = DreamRecordingViewModel()
-        audioRecordingManager           = AudioRecorderManager()
+       // audioRecordingManager           = AudioRecorderManager()
         super.init                        (nibName: nil, bundle: nil)
         
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        Task {
-            if audioRecordingManager.getState() == .recording{
-                try? await audioRecordingManager.updateOrientation(interfaceOrientation: windowOrientation)
-                
-                
-            }
-        }
-    }
+//    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+//        Task {
+//            if audioRecordingManager.getState() == .recording{
+//                try? await audioRecordingManager.updateOrientation(interfaceOrientation: windowOrientation)
+//                
+//                
+//            }
+//        }
+//    }
     
     
     
@@ -59,55 +60,42 @@ class MainViewController: UIViewController{
         setupUI()
         setupConstraints()
         
-        do {
-            try audioRecordingManager.configureAudioSessionAndConfigureRecorderExternally()
-            
-            let recordingSession = audioRecordingManager.getRecordingSession()
-            
-            recordingSession.requestRecordPermission() { [weak self] allowed in
-                guard let self = self else { return }
-                DispatchQueue.main.async {
-                    
-                    if allowed {
-                        self.setupActions()
-                    } else {
-                        // failed to record!
-                        let alert = UIAlertController(title: "action failed",
-                                                      message: "Please Enable Microphone Settings to start Recording",
-                                                      preferredStyle: .alert)
-                        alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                        self.present(alert, animated: true)
-                    }
-                }
-            }
-            SpeechTranscriberManager.shared.requestSpeechRecognizerPermission(){[weak self] result in
-                guard let self = self else{
-                    return
-                }
-                switch result{
-                case.success:
-                    print("success")
-                    
-                case .failure(let err):
-                    let alert = UIAlertController(title: "action failed",
-                                                  message: err.localizedDescription,
-                                                  preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+        // Request microphone permission
+        AVAudioSession.sharedInstance().requestRecordPermission { [weak self] allowed in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if allowed {
+                    self.setupActions()
+                } else {
+                    let alert = UIAlertController(
+                        title: "Microphone Access Required",
+                        message: "Please enable microphone access in Settings to record dreams",
+                        preferredStyle: .alert
+                    )
+                    alert.addAction(UIAlertAction(title: "OK", style: .default))
                     self.present(alert, animated: true)
                 }
-                
-                
-                
             }
-        } catch let err as NSError{
-            let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                          message: err.localizedDescription,//"You tapped the start recording button, but the action failed",
-                                          preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-            self.present(alert, animated: true)
-            
         }
         
+        // Request speech recognition permission
+        SpeechTranscriberManager.shared.requestSpeechRecognizerPermission { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success:
+                print("Speech recognition permission granted")
+                
+            case .failure(let err):
+                let alert = UIAlertController(
+                    title: "Speech Recognition Required",
+                    message: err.localizedDescription,
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+            }
+        }
     }
     
     
@@ -150,38 +138,49 @@ extension MainViewController{
             completion: { [weak self] result in
                 guard let self = self else { return }
                 
-                // Add 'execute:' parameter label
-                DispatchQueue.main.async(execute: {
+                DispatchQueue.main.async {
                     switch result {
                     case .success(let response):
-                        print(response)
                         if response.TimeSinceLastRecordingOrAnalysis {
-                            do {
-                                try self.audioRecordingManager.setupAudioRecorder()
-                                self.audioRecordingManager.getRecorder().delegate = self
-                                self.audioRecordingManager.record()
-                                
-                                SpeechTranscriberManager.shared.startLiveTranscription(
-                                    onUpdate: { [weak self] transcribedText in
-                                        self?.currentTranscription = transcribedText
-                                        self?.mainContentView.updateTranscription(text: transcribedText)
-                                    },
-                                    onError: { [weak self] error in
-                                        print("Transcription error: \(error.localizedDescription)")
+                            let dateFormatter = DateFormatter()
+                            dateFormatter.dateFormat = "d-M-yyyy.hh.mm.ss"
+                            let fileName = dateFormatter.string(from: Date()) + ".m4a"
+                            let recordingURL = getDocumentsDirectory().appendingPathComponent(fileName)
+                            print(recordingURL)
+                            
+                            self.currentRecordingFileName = fileName
+                            
+                            SpeechTranscriberManager.shared.startLiveTranscription(
+                                recordingURL: recordingURL,
+                                onUpdate: { [weak self] text in
+                                    self?.currentTranscription = text
+                                    self?.mainContentView.updateTranscription(text: text)
+                                },
+                                onError: { [weak self] error in
+                                    print("Error: \(error)")
+                                    
+                                    // Ignore normal errors that happen during recording
+                                    let errorMessage = error.localizedDescription
+                                    if errorMessage.contains("No speech detected") ||
+                                       errorMessage.contains("Recognition request was canceled") {
+                                        print("ℹ️ Normal transcription event - ignoring")
+                                        return
                                     }
-                                )
-                                
-                                self.mainContentView.startRecording()
-                                
-                            } catch let err as NSError {
-                                let alert = UIAlertController(
-                                    title: "An Unexpected Error Occurred",
-                                    message: err.localizedDescription,
-                                    preferredStyle: .alert
-                                )
-                                alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                                self.present(alert, animated: true)
-                            }
+                                    
+                                    // Only show alerts for actual errors
+                                    self?.isRecording = false
+                                    let alert = UIAlertController(
+                                        title: "Recording Error",
+                                        message: error.localizedDescription,
+                                        preferredStyle: .alert
+                                    )
+                                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
+                                    self?.present(alert, animated: true)
+                                }
+                            )
+                            
+                            self.isRecording = true
+                            self.mainContentView.startRecording()
                             
                         } else {
                             let alert = UIAlertController(
@@ -189,15 +188,12 @@ extension MainViewController{
                                 message: "You can only make 1 recording per 24 hours. Upgrade to Premium for unlimited recordings.",
                                 preferredStyle: .alert
                             )
-                            
                             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-                            
                             alert.addAction(UIAlertAction(title: "Upgrade", style: .default, handler: { [weak self] _ in
                                 let subscriptionViewController = SubscriptionViewController()
                                 subscriptionViewController.modalPresentationStyle = .fullScreen
                                 self?.navigationController?.present(subscriptionViewController, animated: true)
                             }))
-                            
                             self.present(alert, animated: true)
                         }
                         
@@ -210,62 +206,33 @@ extension MainViewController{
                         errorAlert.addAction(UIAlertAction(title: "OK", style: .default))
                         self.present(errorAlert, animated: true)
                     }
-                })
+                }
             }
         )
     }
     func finishRecording(success: Bool) {
         SpeechTranscriberManager.shared.stopLiveTranscription()
         
-        audioRecordingManager.stop()
-        
-        do {
-            if success {
-                guard let unwrapped_file_title = audioRecordingManager.getUniqueFileName() else {
-                    throw NSError(domain: "AudioRecordingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid FileName"])
-                }
-                
-                // Use the currentTranscription that was updated in real-time
-                let transcribedText = currentTranscription
-                
-                do {
-                    print(transcribedText)
-                    try dreamsRecordingViewModel.addDream(url: unwrapped_file_title, title: unwrapped_file_title, transcribedText: transcribedText)
-                    mainContentView.stopRecording()
-                    
-                    try addNewRecordToDreamRecordingViewdelegate?.updateCollection(controllerMangedByDataSource: .DreamViewController)
-                    try addNewRecordToCalendarViewdelegate?.updateCollection(controllerMangedByDataSource: .CalendarViewController)
-                    
-                } catch let err as NSError {
-                    let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                                  message: err.localizedDescription,
-                                                  preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-                    self.present(alert, animated: true)
-                    mainContentView.stopRecording()
-                }
+        if success, let fileName = currentRecordingFileName {
+            do {
+                try dreamsRecordingViewModel.addDream(url: fileName, title: fileName, transcribedText: currentTranscription)
+                try addNewRecordToDreamRecordingViewdelegate?.updateCollection(controllerMangedByDataSource: .DreamViewController)
+                try addNewRecordToCalendarViewdelegate?.updateCollection(controllerMangedByDataSource: .CalendarViewController)
+            } catch {
+                print("Error saving: \(error)")
             }
-        } catch let err as NSError {
-            let alert = UIAlertController(title: "An Unexpected Error Occured",
-                                          message: err.localizedDescription,
-                                          preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .destructive))
-            self.present(alert, animated: true)
-            mainContentView.actionButton.setTitle("Tap to Record", for: .normal)
         }
         
-        audioRecordingManager.deInitRecorder()
+        mainContentView.stopRecording()
+        isRecording = false
+        currentRecordingFileName = nil
         currentTranscription = ""
     }
 }
 
 extension MainViewController{
     @objc private func recordTapped() {
-        
-        
-        if audioRecordingManager.getState()  == .stopped {
-            
-            
+        if !isRecording {
             startRecording()
         } else {
             finishRecording(success: true)

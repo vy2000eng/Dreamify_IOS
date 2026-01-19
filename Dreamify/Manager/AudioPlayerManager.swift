@@ -34,28 +34,33 @@ class AudioPlayerManager: NSObject{
       }
     
     
-    func  playAudio(fileName:String)  throws -> Void{
-        
+    func playAudio(fileName: String) throws -> Void {
         let url = getDocumentsDirectory().appendingPathComponent(fileName)
+        print("🔊 Attempting to play: \(url)")
         
-        do{
-                
-                audioPlayer = try  AVAudioPlayer(contentsOf: url)
-         
-            
-                audioPlayer?.delegate = self
-                audioPlayer?.volume = 1.0
-                audioPlayer?.play()
-
+        // Check if file exists
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            throw NSError(domain: "AudioPlayingError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Audio file does not exist: \(fileName)"])
+        }
         
+        do {
+            // Configure audio session for playback
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playback, mode: .default, options: [])
+            try audioSession.setActive(true)
             
-        }catch let err as NSError {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.delegate = self
+            audioPlayer?.volume = 1.0
+            audioPlayer?.prepareToPlay()
+            
+            print("✅ Audio duration: \(audioPlayer?.duration ?? 0) seconds")
+            audioPlayer?.play()
+            
+        } catch let err as NSError {
+            print("❌ Playback error: \(err.localizedDescription)")
             throw NSError(domain: "AudioPlayingError", code: 1, userInfo: [NSLocalizedDescriptionKey: err.localizedDescription])
-
-            
-       }
-       
-     
+        }
     }
     func stopAudio() throws ->Void {
             audioPlayer?.stop()

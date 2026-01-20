@@ -213,8 +213,32 @@ extension MainViewController{
     func finishRecording(success: Bool) {
         SpeechTranscriberManager.shared.stopLiveTranscription()
         
+        
+        
+        
+        
         if success, let fileName = currentRecordingFileName {
             do {
+                let url = getDocumentsDirectory().appendingPathComponent(fileName)
+                Task{
+                    
+                    
+                    // DreamApiManager.shared.uploadDream(audioURL: file, fileName: <#T##String#>, tag: <#T##String?#>, transcribedText: <#T##String?#>, completion: <#T##(Result<DreamUploadResponse, APIError>) -> Void#>)
+                    DreamApiManager.shared.uploadDream(
+                        audioURL: url,
+                        fileName: fileName,
+                        tag: "",
+                        transcribedText: currentTranscription
+                        //analyzedText: "The Analysis has not been done yet"
+                    ) { result in
+                        switch result {
+                        case .success(let response):
+                            print("✅ Uploaded: \(response.fileUrl)")
+                        case .failure(let error):
+                            print("❌ Error: \(error)")
+                        }
+                    }
+                }
                 try dreamsRecordingViewModel.addDream(url: fileName, title: fileName, transcribedText: currentTranscription)
                 try addNewRecordToDreamRecordingViewdelegate?.updateCollection(controllerMangedByDataSource: .DreamViewController)
                 try addNewRecordToCalendarViewdelegate?.updateCollection(controllerMangedByDataSource: .CalendarViewController)
